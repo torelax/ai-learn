@@ -1,0 +1,44 @@
+Configurations
+
+# data configurations
+min_freq = 2
+maxlen = 256
+batch_size = 128
+
+# model configurations
+dm = 512
+dk = 64
+dv = 64
+nhead = 8
+layers = 6
+dff = 2048
+bias = False
+dropout = 0.1
+eps = 1e-6
+scale = True
+
+# optimizer configurations
+adam_eps = 5e-9
+lr = 1e-5
+betas = (0.9, 0.98)
+weight_decay = 5e-4
+
+# scheduler configurations
+factor = 0.9
+patience = 10
+
+# decoder search configurations
+beam_width = 3
+alpha = 0.6
+search_eps = 1e-9
+fast = False
+
+# training & metric configurations
+eval_batch_size = 128
+goal_bleu = 30.0
+corpus_level = True
+frequency = 100
+overwrite = False
+warmups = 100
+epochs = 1000
+clip = 3.0
