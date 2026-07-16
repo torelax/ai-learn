@@ -7,7 +7,10 @@ requires-python = ">=3.10"
 dependencies = [
     "anthropic>=0.97.0",
     "dotenv>=0.9.9",
+    "isort>=8.0.1",
+    "openai>=2.36.0",
     "sentence-transformers>=5.4.1",
+    "tushare>=1.4.29",
 ]
 
 [[tool.uv.index]]
