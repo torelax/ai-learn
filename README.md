@@ -27,9 +27,9 @@ cd ai-learn
 
 ```
 ai-learn/
-├── machine_learning/    # 机器学习相关内容
-├── deep_learning/       # 深度学习相关内容
-├── nlp/                 # 自然语言处理相关内容
+├── docs/reports/embedding/   # Embedding 调研报告
+├── embedding/                # 笔记与练习
+├── torch/                    # PyTorch 练习
 ├── ...
 ```
 
