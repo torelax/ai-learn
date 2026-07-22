@@ -1,0 +1,1264 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>图文 Embedding 模型技术综述</title>
+<style>
+  :root{
+    --bg:#fafbfc; --panel:#ffffff; --panel2:#f1f5f9; --line:#e2e8f0;
+    --text:#1a1a2e; --muted:#475569; --accent:#2563eb; --accent2:#059669;
+    --warn:#d97706; --pink:#e11d48; --purple:#7c3aed;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; background:var(--bg); color:var(--text);
+    font-family:-apple-system,"Segoe UI","Microsoft YaHei",Roboto,Helvetica,Arial,sans-serif;
+    line-height:1.75; font-size:16px;
+  }
+  .wrap{max-width:1080px; margin:0 auto; padding:48px 28px 96px;}
+  header{
+    border-bottom:1px solid var(--line); padding-bottom:28px; margin-bottom:8px;
+  }
+  h1{font-size:32px; margin:0 0 10px; letter-spacing:.5px;}
+  .sub{color:var(--muted); font-size:15px;}
+  h2{
+    font-size:23px; margin:56px 0 18px; padding-left:14px;
+    border-left:4px solid var(--accent);
+  }
+  h3{font-size:19px; margin:34px 0 12px; color:var(--accent);}
+  p{margin:12px 0;}
+  code{
+    background:var(--panel2); padding:2px 7px; border-radius:5px;
+    font-family:"Cascadia Code",Consolas,monospace; font-size:14px; color:var(--accent2);
+  }
+  a{color:var(--accent); text-decoration:none;}
+  a:hover{text-decoration:underline;}
+  .lead{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:20px 24px; margin:24px 0; color:var(--muted); font-size:15px;
+  }
+  /* 分类卡片 */
+  .cards{display:grid; grid-template-columns:1fr 1fr; gap:18px; margin:24px 0;}
+  .card{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:20px 22px; position:relative; overflow:hidden;
+  }
+  .card::before{content:""; position:absolute; left:0; top:0; width:100%; height:3px; background:var(--accent);}
+  .card.c2::before{background:var(--accent2);}
+  .card.c3::before{background:var(--purple);}
+  .card.c4::before{background:var(--warn);}
+  .card h4{margin:0 0 6px; font-size:17px;}
+  .card .tag{font-size:12px; color:var(--muted); display:block; margin-bottom:10px;}
+  .card ul{margin:8px 0 0; padding-left:18px; font-size:14px; color:var(--muted);}
+  .card ul li{margin:4px 0;}
+  .chip{
+    display:inline-block; background:var(--panel2); border:1px solid var(--line);
+    border-radius:20px; padding:2px 11px; font-size:12.5px; margin:3px 4px 3px 0; color:var(--text);
+  }
+  /* 时间线 */
+  .timeline{position:relative; margin:30px 0 10px; padding-left:30px;}
+  .timeline::before{content:""; position:absolute; left:8px; top:6px; bottom:6px; width:2px; background:var(--line);}
+  .tl{position:relative; margin:0 0 26px;}
+  .tl::before{
+    content:""; position:absolute; left:-26px; top:6px; width:12px; height:12px;
+    border-radius:50%; background:var(--accent); border:2px solid var(--bg);
+  }
+  .tl .yr{font-weight:700; color:var(--accent); font-size:15px;}
+  .tl .ev{color:var(--muted); font-size:14.5px; margin-top:2px;}
+  .tl b{color:var(--text);}
+  /* 表格 */
+  table{width:100%; border-collapse:collapse; margin:20px 0; font-size:14px;}
+  th,td{border:1px solid var(--line); padding:9px 12px; text-align:left;}
+  th{background:var(--panel2); color:var(--text); font-weight:600;}
+  td{color:var(--muted);}
+  tr:nth-child(even) td{background:#f8fafc;}
+  .tech{
+    background:var(--panel); border:1px solid var(--line); border-radius:10px;
+    padding:16px 20px; margin:14px 0;
+  }
+  .tech h4{margin:0 0 6px; color:var(--accent2); font-size:16px;}
+  .tech p{margin:4px 0; font-size:14.5px; color:var(--muted);}
+  .note{
+    border-left:3px solid var(--warn); background:#fffbeb;
+    padding:12px 18px; margin:22px 0; font-size:14px; color:var(--muted); border-radius:0 8px 8px 0;
+  }
+  html{scroll-behavior:smooth;}
+  h2,h3{scroll-margin-top:20px;}
+  .toc{
+    background:var(--panel); border:1px solid var(--line); border-radius:12px;
+    padding:20px 24px; margin:28px 0;
+  }
+  .toc h3{margin:0 0 12px; color:var(--text); font-size:16px; border:0; padding:0;}
+  .toc ol{margin:0; padding-left:20px; columns:2; column-gap:32px;}
+  .toc li{margin:7px 0; font-size:14.5px; break-inside:avoid;}
+  .toc a{color:var(--muted);}
+  .toc a:hover{color:var(--accent); text-decoration:none;}
+  .backtop{
+    display:inline-block; margin-left:12px; font-size:12px; color:var(--muted);
+    font-weight:400; vertical-align:middle;
+  }
+  @media(max-width:640px){.toc ol{columns:1;}}
+  footer{margin-top:60px; padding-top:20px; border-top:1px solid var(--line); color:var(--muted); font-size:13px;}
+  @media(max-width:760px){.cards{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header id="top">
+  <h1>图文 Embedding 模型技术综述</h1>
+  <div class="sub">图文（image-text）多模态嵌入模型的分类、发展脉络与关键技术 · 截至 2026 年 1 月</div>
+</header>
+
+<div class="lead">
+  图文 Embedding 的目标是把图像、文本（乃至视频、视觉文档）映射到<strong>同一个语义向量空间</strong>，
+  使得语义相近的内容向量距离更近，从而支撑跨模态检索、分类、视觉问答、RAG 等下游任务。
+  按技术路线可以分为四大类，它们在时间上大致<strong>依次演进又相互交叠</strong>：
+  从双塔对比学习，到融合编码器，再到基于大模型（MLLM）的通用嵌入，以及面向视觉文档的多向量后交互路线。
+  <br><br>
+  作为补充，本综述在图文（跨模态）之外，另设两章分别调研<strong>纯图片 Embedding</strong>（第九章，图搜图 / 实例检索，以 DINO 系为代表）
+  与<strong>纯文本 Embedding</strong>（第十章，text-text 语义检索 / RAG，以 BGE、Qwen3-Embedding 系为代表），
+  它们不做跨模态对齐，各自在单一模态内构建向量空间。
+</div>
+
+<nav class="toc">
+  <h3>目录</h3>
+  <ol>
+    <li><a href="#sec1">主要分类</a></li>
+    <li><a href="#sec2">发展顺序（时间线）</a></li>
+    <li><a href="#sec3">四类模型能力对比</a></li>
+    <li><a href="#sec4">关键技术</a></li>
+    <li><a href="#sec5">双塔（Dual-Encoder）架构详解</a>
+      <ul style="columns:1;margin:4px 0 0;padding-left:16px;list-style:circle;"><li><a href="#siglip2">案例：SigLIP 2 详解</a></li></ul>
+    </li>
+    <li><a href="#secfusion">融合编码器（Fusion Encoder）架构详解</a></li>
+    <li><a href="#sec6">四大类经典模型详细对比</a></li>
+    <li><a href="#sec7">小结与选型指引</a></li>
+    <li><a href="#sec-img">纯图片 Embedding 模型调研</a></li>
+    <li><a href="#sec-txt">纯文本 Embedding 模型调研</a></li>
+    <li><a href="#sec8">设备端 0.6B 双模型选型（图搜图 + text-text）</a></li>
+  </ol>
+</nav>
+
+<h2 id="sec1">一、主要分类 <a class="backtop" href="#top">↑ 顶部</a></h2>
+
+<div class="cards">
+  <div class="card c1">
+    <h4>① 双塔对比学习类</h4>
+    <span class="tag">Dual-Encoder / CLIP-style · 2021 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      图像编码器与文本编码器完全独立，用对比学习把配对的图文拉近、非配对推远。
+      推理时两侧可分别离线编码，检索效率极高，是产业界最经典的范式。
+    </p>
+    <div>
+      <span class="chip">CLIP</span><span class="chip">ALIGN</span><span class="chip">OpenCLIP</span>
+      <span class="chip">SigLIP / SigLIP2</span><span class="chip">EVA-CLIP</span><span class="chip">Chinese-CLIP</span>
+      <span class="chip">jina-clip-v2</span>
+    </div>
+    <ul>
+      <li>优点：速度快、可扩展、零样本能力强</li>
+      <li>短板：细粒度对齐弱，难处理复杂组合语义、长文本、指令</li>
+    </ul>
+  </div>
+
+  <div class="card c2">
+    <h4>② 融合编码器 / 跨模态类</h4>
+    <span class="tag">Fusion Encoder · 2021–2022</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      在双塔基础上增加跨模态注意力层，让图文特征深度交互，配合多任务
+      （对比 ITC、匹配 ITM、掩码语言建模 MLM）联合训练，提升细粒度理解。
+    </p>
+    <div>
+      <span class="chip">ALBEF</span><span class="chip">BLIP / BLIP-2</span>
+      <span class="chip">CoCa</span><span class="chip">BEiT-3</span><span class="chip">FLAVA</span>
+    </div>
+    <ul>
+      <li>优点：对齐更精细，理解与生成兼顾</li>
+      <li>短板：跨模态交互层使检索成本上升，难做超大规模索引</li>
+    </ul>
+  </div>
+
+  <div class="card c3">
+    <h4>③ 基于 MLLM 的通用嵌入类</h4>
+    <span class="tag">LLM/VLM-based Universal Embedding · 2024 起（当前主流）</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      直接拿视觉语言大模型（Qwen-VL、LLaVA 等）当骨干，用对比学习微调成嵌入模型。
+      天然支持<strong>指令感知</strong>、任意图文交错输入，是目前 MMEB 榜单霸榜的路线。
+    </p>
+    <div>
+      <span class="chip">E5-V</span><span class="chip">VLM2Vec / V2</span><span class="chip">GME</span>
+      <span class="chip">BGE-VL</span><span class="chip">Ops-MM</span><span class="chip">RzenEmbed</span>
+      <span class="chip">Seed1.6-Embedding</span><span class="chip">Qwen3-VL-Embedding</span>
+    </div>
+    <ul>
+      <li>优点：语义与指令理解最强，统一处理文本/图/视频/文档</li>
+      <li>短板：模型大、推理成本高（需 MRL/量化优化落地）</li>
+    </ul>
+  </div>
+
+  <div class="card c4">
+    <h4>④ 视觉文档多向量后交互类</h4>
+    <span class="tag">ColPali-style Late Interaction · 2024 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      面向 PDF、截图、图表等"视觉文档"，不压缩成单一向量，而是保留 patch 级多向量，
+      检索时用 MaxSim 做后交互（late interaction），在文档检索上效果拔尖。
+    </p>
+    <div>
+      <span class="chip">ColPali</span><span class="chip">ColQwen2.5 / 3</span>
+      <span class="chip">ColNomic</span><span class="chip">Jina-embeddings-v4</span>
+      <span class="chip">llama-nemoretriever-colembed</span>
+    </div>
+    <ul>
+      <li>优点：视觉文档 / OCR 密集场景 SOTA</li>
+      <li>短板：多向量存储与检索开销大，属专用而非通用嵌入</li>
+    </ul>
+  </div>
+</div>
+
+<div class="note">
+  这四类不是严格互斥的。近两年趋势是<strong>融合</strong>：以 MLLM 为骨干（第③类），
+  在文档场景引入后交互（第④类），并全面继承双塔对比学习（第①类）的训练范式。
+</div>
+
+<div class="note">
+  <strong>易混淆示例 · Jina 系两条路线：</strong>
+  <code>jina-clip-v2</code> 是标准双塔 CLIP-style（属第①类）——文本侧 Jina-XLM-RoBERTa、图像侧 EVA02，
+  两塔独立编码后对比对齐，仅叠加了多语言、长文本、Matryoshka 变维度等工程增强；
+  而 <code>jina-embeddings-v4</code> 以 Qwen2.5-VL 为骨干并支持后交互多向量，属第③/④类。选型时注意区分。
+</div>
+
+<h3>Jina 系列模型对比</h3>
+<table>
+  <thead>
+    <tr>
+      <th>模型</th><th>支持模态</th><th>视觉底座</th><th>文本底座</th><th>参数量</th><th>向量维度</th><th>核心适用场景</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>jina-clip-v2</code></td><td>仅图文</td><td>EVA02-L14</td><td>Jina-XLM-RoBERTa</td><td>0.865B（561M+304M）</td><td>1024</td>
+      <td>低成本、CPU 图文检索、商品图搜</td>
+    </tr>
+    <tr>
+      <td><code>jina-embeddings-v4</code></td><td>仅图文</td><td>Qwen2.5-VL-3B ViT</td><td>Qwen2.5-VL LLM（Qwen2.5）</td><td>3.8B</td><td>2048</td>
+      <td>高精度、图表 / 扫描文档、超长文本图文检索</td>
+    </tr>
+    <tr>
+      <td><code>v5-omni-small</code></td><td>图文 + 音视频</td><td>Qwen3VL vision tower（+ Qwen2.5-Omni 音频塔）</td><td>Qwen3（v5-text-small，28 层 / 1024）</td><td>1.56B</td><td>1024</td>
+      <td>存量 v5-text 索引升级多模态、企业混合素材库</td>
+    </tr>
+    <tr>
+      <td><code>v5-omni-nano</code></td><td>图文 + 音视频</td><td>Qwen3VL vision tower（+ Qwen2.5-Omni 音频塔）</td><td>EuroBERT（双向，12 层 / 768）</td><td>1.04B</td><td>768</td>
+      <td>边缘设备、低配 GPU、小规模混合多媒体检索</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="note">
+  <strong>架构核实说明（据 Jina 官方模型卡）：</strong>
+  jina-clip-v2 视觉塔为 EVA02-L14、文本塔为 Jina-XLM-RoBERTa；jina-embeddings-v4 基于 Qwen2.5-VL。
+  v5-omni 系列采用<strong>"冻结塔组合"（frozen-tower composition）</strong>：在 v5-text 文本塔上外挂视觉/音频编码器，
+  只训练轻量连接器。两款 v5-omni 的视觉塔均为 <code>Qwen3VL vision tower</code>、音频塔为 <code>Qwen2.5-Omni audio tower</code>；
+  small 文本塔为 Qwen3（28 层 / 1024），nano 为 EuroBERT（双向，12 层 / 768）。
+  <br><br>
+  <strong>各字段逐个核对（据官方模型卡）：</strong>
+  jina-clip-v2 全维 <strong>1024</strong>（可 Matryoshka 截断至 64，原稿 768 已订正），0.865B = 文本 561M + 视觉 304M，文本上下文 8192 token；
+  jina-embeddings-v4 单向量 2048 / 多向量 128（Matryoshka 128–2048），32768 token；
+  v5-omni-small 1.56B / 1024 维（Matryoshka 32–1024，32768 token）；
+  v5-omni-nano 1.04B / 768 维（Matryoshka 32–512，8192 token）。
+  （原稿"SigLIP2"视觉底座、jina-clip-v2 的 768 维经核实有误，均已订正。）
+</div>
+
+<h2 id="sec2">二、发展顺序（时间线） <a class="backtop" href="#top">↑ 顶部</a></h2>
+
+<div class="timeline">
+  <div class="tl">
+    <div class="yr">2021 · 双塔对比范式开端</div>
+    <div class="ev"><b>CLIP</b>（OpenAI）与 <b>ALIGN</b>（Google）用 4 亿级图文对做对比学习，
+    首次证明大规模弱监督对齐能带来强零样本检索/分类能力，奠定"共享嵌入空间"的基础。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2021–2022 · 融合编码器兴起</div>
+    <div class="ev"><b>ALBEF</b> 提出"先对齐再融合"，<b>BLIP</b> 引入 caption 自举与去噪，
+    <b>CoCa</b> 把对比与生成合一，<b>BEiT-3</b> 用统一 Transformer 处理多模态，细粒度理解显著提升。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2023 · 对比训练规模化与改良</div>
+    <div class="ev"><b>SigLIP</b> 用 Sigmoid loss 替代 Softmax 提升大 batch 稳定性；
+    <b>EVA-CLIP</b>、<b>OpenCLIP</b> 持续 scaling；<b>Chinese-CLIP</b> 等推动中文与多语能力。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2024 · MLLM 嵌入 + 基准诞生</div>
+    <div class="ev"><b>E5-V</b> 首次用多模态大模型直接产出嵌入；<b>VLM2Vec</b> 提出对比训练框架
+    并发布 <b>MMEB</b> 基准（36 数据集，4 类任务）统一评测；<b>ColPali</b> 开创视觉文档后交互路线。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2025 · MLLM 通用嵌入成为主流并刷榜</div>
+    <div class="ev"><b>GME</b>、<b>BGE-VL</b>、<b>MMRet</b> 推进通用多模态检索；
+    <b>VLM2Vec-V2 / MMEB-V2</b> 扩展到视频与视觉文档（57–78 数据集）；
+    <b>Ops-MM</b>、<b>RzenEmbed</b>、字节 <b>Seed1.6-Embedding</b> 相继登顶。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2026 初 · 统一表征 + 工程化</div>
+    <div class="ev"><b>Qwen3-VL-Embedding-8B</b> 以 MMEB-V2 全域 77.8 登顶（图文域 80.1），
+    统一文本/图/视频/文档，并把 <b>MRL</b>、<b>量化感知训练</b>、多阶段蒸馏做进训练管线，
+    标志着从"刷分"走向"高效可部署"。</div>
+  </div>
+</div>
+
+<h2 id="sec3">三、四类模型能力对比 <a class="backtop" href="#top">↑ 顶部</a></h2>
+
+<table>
+  <thead>
+    <tr><th>维度</th><th>① 双塔对比</th><th>② 融合编码器</th><th>③ MLLM 通用嵌入</th><th>④ 多向量后交互</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>代表模型</td><td>CLIP / SigLIP</td><td>BLIP / CoCa</td><td>Qwen3-VL-Emb / RzenEmbed</td><td>ColPali / ColQwen</td></tr>
+    <tr>
+      <td>代表模型参数量</td>
+      <td>CLIP ViT-L/14 ≈4.28 亿；<br>SigLIP-So400m 视觉塔 ≈4 亿</td>
+      <td>BLIP(ViT-L) ≈4.7 亿；<br>BLIP-2 约 3.4B–12B（含冻结 LLM）；<br>CoCa 原论文 ≈2.1B</td>
+      <td>Qwen3-VL-Embedding 2B / 8B；<br>RzenEmbed 2B / 8B</td>
+      <td>ColPali ≈3B（基于 PaliGemma）；<br>ColQwen2 ≈2B / ColQwen2.5 ≈3B</td>
+    </tr>
+    <tr><td>检索效率</td><td>★★★★★</td><td>★★★</td><td>★★★（需 MRL/量化）</td><td>★★（多向量开销大）</td></tr>
+    <tr><td>细粒度/语义理解</td><td>★★</td><td>★★★★</td><td>★★★★★</td><td>★★★★</td></tr>
+    <tr><td>指令感知</td><td>否</td><td>否</td><td>是</td><td>部分</td></tr>
+    <tr><td>视觉文档场景</td><td>弱</td><td>中</td><td>强</td><td>最强</td></tr>
+    <tr><td>典型部署成本</td><td>低</td><td>中</td><td>高</td><td>高（存储）</td></tr>
+  </tbody>
+</table>
+
+<h2 id="sec4">四、关键技术 <a class="backtop" href="#top">↑ 顶部</a></h2>
+
+<h3>基础训练技术</h3>
+<div class="tech">
+  <h4>对比学习（Contrastive Learning / InfoNCE）</h4>
+  <p>核心目标函数：拉近正样本图文对、推远负样本，通过温度系数 <code>τ</code> 调节分布锐度。
+  是所有图文嵌入模型的基石；SigLIP 用 Sigmoid loss 缓解大 batch 下的归一化压力。</p>
+</div>
+<div class="tech">
+  <h4>大规模弱监督图文对</h4>
+  <p>从互联网抓取的数亿级 (image, alt-text) 对是能力来源。数据的规模、清洗质量与多样性，
+  往往比模型结构更决定上限。近期普遍用 VLM 做数据合成与打标以补足稀缺场景。</p>
+</div>
+<div class="tech">
+  <h4>硬负例挖掘（Hard Negative Mining）</h4>
+  <p>用当前模型检索出"似是而非"的高相似度负例参与训练，显著提升判别力；
+  同时需要"假负例过滤"（相似度超过正例即屏蔽），避免把真正相关项误当负例。</p>
+</div>
+
+<h3>MLLM 嵌入路线的关键技术</h3>
+<div class="tech">
+  <h4>Pooling 策略（表征提取）</h4>
+  <p>如何从骨干网络取出句/图向量：CLIP 用 CLS，文本模型常用 mean pooling，
+  而 MLLM 类多在输入末尾加 <code>&lt;EOS&gt;</code>/<code>PAD</code> token，取其最后隐藏态作为整体表征（last-token pooling）。</p>
+</div>
+<div class="tech">
+  <h4>指令感知（Instruction-aware Embedding）</h4>
+  <p>把任务指令（如"检索能回答该问题的图片"）作为输入的一部分，让同一模型按任务产出不同表征，
+  是通用嵌入模型泛化到多任务的关键，也是 MLLM 骨干相比 CLIP 的天然优势。</p>
+</div>
+<div class="tech">
+  <h4>多阶段训练（Multi-stage Pipeline）</h4>
+  <p>典型流程：大规模合成数据<strong>对比预训练</strong> → 高质量数据<strong>多任务微调</strong> →
+  从 reranker <strong>蒸馏</strong> → <strong>模型合并</strong>。逐级"以模型提数据质量、以数据促模型能力"，形成正循环。</p>
+</div>
+<div class="tech">
+  <h4>知识蒸馏（Reranker → Embedding）</h4>
+  <p>用更强的 cross-encoder 重排模型给出细粒度相关性分数，作为软标签监督双塔嵌入模型，
+  在检索任务上大幅提点；再与微调分支合并，兼顾分类/QA 不掉分。</p>
+</div>
+
+<h3>高效落地技术</h3>
+<div class="tech">
+  <h4>Matryoshka 表征学习（MRL）</h4>
+  <p>训练时对同一向量的多个前缀维度同时施加损失，使得推理时可按需截断维度
+  （如 4096→512）而性能损失很小，直接换来存储减半、检索提速一倍。</p>
+</div>
+<div class="tech">
+  <h4>量化感知训练（QAT）</h4>
+  <p>训练中同时对全精度与低精度（int8/binary）嵌入计算损失，让模型学出"抗量化"的表征。
+  int8 几乎无损、可大幅压缩索引存储与算力。</p>
+</div>
+<div class="tech">
+  <h4>后交互 / 多向量（Late Interaction / MaxSim）</h4>
+  <p>ColPali 系不把文档压成单向量，而保留 patch 级多向量，查询时对每个查询 token 取最大相似度求和。
+  换取视觉文档检索的高精度，代价是索引存储与计算开销上升。</p>
+</div>
+<div class="tech">
+  <h4>统一表征空间与模型合并（Model Merging）</h4>
+  <p>让文本、图像、视频、文档共享一个向量空间以支持任意跨模态检索；
+  并通过参数合并调和不同训练阶段/任务间的能力冲突，得到均衡的最终模型。</p>
+</div>
+
+<h2 id="sec5">五、双塔（Dual-Encoder）架构详解 <a class="backtop" href="#top">↑ 顶部</a></h2>
+<p>
+  双塔架构是 CLIP 一系的核心。精髓是<strong>两个模态各走各的编码器，只在最末端用向量相似度对齐</strong>——
+  即"双塔 + 晚融合（late fusion）"，中间没有任何跨模态注意力，这正是它区别于第②类融合编码器的根本点。
+</p>
+
+<div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:20px 0;overflow-x:auto;">
+<svg viewBox="0 0 720 470" width="100%" style="max-width:720px;display:block;margin:0 auto;font-family:inherit;">
+  <defs>
+    <marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <!-- 图像塔 -->
+  <rect x="70" y="20" width="180" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="160" y="45" fill="#1a1a2e" font-size="14" text-anchor="middle">图像输入 x_img</text>
+  <line x1="160" y1="60" x2="160" y2="88" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="70" y="90" width="180" height="52" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="160" y="112" fill="#2563eb" font-size="14" text-anchor="middle" font-weight="700">图像编码器</text>
+  <text x="160" y="130" fill="#64748b" font-size="12" text-anchor="middle">ViT / CNN → [CLS]</text>
+  <line x1="160" y1="142" x2="160" y2="170" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="70" y="172" width="180" height="46" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="160" y="194" fill="#1a1a2e" font-size="13" text-anchor="middle">投影层 + L2 归一化</text>
+  <text x="160" y="210" fill="#64748b" font-size="11" text-anchor="middle">→ 单位超球面</text>
+  <line x1="160" y1="218" x2="160" y2="250" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="95" y="252" width="130" height="34" rx="17" fill="#dbeafe" stroke="#2563eb"/>
+  <text x="160" y="274" fill="#2563eb" font-size="13" text-anchor="middle" font-weight="700">v_img (d 维)</text>
+
+  <!-- 文本塔 -->
+  <rect x="470" y="20" width="180" height="40" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="560" y="45" fill="#1a1a2e" font-size="14" text-anchor="middle">文本输入 x_txt</text>
+  <line x1="560" y1="60" x2="560" y2="88" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="470" y="90" width="180" height="52" rx="8" fill="#ffffff" stroke="#059669" stroke-width="1.5"/>
+  <text x="560" y="112" fill="#059669" font-size="14" text-anchor="middle" font-weight="700">文本编码器</text>
+  <text x="560" y="130" fill="#64748b" font-size="12" text-anchor="middle">Transformer → [EOS]/mean</text>
+  <line x1="560" y1="142" x2="560" y2="170" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="470" y="172" width="180" height="46" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="560" y="194" fill="#1a1a2e" font-size="13" text-anchor="middle">投影层 + L2 归一化</text>
+  <text x="560" y="210" fill="#64748b" font-size="11" text-anchor="middle">→ 单位超球面</text>
+  <line x1="560" y1="218" x2="560" y2="250" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="495" y="252" width="130" height="34" rx="17" fill="#d1fae5" stroke="#059669"/>
+  <text x="560" y="274" fill="#059669" font-size="13" text-anchor="middle" font-weight="700">v_txt (d 维)</text>
+
+  <!-- 独立提示 -->
+  <text x="360" y="120" fill="#d97706" font-size="12" text-anchor="middle">两塔独立</text>
+  <text x="360" y="136" fill="#64748b" font-size="11" text-anchor="middle">参数不共享</text>
+
+  <!-- 汇聚到相似度 -->
+  <path d="M160,286 L160,320 L360,320" fill="none" stroke="#64748b" stroke-width="1.5"/>
+  <path d="M560,286 L560,320 L360,320" fill="none" stroke="#64748b" stroke-width="1.5"/>
+  <line x1="360" y1="320" x2="360" y2="348" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="250" y="350" width="220" height="46" rx="8" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="360" y="372" fill="#7c3aed" font-size="14" text-anchor="middle" font-weight="700">余弦相似度（点积）</text>
+  <text x="360" y="388" fill="#64748b" font-size="11" text-anchor="middle">sim = v_img · v_txt</text>
+  <line x1="360" y1="396" x2="360" y2="420" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar)"/>
+  <rect x="230" y="422" width="260" height="38" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="360" y="446" fill="#1a1a2e" font-size="12.5" text-anchor="middle">对比学习 InfoNCE（对角线为正样本）</text>
+</svg>
+</div>
+
+<h3>数据流逐层拆解</h3>
+<div class="tech">
+  <h4>图像塔（Image Encoder）</h4>
+  <p>把图像编码成固定长度向量。<strong>ViT</strong>：图像切 patch（如 14×14）+ 位置编码，过 Transformer，取 <code>[CLS]</code> 输出（CLIP-L/14、SigLIP、EVA02 均属此类）；早期也用 <strong>CNN</strong>（CLIP 用过 ResNet，ALIGN 用 EfficientNet-L2）。</p>
+</div>
+<div class="tech">
+  <h4>文本塔（Text Encoder）</h4>
+  <p>文本 tokenize + 位置编码后过 Transformer。CLIP 取序列结尾 <code>[EOS]</code> token 的隐藏态作句向量；BERT 类常用 <code>[CLS]</code> 或 mean pooling（jina-clip-v2 文本塔即 mean pooling）。</p>
+</div>
+<div class="tech">
+  <h4>投影层 + L2 归一化（对齐的关键）</h4>
+  <p>两塔输出维度往往不同，各接一个<strong>线性投影层</strong>映射到<strong>同一维度 d</strong>（共享嵌入空间），再做 <strong>L2 归一化</strong>压到单位超球面。这样点积就直接等于余弦相似度：
+  <code>sim = (v_img·v_txt) / (‖v_img‖‖v_txt‖) = v̂_img · v̂_txt</code>。</p>
+</div>
+
+<h3>训练目标：对比学习 InfoNCE</h3>
+<p>
+  一个 batch 有 N 对配对图文，算出 N×N 相似度矩阵，<strong>对角线是正样本、其余 N²−N 个是负样本</strong>，
+  目标是拉高对角线、压低非对角线。采用对称 InfoNCE（图→文、文→图各算一次交叉熵）：
+</p>
+<div class="tech">
+  <p style="color:var(--text);"><code>L = −(1/N) Σᵢ log[ exp(sim(vᵢ_img, vᵢ_txt)/τ) / Σⱼ exp(sim(vᵢ_img, vⱼ_txt)/τ) ]</code></p>
+  <p><strong>温度系数 τ</strong>：缩放 logits 控制分布锐度，CLIP 把它设为可学习参数（<code>logit_scale</code>）。</p>
+  <p><strong>大 batch 至关重要</strong>：负样本来自同 batch，batch 越大负例越多、对齐越强（CLIP 用 32k）。SigLIP 的关键改进是把 Softmax 换成 <strong>Sigmoid loss</strong>，让每对图文独立做二分类，摆脱对超大 batch 全局归一化的依赖。</p>
+</div>
+
+<h3>推理与检索流程（双塔最大的工程优势）</h3>
+<p>因为两塔独立，图侧可<strong>离线预编码并复用</strong>：</p>
+<ol style="color:var(--muted);font-size:14.5px;line-height:1.9;">
+  <li>把图库所有图片提前过图像塔，向量存入向量库（FAISS / Milvus 等）；</li>
+  <li>来一个文本 query，只需过一次文本塔得到 query 向量；</li>
+  <li>在向量库做近似最近邻（ANN）检索，点积取 Top-K。</li>
+</ol>
+<p>在线只算 query 一侧，这正是双塔能撑起<strong>亿级图库实时检索</strong>的原因，也是它相比融合编码器（每个 query-doc 对都要重跑一遍跨模态网络）的决定性效率优势。</p>
+
+<div class="note">
+  <strong>能力与局限：</strong>
+  强项是零样本分类/检索、可扩展、速度快；短板是<strong>细粒度/组合语义弱</strong>——整图整句各压成一个向量，丢失 token 级对齐（如"红衣服的人在蓝车左边"这类关系易错），且不支持指令、长文本较弱。
+  后续改进（SigLIP 改 loss、EVA-CLIP 提 scaling、jina-clip-v2 加多语言/长文本/Matryoshka）多在补这些短板，但骨架仍是这套双塔。
+</div>
+
+<h3 id="siglip2">案例：SigLIP 2 —— 双塔编码器的集大成改进</h3>
+<p>
+  SigLIP 2 是 Google 于 2025 年 2 月发布的<strong>多语言视觉-语言编码器家族</strong>，仍是双塔路线、SigLIP 的第二代。
+  核心思路：<strong>在 SigLIP 的 Sigmoid loss 之上，把此前多个独立发展的训练技术统一进一套配方</strong>，
+  同时提升语义理解、定位能力与稠密特征。在所有规模上，其零样本分类、图文检索及作为 VLM 视觉底座的迁移能力均超过同规模 SigLIP。
+</p>
+
+<h4 style="color:var(--accent);margin:22px 0 10px;">四项训练改进</h4>
+<div class="tech">
+  <h4>① Sigmoid loss（继承自 SigLIP）</h4>
+  <p>基础图文对比对齐目标：每对图文独立做二分类，摆脱对超大 batch 全局归一化的依赖。</p>
+</div>
+<div class="tech">
+  <h4>② 加解码器：Decoder-based 预训练</h4>
+  <p>在双塔外加一个<strong>文本解码器</strong>，承担三个任务：预测整图 caption、给定区域描述预测 bounding box 坐标、给定坐标预测区域 caption。这个额外信号让视觉编码器<strong>位置感知</strong>，显著改善 OCR 与定位。</p>
+</div>
+<div class="tech">
+  <h4>③ 自蒸馏：Global-Local Loss + Masked Prediction</h4>
+  <p>用同一模型做师生（teacher 是 student 参数的滑动平均 EMA）：<strong>Global-Local Loss</strong> 让 student 只看局部视图去匹配 teacher 的整图表征；<strong>Masked Prediction Loss</strong> 遮住 student 50% 的 patch，在被遮位置匹配 teacher 特征。二者提升细粒度局部语义与稠密预测。为省算力，这些损失只在训练完成 <strong>80%</strong> 后才加入。</p>
+</div>
+<div class="tech">
+  <h4>④ 在线数据筛选 + 多语言数据</h4>
+  <p>训练中做 online data curation，并引入多语言语料，带来多语言能力。</p>
+</div>
+
+<h4 style="color:var(--accent);margin:22px 0 10px;">NaFlex：动态分辨率变体</h4>
+<p style="color:var(--muted);font-size:14.5px;">
+  图像模型对分辨率/长宽比敏感。SigLIP 2 提供两种适配：<strong>固定分辨率变体</strong>（取 95% 训练 checkpoint，resize 位置/patch 编码后继续训到目标分辨率）；
+  <strong>动态分辨率变体 NaFlex</strong>（融合 FlexiViT 变序列长度 + NaViT 原生长宽比，<strong>一个模型兼顾 OCR 与文档理解</strong>，带 <code>-naflex</code> 后缀）。
+</p>
+
+<h4 style="color:var(--accent);margin:22px 0 10px;">模型规格</h4>
+<table>
+  <thead>
+    <tr><th>规格</th><th>参数量</th><th>patch</th><th>分辨率</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>Base</td><td>86M</td><td>32 / 16</td><td>224–512</td></tr>
+    <tr><td>Large</td><td>303M</td><td>16</td><td>256 / 384 / 512</td></tr>
+    <tr><td>So400m（形状优化）</td><td>≈400M</td><td>14 / 16</td><td>224 / 384 / 512</td></tr>
+    <tr><td>Giant</td><td>1B</td><td>16</td><td>256 / 384</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:13px;">
+  相比 SigLIP 1 新增了 <strong>Giant (1B)</strong> 系列与 <strong>NaFlex</strong> 动态分辨率变体；各档嵌入维度分别为 Base 768 / Large 1024 / So400m 1152 / Giant 1536（so400m-patch14-384 即 1152）。
+</p>
+
+<h4 style="color:var(--accent);margin:22px 0 10px;">文本塔（Text Encoder）</h4>
+<p style="color:var(--muted);font-size:14.5px;">
+  SigLIP 2 的文本塔是一个标准 <strong>Transformer 编码器</strong>（非解码器 LLM），与视觉塔并列组成双塔，宽度/深度按变体匹配视觉塔，输出维度与该档嵌入维度一致（如 ViT-B/16 → 768）。
+</p>
+<div class="tech">
+  <h4>Tokenizer：改用 Gemma 多语言词表（相比 SigLIP 1 的最大变化）</h4>
+  <p>SigLIP 1 用约 32k 的多语言 SentencePiece 词表；<strong>SigLIP 2 换成 Gemma 多语言 tokenizer（约 256k 词表）</strong>，这是其多语言能力（含中文可直接编码）的直接来源。代价：256k 词表使 <strong>文本塔的嵌入表非常大</strong>（约 256000×d，Base 768 宽度下仅嵌入表就约 2 亿参数，往往比同档视觉塔还重）——估算内存/算力时不能只按 Transformer 层数计。</p>
+</div>
+<div class="tech">
+  <h4>输入与池化</h4>
+  <p>文本<strong>定长 64 token</strong>、右侧 padding 到满，推理阶段<strong>不使用 attention mask</strong>（直接过完整 64 长度）。池化取<strong>最后一个 token</strong> 的隐藏态 → 线性 head → 句向量，再 <strong>L2 归一化</strong>。注意与视觉侧不同：视觉塔用 <strong>MAP 多头注意力池化</strong>，两塔池化方式不一致。</p>
+</div>
+
+<div class="note">
+  <strong>推理与部署要点（双塔特性）：</strong>
+  ① 图、文两塔<strong>独立编码</strong>，图库可离线预编码建索引，在线只编 query 一侧；
+  ② 两塔输出均 L2 归一化后，<strong>点积即余弦相似度</strong>；
+  ③ 零样本分类依赖 <strong>prompt 模板</strong>（英文常用 <code>This is a photo of a {}.</code>，中文可用中文类名/模板），且换类别标签时必须用 <strong>SigLIP 2 自带的 Gemma tokenizer</strong> 重新生成 token（定长 64），不能混用其它分词器；
+  ④ 板端部署常见做法：离线生成 <code>input_ids [N,64]</code> 存盘，设备端只跑视觉/文本两个编码器，最后做余弦匹配。
+</div>
+
+<div class="note">
+  <strong>主要用途：</strong>零样本分类 / 图文检索全规模领先；因解码器 + 自蒸馏，定位与稠密预测（分割、深度）明显增强；
+  最重要的应用是<strong>作为 VLM 的视觉底座</strong>——PaliGemma / PaliGemma 2 即用 SigLIP 家族当视觉塔，第④类的 ColPali 骨干 PaliGemma-3B 里的视觉塔正是 SigLIP-So400m。
+  <br><br>
+  来源：<a href="https://arxiv.org/abs/2502.14786" target="_blank">SigLIP 2 论文 arXiv:2502.14786</a> 与 <a href="https://huggingface.co/blog/siglip2" target="_blank">HuggingFace 官方博客</a>，内容经改写。
+</div>
+
+<h2 id="secfusion">六、融合编码器（Fusion Encoder）架构详解 <a class="backtop" href="#top">↑ 顶部</a></h2>
+<p>
+  融合编码器（也叫跨模态编码器）的核心是<strong>让图像和文本在网络内部就通过跨模态注意力深度交互</strong>，
+  而非双塔那样各编各的、只在最后点积一次。它换来更强的细粒度对齐，代价是检索效率。
+</p>
+
+<div style="background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:20px;margin:20px 0;overflow-x:auto;">
+<svg viewBox="0 0 720 430" width="100%" style="max-width:720px;display:block;margin:0 auto;font-family:inherit;">
+  <defs>
+    <marker id="ar2" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto">
+      <path d="M0,0 L6,3 L0,6 Z" fill="#64748b"/>
+    </marker>
+  </defs>
+  <!-- 图像单模态编码器 -->
+  <rect x="60" y="20" width="180" height="38" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="150" y="44" fill="#1a1a2e" font-size="14" text-anchor="middle">图像输入</text>
+  <line x1="150" y1="58" x2="150" y2="82" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <rect x="60" y="84" width="180" height="48" rx="8" fill="#ffffff" stroke="#2563eb" stroke-width="1.5"/>
+  <text x="150" y="106" fill="#2563eb" font-size="13.5" text-anchor="middle" font-weight="700">图像编码器 (ViT)</text>
+  <text x="150" y="123" fill="#64748b" font-size="11" text-anchor="middle">图 token 序列</text>
+  <!-- 文本单模态编码器 -->
+  <rect x="480" y="20" width="180" height="38" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="570" y="44" fill="#1a1a2e" font-size="14" text-anchor="middle">文本输入</text>
+  <line x1="570" y1="58" x2="570" y2="82" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <rect x="480" y="84" width="180" height="48" rx="8" fill="#ffffff" stroke="#059669" stroke-width="1.5"/>
+  <text x="570" y="106" fill="#059669" font-size="13.5" text-anchor="middle" font-weight="700">文本编码器</text>
+  <text x="570" y="123" fill="#64748b" font-size="11" text-anchor="middle">文 token 序列</text>
+
+  <!-- ITC 先对齐 -->
+  <path d="M150,132 L150,160 L280,160" fill="none" stroke="#d97706" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <path d="M570,132 L570,160 L440,160" fill="none" stroke="#d97706" stroke-width="1.3" stroke-dasharray="4 3"/>
+  <rect x="280" y="145" width="160" height="30" rx="15" fill="#fef3c7" stroke="#d97706"/>
+  <text x="360" y="165" fill="#d97706" font-size="12" text-anchor="middle">ITC 先对齐（进融合前）</text>
+
+  <!-- 跨模态融合层 -->
+  <line x1="150" y1="132" x2="150" y2="200" stroke="#64748b" stroke-width="1.5"/>
+  <line x1="570" y1="132" x2="570" y2="200" stroke="#64748b" stroke-width="1.5"/>
+  <path d="M150,200 L300,200" fill="none" stroke="#64748b" stroke-width="1.5"/>
+  <path d="M570,200 L420,200" fill="none" stroke="#64748b" stroke-width="1.5"/>
+  <line x1="360" y1="200" x2="360" y2="222" stroke="#64748b" stroke-width="1.5" marker-end="url(#ar2)"/>
+  <rect x="210" y="224" width="300" height="56" rx="10" fill="#ede9fe" stroke="#7c3aed" stroke-width="1.5"/>
+  <text x="360" y="247" fill="#7c3aed" font-size="14" text-anchor="middle" font-weight="700">跨模态融合层</text>
+  <text x="360" y="266" fill="#64748b" font-size="11.5" text-anchor="middle">Cross-Attention（token 级深度交互）</text>
+
+  <!-- 多任务头 -->
+  <line x1="360" y1="280" x2="360" y2="308" stroke="#64748b" stroke-width="1.5"/>
+  <path d="M170,320 L550,320" fill="none" stroke="#64748b" stroke-width="1.2"/>
+  <line x1="360" y1="308" x2="360" y2="320" stroke="#64748b" stroke-width="1.2"/>
+  <line x1="170" y1="320" x2="170" y2="344" stroke="#64748b" stroke-width="1.2" marker-end="url(#ar2)"/>
+  <line x1="360" y1="320" x2="360" y2="344" stroke="#64748b" stroke-width="1.2" marker-end="url(#ar2)"/>
+  <line x1="550" y1="320" x2="550" y2="344" stroke="#64748b" stroke-width="1.2" marker-end="url(#ar2)"/>
+  <rect x="110" y="346" width="120" height="36" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="170" y="369" fill="#1a1a2e" font-size="12.5" text-anchor="middle">ITM 匹配</text>
+  <rect x="300" y="346" width="120" height="36" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="360" y="369" fill="#1a1a2e" font-size="12.5" text-anchor="middle">MLM 掩码</text>
+  <rect x="490" y="346" width="120" height="36" rx="8" fill="#f1f5f9" stroke="#e2e8f0"/>
+  <text x="550" y="369" fill="#1a1a2e" font-size="12.5" text-anchor="middle">VQA / caption</text>
+  <text x="360" y="410" fill="#64748b" font-size="11" text-anchor="middle">多任务预训练目标</text>
+</svg>
+</div>
+
+<h3>两种融合结构</h3>
+<div class="tech">
+  <h4>① 单流（Single-stream）</h4>
+  <p>把图像 token 与文本 token <strong>拼接成一个序列</strong>喂进同一个 Transformer，靠 self-attention 完成跨模态交互。代表：VisualBERT、UNITER、BEiT-3（用模态专家 FFN 的变体）。</p>
+</div>
+<div class="tech">
+  <h4>② 双流 / 协同注意力（Dual-stream / Co-attention）</h4>
+  <p>两个模态各有一支，通过 <strong>cross-attention</strong> 层互相交换信息。代表：ViLBERT、LXMERT、ALBEF（文本后半段做 fusion）。</p>
+</div>
+
+<h3>"先对齐，再融合"（ALBEF 的关键思想）</h3>
+<p style="color:var(--muted);font-size:14.5px;">
+  早期模型直接把未对齐的图文特征丢进融合层，跨模态注意力很难学。ALBEF 提出：<strong>先用对比损失 ITC 把图、文特征在进入融合层前拉到同一空间</strong>，
+  让融合层拿到已粗对齐的特征再做深度交互。这几乎成了后续所有融合模型的标配。
+</p>
+
+<h3>多任务预训练目标（这一类的灵魂）</h3>
+<div class="tech">
+  <h4>ITC · Image-Text Contrastive</h4>
+  <p>图文对比做粗粒度对齐（同 CLIP 对比损失），也用于检索初筛。</p>
+</div>
+<div class="tech">
+  <h4>ITM · Image-Text Matching</h4>
+  <p>把 [CLS] 联合表征过二分类头判断"图文是否匹配"，通常配 <strong>hard negative mining</strong>（用 ITC 相似度挑最难负例），是细粒度判别的关键。</p>
+</div>
+<div class="tech">
+  <h4>MLM · Masked Language Modeling（及可选 MIM / captioning）</h4>
+  <p>遮住部分文本 token，让模型结合图像预测，逼它建立词—区域关联。部分模型还加掩码图像建模、图像描述生成（CoCa、BLIP）、PrefixLM 等。</p>
+</div>
+
+<h3>四个代表模型的结构差异</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>结构要点</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>ALBEF</td><td>ViT-B/16 + BERT-base 拆成"6 层文本编码 + 6 层跨模态融合"；用<strong>动量蒸馏</strong>对抗网络噪声标签</td></tr>
+    <tr><td>BLIP</td><td>提出 <strong>MED</strong>（多模态编码-解码混合），一套参数可切"单模态编码/图文匹配/图文生成"三模式；用 <strong>CapFilt</strong> 生成+过滤清洗数据</td></tr>
+    <tr><td>CoCa</td><td>图像编码器 + <strong>文本解码器</strong>，同训"对比损失（前半）+ captioning 生成（后半）"，对比与生成合流</td></tr>
+    <tr><td>BEiT-3</td><td><strong>Multiway Transformer</strong>：共享自注意力 + 按模态切换的专家 FFN（视觉/语言/视觉-语言专家），把图、文、图文统一建模</td></tr>
+  </tbody>
+</table>
+
+<h3>推理与检索：为什么慢</h3>
+<p style="color:var(--muted);font-size:14.5px;">
+  融合模型判断一对图文是否匹配，必须<strong>把这对图文一起过一遍融合层</strong>，无法像双塔那样离线建索引（N 张图理论上要跑 N 次融合前向）。
+  工程上用<strong>两阶段（retrieve-then-rerank）</strong>缓解：先用 ITC 分支（等价双塔）快速召回 Top-K，再用 ITM/融合分支精排，兼顾速度与精度。
+</p>
+
+<div class="note">
+  <strong>能力与局限：</strong>强项是细粒度对齐、token—区域级理解，天然支持 VQA / 图文匹配 / captioning，精排精度高于纯双塔；
+  短板是检索/索引成本高、模型更重、多目标训练更复杂，不适合亿级实时向量检索。
+  演进主线：<strong>双塔 ITC 对齐 + 跨模态融合层（ITM/MLM）+ 可选生成目标</strong>，用计算换对齐精度——后来的第③类 MLLM 通用嵌入某种程度上是"用大 VLM 内化融合能力，再退回双塔式输出向量"，取两者之长。
+</div>
+
+<h2 id="sec6">七、四大类经典模型详细对比 <a class="backtop" href="#top">↑ 顶部</a></h2>
+<p style="color:var(--muted);font-size:14.5px;">
+  下列数据均取自各模型<strong>原始论文或官方模型卡</strong>，并注明来源。各类采用其领域内公认的经典基准：
+  ① 用 ImageNet 零样本 + COCO/Flickr 检索；② 用微调后 COCO/Flickr 检索 + VQA；③ 用 MMEB；④ 用 ViDoRe。
+  由于不同论文口径不同（零样本 vs 微调、基准版本差异），跨类分数<strong>不可直接横向比较</strong>。
+</p>
+
+<h3>① 双塔对比学习类 · 基准：ImageNet 零样本 top-1 / 检索 R@1</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>总参数</th><th>图像底座</th><th>文本底座</th><th>ImageNet 零样本</th><th>检索 R@1（零样本）</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>CLIP (ViT-L/14)</td><td>≈427.6M</td><td>ViT-L/14 ≈304M</td><td>Transformer ≈124M</td>
+      <td>75.5%（336px 76.2%）</td><td>COCO 图→文58.4/文→图37.8；Flickr 88.0/68.7</td>
+    </tr>
+    <tr>
+      <td>ALIGN</td><td>≈800M</td><td>EfficientNet-L2 ≈480M</td><td>BERT-Large ≈340M</td>
+      <td>76.4%</td><td>COCO 58.6/45.6；Flickr 88.6/75.7</td>
+    </tr>
+    <tr>
+      <td>SigLIP (SoViT-400m/14@384)</td><td>≈878M</td><td>So400m ≈400M</td><td>≈478M</td>
+      <td>83.2%</td><td>COCO 70.2/52.0；Flickr 93.5/80.5</td>
+    </tr>
+    <tr>
+      <td><strong>SigLIP 2 (So400m/14@384)</strong></td><td>≈1.14B</td><td>So400m ≈400M</td><td>≈736M（推算，含 256k 词表嵌入）</td>
+      <td><strong>84.1%</strong></td><td>COCO 71.7/55.8；Flickr 94.9/85.7</td>
+    </tr>
+    <tr>
+      <td>SigLIP 2 (Giant g-opt/16@384)</td><td>≈1.87B</td><td>g ≈1B</td><td>未单列</td>
+      <td>85.0%</td><td>COCO 72.8/56.1；Flickr 95.4/86.0</td>
+    </tr>
+    <tr>
+      <td>OpenCLIP (ViT-bigG/14, LAION-2B)</td><td>≈2.5B</td><td>ViT-bigG ≈1.8B</td><td>≈0.69B</td>
+      <td>80.1%</td><td>论文/卡未列 R@1</td>
+    </tr>
+    <tr>
+      <td>jina-clip-v2</td><td>≈0.865B</td><td>EVA02-L14 ≈304M</td><td>Jina-XLM-RoBERTa ≈561M</td>
+      <td>—（主打多语跨模态检索）</td><td>较 v1 检索 +3%（见技术报告）</td>
+    </tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  来源：CLIP <a href="https://arxiv.org/abs/2103.00020" target="_blank">2103.00020</a> / HF openai-clip-vit-large-patch14；ALIGN <a href="https://arxiv.org/abs/2102.05918" target="_blank">2102.05918</a>；SigLIP <a href="https://arxiv.org/abs/2303.15343" target="_blank">2303.15343</a>；SigLIP 2 <a href="https://arxiv.org/abs/2502.14786" target="_blank">2502.14786</a>（Table 1，ImageNet 0-shot 与检索 R@1；总参取自 HF safetensors）；OpenCLIP <a href="https://laion.ai/blog/large-openclip/" target="_blank">LAION</a>。检索 R@1 部分引自 CoCa / SigLIP2 论文对比表（均为零样本口径）。CLIP/ALIGN/OpenCLIP 及 SigLIP 文本底座拆分含推算/社区统计（SigLIP 2 文本塔参数论文未单列，为总参减图像塔的推算值）。
+</p>
+
+<h3>② 融合编码器 / 跨模态类 · 基准：微调检索 R@1 / VQA test-dev</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>总参数</th><th>图像底座</th><th>文本底座</th><th>COCO / Flickr 检索 R@1（微调）</th><th>VQA test-dev</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ALBEF</td><td>≈210M</td><td>ViT-B/16 ≈85.8M</td><td>BERT-base ≈123.7M</td>
+      <td>COCO 77.6/60.7；Flickr 95.9/85.6</td><td>75.84</td>
+    </tr>
+    <tr>
+      <td>BLIP</td><td>≈252M（ViT-B）</td><td>ViT-B/16 ≈86M（可选 ViT-L）</td><td>BERT-base（MED）</td>
+      <td>COCO 80.6/63.1（ViT-L 达 82.4/65.1）；Flickr 96.6/87.2</td><td>78.25</td>
+    </tr>
+    <tr>
+      <td>CoCa</td><td>≈2.1B</td><td>ViT-giant ≈1B</td><td>文本解码器 ≈1.1B（非 BERT）</td>
+      <td>COCO 66.3/51.2；Flickr 92.5/80.4（零样本）</td><td>82.3</td>
+    </tr>
+    <tr>
+      <td>BEiT-3</td><td>≈1.9B</td><td colspan="2">Multiway Transformer（视觉专家 692M + 语言专家 692M + VL 专家 52M + 共享注意力 317M）</td>
+      <td>COCO 84.8/67.2；Flickr 98.0/90.3</td><td>84.19</td>
+    </tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  来源：ALBEF <a href="https://arxiv.org/abs/2107.07651" target="_blank">2107.07651</a>；BLIP <a href="https://arxiv.org/abs/2201.12086" target="_blank">2201.12086</a>；CoCa <a href="https://arxiv.org/abs/2205.01917" target="_blank">2205.01917</a>；BEiT-3 <a href="https://arxiv.org/abs/2208.10442" target="_blank">2208.10442</a>。注：CoCa 检索为零样本、其余为微调；CoCa 用文本解码器、BEiT-3 用模态专家 FFN，均非传统 BERT 文本塔。检索格式为 图→文 / 文→图。
+</p>
+
+<h3>③ MLLM 通用嵌入类 · 基准：MMEB（多模态嵌入基准）</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>骨干 VLM</th><th>总参数</th><th>图像底座</th><th>文本底座（LLM）</th><th>MMEB 分数</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>E5-V</td><td>LLaVA-NeXT-8B</td><td>≈8.4B</td><td>CLIP ViT-L/14-336 ≈0.3B</td><td>Llama-3-8B</td>
+      <td>早于 MMEB，原文报 COCO/Flickr/CIRR 检索</td>
+    </tr>
+    <tr>
+      <td>VLM2Vec</td><td>Phi-3.5-V / LLaVA-1.6</td><td>4.15B / 7.57B</td><td>ViT-L/14-336 ≈0.3B</td><td>Phi-3.5-mini 3.8B / Mistral-7B</td>
+      <td>MMEB-V1 Overall 60.1（Phi）/ 62.9（LLaVA 最佳）</td>
+    </tr>
+    <tr>
+      <td>GME</td><td>Qwen2-VL-2B / 7B</td><td>2.2B / 8.2B</td><td>Qwen2-VL ViT ≈675M</td><td>Qwen2-1.5B / 7B</td>
+      <td>MMEB-V1 Overall 51.9 / 56.0（第三方复测）</td>
+    </tr>
+    <tr>
+      <td>RzenEmbed</td><td>Qwen2-VL-2B / 7B</td><td>2.21B / 8.29B</td><td>Qwen2-VL ViT ≈675M</td><td>Qwen2-1.5B / 7B</td>
+      <td>MMEB-V1 Overall 72.3 / 75.9；MMEB-V2 All 67.2 / 71.6</td>
+    </tr>
+    <tr>
+      <td>Qwen3-VL-Embedding</td><td>Qwen3-VL-2B / 8B</td><td>2B / 8B</td><td>Qwen3-VL 视觉编码器</td><td>Qwen3 LM</td>
+      <td>MMEB-V2 All 73.2 / <strong>77.8</strong>（8B 居榜首）</td>
+    </tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  来源：E5-V <a href="https://arxiv.org/abs/2407.12580" target="_blank">2407.12580</a>；VLM2Vec <a href="https://arxiv.org/abs/2410.05160" target="_blank">2410.05160</a>；GME <a href="https://arxiv.org/abs/2412.16855" target="_blank">2412.16855</a>；RzenEmbed <a href="https://arxiv.org/abs/2510.27350" target="_blank">2510.27350</a>；Qwen3-VL-Embedding <a href="https://arxiv.org/abs/2601.04720" target="_blank">2601.04720</a>。MMEB-V1=36 数据集 Precision@1；MMEB-V2=78 数据集。各嵌入论文普遍只给总参数、不单列视觉/文本底座（此处为骨干推算）。
+</p>
+
+<h3>④ 视觉文档后交互类 · 基准：ViDoRe（nDCG@5）</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>骨干 VLM</th><th>总参数</th><th>图像底座</th><th>文本底座</th><th>ViDoRe nDCG@5</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>ColPali</td><td>PaliGemma-3B</td><td>≈2.9B</td><td>SigLIP-So400m ≈400M</td><td>Gemma-2B ≈2B</td>
+      <td>v1 = <strong>81.3</strong>（对比最佳基线 67.0）</td>
+    </tr>
+    <tr>
+      <td>ColQwen2-v1.0</td><td>Qwen2-VL-2B</td><td>≈2.2B</td><td>Qwen2-VL ViT ≈675M</td><td>Qwen2-1.5B</td>
+      <td>v1 较 ColPali 约 +5~8（确值以 ViDoRe 榜单为准）</td>
+    </tr>
+    <tr>
+      <td>ColNomic-embed-multimodal-3b</td><td>Qwen2.5-VL-3B</td><td>3B</td><td>≈675M（未单列）</td><td>≈3B（未单列）</td>
+      <td>v1 = <strong>91.0</strong>；v2 = 63.5（论文）/ 61.2（卡）</td>
+    </tr>
+    <tr>
+      <td>jina-embeddings-v4</td><td>Qwen2.5-VL-3B</td><td>3.8B</td><td>≈675M（未单列）</td><td>≈3B（未单列）</td>
+      <td>支持单/多向量；确值见技术报告</td>
+    </tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  来源：ColPali <a href="https://arxiv.org/abs/2407.01449" target="_blank">2407.01449</a>；ColQwen2 同论文 / HF vidore-colqwen2-v1.0；ColNomic <a href="https://arxiv.org/abs/2507.05513" target="_blank">2507.05513</a>；jina-v4 <a href="https://arxiv.org/abs/2506.18902" target="_blank">2506.18902</a>。ColQwen2 与 jina-v4 的确切 ViDoRe 平均分未能从一手来源核实到单一数值，故按论文/榜单描述给出。
+</p>
+
+<h2 id="sec7">八、小结与选型指引 <a class="backtop" href="#top">↑ 顶部</a></h2>
+<div class="lead">
+  <p style="margin-top:0;">技术演进主线：<strong>双塔对比（快）→ 融合编码器（准）→ MLLM 通用嵌入（强且通用）→ 工程化高效部署（MRL/量化/后交互）</strong>。</p>
+  <p style="margin-bottom:0;">
+    · 大规模快速检索、算力紧张 → CLIP / SigLIP 系；<br>
+    · 追求综合效果与指令泛化、可私有化 → Qwen3-VL-Embedding、RzenEmbed 等 MLLM 通用嵌入；<br>
+    · 走 API 且要顶尖效果 → Seed1.6-Embedding；<br>
+    · 视觉文档 / PDF / 图表 RAG → ColPali / ColQwen / Jina-v4 等后交互模型。
+  </p>
+</div>
+
+<h2 id="sec-img">九、纯图片 Embedding 模型调研 <a class="backtop" href="#top">↑ 顶部</a></h2>
+<p>
+  前八章的图文模型把图像对齐到<strong>文本语义空间</strong>；本章讨论的<strong>纯图片 Embedding</strong>则完全不涉及文本，
+  目标是把一张图映射成一个向量，使<strong>视觉内容相近</strong>的图向量距离更近，直接支撑
+  <strong>图搜图（instance / near-duplicate retrieval）、图像去重、聚类、以图打标（kNN 分类）、版权与溯源</strong>等任务。
+  它与 CLIP 的图像塔有本质区别：CLIP 图像塔被"拉向文本"，偏高层类别语义；纯视觉模型不受文本约束，
+  对<strong>颜色、纹理、构图、实例外观</strong>等低层视觉特征更敏感，因而在同模态图搜图上通常更强。
+</p>
+
+<div class="cards">
+  <div class="card c1">
+    <h4>① 监督分类预训练特征</h4>
+    <span class="tag">Supervised Backbone Features · 2015 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      直接取 ImageNet 等监督分类模型（ResNet / ViT）的倒数层特征当嵌入，或在地标数据上专门微调检索模型
+      （GeM 池化 + 度量学习）。是最早、最工程化的图像检索路线。
+    </p>
+    <div>
+      <span class="chip">ResNet</span><span class="chip">ViT (sup.)</span>
+      <span class="chip">AP-GeM</span><span class="chip">DELG</span><span class="chip">CVNet</span>
+    </div>
+    <ul>
+      <li>优点：成熟、轻量、易部署</li>
+      <li>短板：跨域泛化弱，通用图搜图不如自监督</li>
+    </ul>
+  </div>
+
+  <div class="card c2">
+    <h4>② 自监督对比 / 自蒸馏（当前主流）</h4>
+    <span class="tag">Self-Supervised (Contrastive / Self-Distillation) · 2020 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      无需标签，靠"同图不同增广视图应相近"来学表征。从对比式（SimCLR/MoCo/BYOL）到自蒸馏式
+      （DINO/iBOT），再到规模化的 <strong>DINOv2 / DINOv3</strong>，冻结特征即可做强图搜图。
+    </p>
+    <div>
+      <span class="chip">SimCLR</span><span class="chip">MoCo</span><span class="chip">BYOL</span>
+      <span class="chip">DINO / iBOT</span><span class="chip">DINOv2</span><span class="chip">DINOv3</span>
+    </div>
+    <ul>
+      <li>优点：实例级检索 SOTA、跨域鲁棒、免微调</li>
+      <li>短板：大模型算力高（可用蒸馏小档）</li>
+    </ul>
+  </div>
+
+  <div class="card c3">
+    <h4>③ 掩码图像建模（MIM）</h4>
+    <span class="tag">Masked Image Modeling · 2021 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      遮住大部分 patch 让模型重建，学出强<strong>可微调</strong>骨干。但其"开箱"特征（不微调直接取向量）
+      在检索/线性探测上通常弱于自蒸馏路线，更适合作下游微调初始化。
+    </p>
+    <div>
+      <span class="chip">MAE</span><span class="chip">BEiT</span><span class="chip">SimMIM</span>
+    </div>
+    <ul>
+      <li>优点：微调上限高、预训练高效</li>
+      <li>短板：冻结特征做图搜图偏弱</li>
+    </ul>
+  </div>
+
+  <div class="card c4">
+    <h4>④ CLIP 图像塔（弱监督语义）</h4>
+    <span class="tag">Weakly-Supervised Image Tower · 2021 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      把 CLIP/SigLIP 的图像塔单独拿来产图向量。语义类别检索强，但因被文本对齐"拉高层"，
+      对实例级、低层视觉相似的图搜图不如 DINO 系。
+    </p>
+    <div>
+      <span class="chip">CLIP-ViT</span><span class="chip">OpenCLIP</span><span class="chip">SigLIP2 vision</span>
+    </div>
+    <ul>
+      <li>优点：语义/类别检索强、生态成熟</li>
+      <li>短板：实例级图搜图弱于 DINO 系</li>
+    </ul>
+  </div>
+</div>
+
+<div class="note">
+  <strong>核心结论：</strong>纯图搜图首选<strong>自监督自蒸馏路线（DINOv2 / DINOv3）</strong>。DINOv2 论文实测：在 ROxford/RParis 实例检索上，
+  参数远大的 OpenCLIP ViT-G/14（≈1.8B）显著落后于 DINOv2 ViT-B（86M）——说明<strong>"图搜图看视觉特征质量，不看是否对齐文本、也不唯参数量论"</strong>。
+</div>
+
+<h3>发展脉络（时间线）</h3>
+<div class="timeline">
+  <div class="tl">
+    <div class="yr">2015–2019 · 监督特征 + 度量学习检索</div>
+    <div class="ev">取 <b>ResNet</b> 分类特征做检索；地标检索用 <b>GeM 池化</b>、<b>AP-GeM</b>、<b>DELG</b> 等做度量学习与局部特征重排。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2020 · 对比式自监督崛起</div>
+    <div class="ev"><b>SimCLR / MoCo / BYOL</b> 证明无标签也能学出可媲美监督的表征，为免标注的通用视觉嵌入铺路。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2021 · 自蒸馏与掩码建模</div>
+    <div class="ev"><b>DINO</b> 提出无标签自蒸馏，注意力天然分割前景，检索特征优秀；同期 <b>MAE / BEiT</b> 走掩码重建路线。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2023 · DINOv2 规模化</div>
+    <div class="ev"><b>DINOv2</b>（Meta）用 1.42 亿精选图 + 大模型，产出开箱即用、跨域鲁棒的视觉特征，成为图搜图/稠密任务的通用底座。</div>
+  </div>
+  <div class="tl">
+    <div class="yr">2025 · DINOv3 再扩 6 倍</div>
+    <div class="ev"><b>DINOv3</b> 模型规模 ×6（达 <b>7B</b>）、数据 ×12，提出 <b>Gram anchoring</b> 抑制长训练下稠密特征退化，
+    并放出从 ViT-7B 蒸馏出的 ViT-S/B/L 及 ConvNeXt 全家桶，SSL 首次在多项探测任务上超越弱监督模型。</div>
+  </div>
+</div>
+
+<h3>关键技术</h3>
+<div class="tech">
+  <h4>特征池化（CLS / GeM / 多尺度）</h4>
+  <p>ViT 常取 <code>[CLS]</code> 作全局向量；检索专用模型多用 <strong>GeM（广义平均池化）</strong>聚合 patch 特征，比平均/最大池化更利于实例检索；也可拼接多尺度/多层特征增强鲁棒性。</p>
+</div>
+<div class="tech">
+  <h4>实例检索评测口径（mAP / kNN）</h4>
+  <p>图搜图的核心指标是 <strong>ROxford / RParis 的 mAP</strong>（冻结特征 + 余弦最近邻），衡量"找回同一地标/实例"的能力；<strong>ImageNet kNN top-1</strong> 常作检索质量的代理指标（不训练分类头，直接近邻投票）。</p>
+</div>
+<div class="tech">
+  <h4>寄存器 token（Register Tokens）</h4>
+  <p>DINOv2/v3 引入额外 <strong>register token</strong> 吸收注意力中的异常"伪影"，让 patch 特征更干净，提升稠密任务与检索稳定性（DINOv3 为 1 CLS + 4 register + patch tokens）。</p>
+</div>
+<div class="tech">
+  <h4>Gram Anchoring（DINOv3 稠密特征保鲜）</h4>
+  <p>长时间训练会使 patch 级稠密特征逐渐退化。DINOv3 用 <strong>Gram anchoring</strong> 约束特征的 Gram 矩阵，抑制退化，保住高分辨率稠密特征质量——这对密集匹配、分割、局部检索尤为关键。</p>
+</div>
+<div class="tech">
+  <h4>蒸馏出小档以便部署</h4>
+  <p>DINOv2/v3 均用大教师（DINOv3 为 ViT-7B）蒸馏出 ViT-S/B/L 甚至 ConvNeXt 变体，让边缘/设备端也能用上接近大模型的视觉特征，是落地图搜图的主力档位。</p>
+</div>
+
+<h3>代表模型对比 · 基准：实例检索 mAP 与 ImageNet kNN</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>类别</th><th>参数量</th><th>维度</th><th>ROxford-H (mAP)</th><th>RParis-H (mAP)</th><th>ImageNet kNN</th><th>许可</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>DINOv2 ViT-S/14</td><td>自蒸馏 SSL</td><td>21M</td><td>384</td><td>43.2</td><td>68.5</td><td>79.0</td><td>Apache-2.0</td></tr>
+    <tr><td><strong>DINOv2 ViT-B/14</strong></td><td>自蒸馏 SSL</td><td>86M</td><td>768</td><td>49.5</td><td>78.6</td><td>82.1</td><td>Apache-2.0</td></tr>
+    <tr><td>DINOv2 ViT-L/14</td><td>自蒸馏 SSL</td><td>300M</td><td>1024</td><td>54.0</td><td>83.5</td><td>83.5</td><td>Apache-2.0</td></tr>
+    <tr><td>DINOv2 ViT-g/14</td><td>自蒸馏 SSL</td><td>1.1B</td><td>1536</td><td>52.3</td><td>82.6</td><td>83.5</td><td>Apache-2.0</td></tr>
+    <tr><td colspan="8" style="background:#fffbeb;color:var(--warn);font-size:12.5px;">↓ 以下 DINOv3 的 <strong>Ox.-H †</strong> 取自<strong>官方模型卡</strong>（Oxford-Hard 实例检索 mAP，patch-16、DINOv3 自有评测协议）；<strong>与上方 DINOv2 的 ROxford-H 口径不同，不可直接横向比较</strong>，仅供 DINOv3 内部各档对比。模型卡未给 RParis-H 与 ImageNet kNN（官方改报 IN-ReaL 等 probe 指标）。</td></tr>
+    <tr><td>DINOv3 ViT-S/16</td><td>自蒸馏 SSL（蒸馏）</td><td>21M</td><td>384</td><td>49.5 †</td><td>未报告</td><td>未报告</td><td>DINOv3 License</td></tr>
+    <tr><td>DINOv3 ViT-S+/16</td><td>自蒸馏 SSL（蒸馏）</td><td>29M</td><td>384</td><td>50.0 †</td><td>未报告</td><td>未报告</td><td>DINOv3 License</td></tr>
+    <tr><td>DINOv3 ViT-B/16</td><td>自蒸馏 SSL（蒸馏）</td><td>86M</td><td>768</td><td>58.5 †</td><td>未报告</td><td>未报告</td><td>DINOv3 License</td></tr>
+    <tr><td>DINOv3 ViT-L/16</td><td>自蒸馏 SSL（蒸馏）</td><td>300M</td><td>1024</td><td>63.1 †</td><td>未报告</td><td>未报告</td><td>DINOv3 License</td></tr>
+    <tr><td>DINOv3 ViT-H+/16</td><td>自蒸馏 SSL（蒸馏）</td><td>840M</td><td>1280</td><td>64.5 †</td><td>未报告</td><td>未报告</td><td>DINOv3 License</td></tr>
+    <tr><td>DINOv3 ViT-7B/16</td><td>自蒸馏 SSL（教师）</td><td>6716M</td><td>4096</td><td><strong>72.8 †</strong></td><td>未报告</td><td>未报告</td><td>DINOv3 License</td></tr>
+    <tr><td>OpenCLIP ViT-G/14（CLIP 对照）</td><td>弱监督 CLIP 图像塔</td><td>≈1.8B</td><td>—</td><td>19.7</td><td>60.2</td><td>81.7</td><td>—</td></tr>
+    <tr><td>MAE ViT-L（对照）</td><td>掩码建模 MIM</td><td>300M</td><td>1024</td><td colspan="3" style="text-align:center;">冻结特征检索/kNN 偏弱，长于微调</td><td>CC-BY-NC</td></tr>
+    <tr><td>SigLIP2-Base 视觉塔（对照）</td><td>弱监督图像塔</td><td>86M</td><td>768</td><td colspan="3" style="text-align:center;">语义检索强、实例图搜图弱于 DINO</td><td>Apache-2.0</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  DINOv2 数值取自论文 <a href="https://arxiv.org/abs/2304.07193" target="_blank">2304.07193</a> Table 9（ROxford/RParis-Hard 实例检索 mAP，冻结特征）与 Table 4（ImageNet kNN top-1）；参数/维度见论文 Table 17 与 Meta 官方模型卡。
+  DINOv3 见 <a href="https://arxiv.org/abs/2508.10104" target="_blank">2508.10104</a> 与 <a href="https://github.com/facebookresearch/dinov3/blob/main/MODEL_CARD.md" target="_blank">官方模型卡</a>（ViT-S 21M / S+ 29M / B 86M / L 300M / H+ 840M / 7B 6716M，嵌入维度 384/384/768/1024/1280/4096，patch 16、含 4 个寄存器 token；除 7B 教师外均从 ViT-7B 蒸馏，另有 ConvNeXt 变体）。
+  <strong>† 标记的 Ox.-H</strong> 为官方模型卡给出的 <strong>Oxford-Hard 实例检索 mAP</strong>（DINOv3 自有协议，patch-16），<strong>与上方 DINOv2 论文 Table 9 的 ROxford-H 口径不同，切勿直接横比</strong>；模型卡未提供 RParis-H 与 ImageNet kNN（官方改报 IN-ReaL / IN-R / ObjectNet 等 probe 指标）。若需与 DINOv2 严格同口径对比，仍建议在自有数据实测。
+  OpenCLIP 对照与"CLIP 偏语义、DINO 偏视觉"结论见 DINOv2 论文及 <a href="https://arxiv.org/html/2510.11835v1" target="_blank">arXiv:2510.11835</a>。
+</p>
+
+<div class="tech">
+  <h4>案例：DINOv3 —— 纯视觉自监督的集大成</h4>
+  <p>DINOv3（Meta，2025-08）在 DINOv2 的自蒸馏范式上把<strong>模型规模扩到 7B、训练数据扩 12 倍</strong>，
+  核心创新是 <strong>Gram anchoring</strong> 解决长训练下稠密特征退化，并用 post-hoc 策略适配不同分辨率与模型尺寸。
+  它首次让<strong>纯 SSL 模型在广泛探测任务上超越弱监督（CLIP 式）模型</strong>，且放出 ViT-7B 教师 + 蒸馏小档（ViT-S/S+/B/L/H+）与 ConvNeXt 变体，
+  兼顾极致质量与边缘部署。官方模型卡也给出了 <strong>Oxford-Hard 实例检索 mAP</strong>（Ox.-H：ViT-B 58.5、ViT-L 63.1、ViT-7B 72.8），在其自有协议下随规模稳步提升——但该口径与 DINOv2 论文不同，横比需谨慎。
+  注意其许可为自定义 <strong>DINOv3 License</strong>（非 Apache），商用前需核对条款。</p>
+</div>
+
+<div class="note">
+  <strong>选型指引（纯图搜图）：</strong>
+  ① 通用图搜图 / 免微调 → <strong>DINOv2 或 DINOv3 的 ViT-B/L</strong>，质量与成本均衡；
+  ② 边缘/设备端 → DINOv2 ViT-S（21M）或 DINOv3 ViT-S（≈21.6M）蒸馏档 + int8 量化；
+  ③ 追求极致 / 稠密任务 → DINOv3 ViT-7B 或 ViT-L；
+  ④ 若检索目标是"同类别/同语义"而非"同实例"（如商品分类聚合）→ 可考虑 CLIP/SigLIP2 图像塔；
+  ⑤ 需自训微调 → MAE/BEiT 作骨干初始化。商用许可上 DINOv2 系（Apache-2.0）最省心。
+</div>
+
+<h2 id="sec-txt">十、纯文本 Embedding 模型调研 <a class="backtop" href="#top">↑ 顶部</a></h2>
+<p>
+  纯文本 Embedding 把一段文本（词、句、段落、文档）映射为稠密向量，使<strong>语义相近</strong>的文本向量更近，
+  是 <strong>语义检索、RAG、去重、聚类、分类、相似问答（STS）、代码检索</strong>的基础设施。
+  与图文模型的文本塔不同，它<strong>不需要对齐图像</strong>，可以把全部容量投入到纯文本语义，
+  因而在 text-text 检索上通常显著强于 CLIP 类的文本塔。评测事实标准是 <strong>MTEB / C-MTEB</strong>。
+</p>
+
+<div class="cards">
+  <div class="card c1">
+    <h4>① BERT 时代句向量</h4>
+    <span class="tag">Sentence Encoders · 2019 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      在 BERT 上做孪生网络或对比学习得到句向量，奠定"池化 + 余弦相似度"范式。轻量、易部署，是很多早期检索系统的基石。
+    </p>
+    <div>
+      <span class="chip">Sentence-BERT</span><span class="chip">SimCSE</span>
+    </div>
+    <ul>
+      <li>优点：小、快、成熟</li>
+      <li>短板：泛化与多任务能力有限</li>
+    </ul>
+  </div>
+
+  <div class="card c2">
+    <h4>② 对比学习通用嵌入（弱监督）</h4>
+    <span class="tag">Contrastive Universal Embedding · 2022 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      用海量弱监督文本对做大规模对比预训练 + 高质量数据微调，产出跨任务通用嵌入。
+      中文/多语首选 <strong>BGE、GTE、E5</strong> 系；<strong>BGE-M3</strong> 还统一稠密/稀疏/多向量三功能。
+    </p>
+    <div>
+      <span class="chip">E5</span><span class="chip">GTE</span><span class="chip">BGE / BGE-M3</span>
+    </div>
+    <ul>
+      <li>优点：中文/多语强、体积适中、开源可商用</li>
+      <li>短板：复杂指令与推理不如 LLM 骨干</li>
+    </ul>
+  </div>
+
+  <div class="card c3">
+    <h4>③ 指令微调嵌入</h4>
+    <span class="tag">Instruction-tuned · 2022 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      把任务指令写进输入，让同一模型按任务产出不同表征。<strong>Instructor</strong> 首创，后被 LLM 骨干模型广泛继承，是通用性关键。
+    </p>
+    <div>
+      <span class="chip">Instructor</span><span class="chip">TART</span>
+    </div>
+    <ul>
+      <li>优点：一模型多任务、可定制检索意图</li>
+      <li>短板：需构造合适指令</li>
+    </ul>
+  </div>
+
+  <div class="card c4">
+    <h4>④ LLM 骨干嵌入（当前 SOTA）</h4>
+    <span class="tag">LLM-based Embedding · 2024 起</span>
+    <p style="font-size:14px;color:var(--muted);margin:0 0 8px;">
+      直接用解码器大模型（Mistral / Qwen 等）当骨干做对比微调，last-token 池化 + 指令感知，
+      长文本与推理能力最强，霸榜 MTEB。代表 <strong>Qwen3-Embedding、NV-Embed、gte-Qwen2、E5-mistral</strong>。
+    </p>
+    <div>
+      <span class="chip">E5-mistral-7b</span><span class="chip">NV-Embed-v2</span>
+      <span class="chip">gte-Qwen2</span><span class="chip">SFR-Embedding</span><span class="chip">Qwen3-Embedding</span>
+    </div>
+    <ul>
+      <li>优点：语义/指令/长文最强，多语覆盖广</li>
+      <li>短板：大、慢、显存高（需 MRL/量化）</li>
+    </ul>
+  </div>
+</div>
+
+<div class="note">
+  <strong>路线演进主线：</strong>BERT 句向量 → 大规模对比学习通用嵌入（BGE/GTE/E5）→ 指令微调 → <strong>LLM 骨干嵌入</strong>。
+  与图文第③类高度同构：都是"以大模型为骨干 + 对比学习 + last-token 池化 + 指令感知 + MRL/量化落地"。
+</div>
+
+<h3>关键技术</h3>
+<div class="tech">
+  <h4>池化策略（CLS / mean / last-token / latent-attention）</h4>
+  <p>BERT 类多用 <strong>[CLS]</strong> 或 <strong>mean pooling</strong>；LLM 骨干因单向注意力常用 <strong>last-token pooling</strong>（取 <code>&lt;EOS&gt;</code> 隐藏态）。NV-Embed 提出 <strong>latent attention 层</strong>做可学习池化，进一步提点。</p>
+</div>
+<div class="tech">
+  <h4>双向注意力改造（LLM2Vec）</h4>
+  <p>解码器 LLM 天生单向，直接做嵌入会丢失后文信息。<strong>LLM2Vec</strong> 等把因果掩码改为双向 + 掩码 token 预测再对比微调；NV-Embed 也移除因果掩码以增强表征。</p>
+</div>
+<div class="tech">
+  <h4>对比学习 + 硬负例 + 大 batch</h4>
+  <p>沿用 InfoNCE，配 <strong>in-batch 负例 + 挖掘的硬负例</strong>；LLM 骨干需大 batch 与梯度缓存。数据配方（query-doc 对的质量与多样性）往往比模型更决定上限。</p>
+</div>
+<div class="tech">
+  <h4>指令感知 + 多任务</h4>
+  <p>输入前缀写任务指令（如"为这条查询检索相关文档"），使同一模型服务检索/分类/聚类/STS 等多任务，是 MTEB 高分的关键。</p>
+</div>
+<div class="tech">
+  <h4>MRL + 长文本 + 多语言</h4>
+  <p><strong>Matryoshka</strong> 支持按需截断维度省存储；LLM 骨干天然支持 <strong>长上下文</strong>（Qwen3-Embedding 达 32k）；多语言语料带来跨语检索能力（BGE-M3、Qwen3-Embedding 覆盖 100+ 语言）。</p>
+</div>
+
+<h3>代表模型对比 · 基准：MTEB / C-MTEB</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>类别</th><th>骨干 / 参数量</th><th>维度</th><th>上下文</th><th>基准分数</th><th>许可</th></tr>
+  </thead>
+  <tbody>
+    <tr><td>bge-large-zh-v1.5</td><td>对比（BERT 类）</td><td>326M</td><td>1024</td><td>512</td><td>C-MTEB 平均 64.53</td><td>MIT</td></tr>
+    <tr><td>bge-m3</td><td>对比（多语/多功能）</td><td>568M</td><td>1024</td><td>8192</td><td>MIRACL 多语检索 SOTA（稠密+稀疏+多向量）</td><td>MIT</td></tr>
+    <tr><td>gte-Qwen2-7B-instruct</td><td>LLM 骨干</td><td>Qwen2-7B</td><td>3584</td><td>32k</td><td>MTEB(en) 约 70（发布时居前）</td><td>Apache-2.0</td></tr>
+    <tr><td>E5-mistral-7b-instruct</td><td>LLM 骨干</td><td>Mistral-7B</td><td>4096</td><td>32k</td><td>MTEB(en) 约 66（首个 LLM 骨干爆款）</td><td>MIT</td></tr>
+    <tr><td>NV-Embed-v2</td><td>LLM 骨干 + latent attn</td><td>Mistral-7B</td><td>4096</td><td>32k</td><td>MTEB(en v1) 约 72.31（曾登顶）</td><td>CC-BY-NC（研究）</td></tr>
+    <tr><td>Qwen3-Embedding-0.6B</td><td>LLM 骨干</td><td>0.6B</td><td>1024</td><td>32k</td><td>MTEB 多语 64.33</td><td>Apache-2.0</td></tr>
+    <tr><td>Qwen3-Embedding-4B</td><td>LLM 骨干</td><td>4B</td><td>2560</td><td>32k</td><td>MTEB 多语 69.45</td><td>Apache-2.0</td></tr>
+    <tr><td><strong>Qwen3-Embedding-8B</strong></td><td>LLM 骨干</td><td>8B</td><td>4096</td><td>32k</td><td><strong>MTEB 多语 70.58（发布时 No.1）</strong></td><td>Apache-2.0</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  来源：bge 系列 C-MTEB 见 <a href="https://huggingface.co/BAAI/bge-large-zh-v1.5" target="_blank">BAAI 模型卡</a>；BGE-M3 <a href="https://arxiv.org/abs/2402.03216" target="_blank">2402.03216</a>；
+  Qwen3-Embedding 系列（0.6B/4B/8B、维度 1024/2560/4096、32k 上下文、MRL、8B MTEB 多语 70.58 且截至 2025-06-05 居榜首）见论文 <a href="https://arxiv.org/abs/2506.05176" target="_blank">2506.05176</a> 与 <a href="https://qwenlm.github.io/blog/qwen3-embedding/" target="_blank">Qwen 官方博客</a>；
+  gte-Qwen2 / E5-mistral / NV-Embed-v2 分数为各自发布时 MTEB 口径（英文 v1），榜单实时更新、版本口径不同<strong>不可直接横比</strong>。0.6B 参数以外的维度/上下文以官方模型卡为准。
+</p>
+
+<div class="tech">
+  <h4>案例：Qwen3-Embedding —— LLM 骨干文本嵌入的当前标杆</h4>
+  <p>基于 Qwen3 基础模型，提供 <strong>0.6B / 4B / 8B</strong> 三档嵌入 + 配套 reranker，继承多语言（100+ 语言）、长文本（32k）与推理能力。
+  训练用<strong>多阶段范式</strong>：大规模弱监督对比预训练 → 高质量数据 + 合成数据微调 → 模型合并，并支持 <strong>指令感知</strong>与 <strong>MRL 变维</strong>。
+  8B 档以 MTEB 多语 70.58 于 2025-06 登顶多语榜单；<strong>0.6B 档</strong>在设备端尤其实用——1024 维、Apache-2.0 可商用，是本综述第十一章设备端选型的核心候选之一。</p>
+</div>
+
+<div class="note">
+  <strong>选型指引（纯 text-text）：</strong>
+  ① 中文为主、体积敏感 → <strong>bge-large-zh-v1.5</strong>（326M/MIT）或 bge-base；
+  ② 多语言 / 长文档 / 需稀疏+稠密混合 → <strong>bge-m3</strong>；
+  ③ 追求最高精度且算力充足 → <strong>Qwen3-Embedding-8B / 4B</strong> 或 gte-Qwen2-7B；
+  ④ 设备端 / 低资源 → <strong>Qwen3-Embedding-0.6B</strong> 或 bge-small，配 MRL 截维 + int8 量化；
+  ⑤ 走 API → OpenAI text-embedding-3、Cohere Embed v3、Voyage-3、Gemini Embedding 等（免运维、多语强，但数据出域需评估合规）。
+</div>
+
+<h2 id="sec8">十一、设备端 0.6B 双模型选型（图搜图 + text-text） <a class="backtop" href="#top">↑ 顶部</a></h2>
+
+<div class="lead">
+  <p style="margin-top:0;"><strong>场景约束</strong>：设备端 embedding 能力总预算 <strong>≈0.6B 参数，且为"并发常驻总量"</strong>——图像模型与文本模型必须<strong>同时装载</strong>，两者参数之和 ≤0.6B。需求为两条独立检索线：</p>
+  <p style="margin-bottom:0;">
+    · <strong>图搜图</strong>（同模态、以图找相似图，非跨模态文搜图）；<br>
+    · <strong>text-text</strong>（纯文本语义检索 / RAG，非跨模态）。
+  </p>
+</div>
+
+<div class="note">
+  <strong>关键判断：为什么是两个独立模型、两个向量空间。</strong>
+  纯 text-text 检索需要专门的文本 embedding 模型（CLIP 文本塔对齐到图像空间、做 text-text 偏弱）；
+  而图搜图只需纯视觉编码器，<strong>不需要 CLIP 的文本塔</strong>。二者互不共享向量空间，各自域内检索。
+  0.6B 并发预算下无法再塞下"强独立文本 + 强独立图像 + 跨模态"三合一，故按两条独立线拆分预算。
+</div>
+
+<h3>推荐组合（并发常驻总量 ≤0.6B）</h3>
+<table>
+  <thead>
+    <tr><th>档位</th><th>图搜图（视觉）</th><th>text-text（文本）</th><th>合计参数</th><th>适用</th></tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><strong>均衡（推荐）</strong></td>
+      <td>DINOv2 ViT-B/14 · 86M</td>
+      <td>bge-large-zh-v1.5 · 326M</td>
+      <td><strong>≈412M</strong></td>
+      <td>图文检索质量均衡，留出量化余量</td>
+    </tr>
+    <tr>
+      <td>图像优先</td>
+      <td>DINOv2 ViT-L/14 · 300M</td>
+      <td>bge-base-zh-v1.5 · ~102M</td>
+      <td>≈402M</td>
+      <td>图像相似检索质量要求高</td>
+    </tr>
+    <tr>
+      <td>文本优先/极省</td>
+      <td>DINOv2 ViT-S/14 · 21M</td>
+      <td>bge-large-zh-v1.5 · 326M</td>
+      <td>≈347M</td>
+      <td>文本为主，图像召回够用</td>
+    </tr>
+    <tr>
+      <td>⚠️ 不建议</td>
+      <td>DINOv2 ViT-L/14 · 300M</td>
+      <td>bge-large-zh-v1.5 · 326M</td>
+      <td>≈626M</td>
+      <td>略超 0.6B 并发预算</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>图搜图候选：视觉编码器</h3>
+<p style="color:var(--muted);font-size:14.5px;">
+  纯"图搜图"看重视觉外观/实例相似性。研究表明 <strong>CLIP 偏高层语义（类别、文字），DINO 系对颜色、样式等低层视觉特征更敏感</strong>，
+  更契合内容级图像相似检索；DINOv2 提供开箱即用、跨域鲁棒的视觉特征，无需微调。
+</p>
+<table>
+  <thead>
+    <tr>
+      <th>模型</th><th>参数量</th><th>维度</th>
+      <th>ROxford-H</th><th>RParis-H</th><th>AmsterTime</th><th>ImageNet k-NN</th><th>许可</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>DINOv2 ViT-S/14</td><td>21M</td><td>384</td><td>43.2</td><td>68.5</td><td>43.5</td><td>79.0</td><td>Apache-2.0</td></tr>
+    <tr><td><strong>DINOv2 ViT-B/14（推荐）</strong></td><td>86M</td><td>768</td><td>49.5</td><td>78.6</td><td>45.6</td><td>82.1</td><td>Apache-2.0</td></tr>
+    <tr><td>DINOv2 ViT-L/14</td><td>300M</td><td>1024</td><td><strong>54.0</strong></td><td><strong>83.5</strong></td><td><strong>50.0</strong></td><td>83.5</td><td>Apache-2.0</td></tr>
+    <tr><td>DINOv2 ViT-g/14（超预算）</td><td>1.1B</td><td>1536</td><td>52.3</td><td>82.6</td><td>46.7</td><td>83.5</td><td>Apache-2.0</td></tr>
+    <tr><td>OpenCLIP ViT-G/14（CLIP 对照）</td><td>≈1.8B</td><td>—</td><td>19.7</td><td>60.2</td><td>24.6</td><td>81.7</td><td>—</td></tr>
+    <tr><td>DINOv3 ViT-B/16 · L/16</td><td>86M · 300M</td><td>768 · 1024</td><td colspan="4" style="text-align:center;">更新更强，官方未给同口径 mAP（需自测）</td><td>DINOv3 License</td></tr>
+    <tr><td>SigLIP2-Base 视觉塔（备选）</td><td>86M</td><td>768</td><td colspan="4" style="text-align:center;">语义特征为主，图搜图弱于 DINO；工具链更顺</td><td>Apache-2.0</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  指标口径：<strong>ROxford-Hard / RParis-Hard / AmsterTime 为 mAP（%），是"图搜图"实例级检索的核心指标</strong>（冻结特征 + 余弦相似度最近邻）；ImageNet k-NN 为最近邻分类 top-1（%），可作检索质量代理。
+  数值取自 <strong>DINOv2 论文 <a href="https://arxiv.org/abs/2304.07193" target="_blank">2304.07193</a> Table 9（实例检索）与 Table 4（k-NN）</strong>；参数/维度见论文 Table 17 及 Meta 官方模型卡。
+  <br>
+  <strong>关键对照</strong>：参数远大的 OpenCLIP ViT-G/14 在实例检索上显著落后（ROxford-H 19.7 vs DINOv2-B 49.5、RParis-H 60.2 vs 78.6），印证<strong>纯图搜图应选 DINO 系而非 CLIP</strong>（特征差异见 <a href="https://arxiv.org/html/2510.11835v1" target="_blank">arXiv:2510.11835</a>）。
+  注：个别对象实例检索设定下 DINOv2 也可能不及初代 DINO（<a href="https://arxiv.org/abs/2401.00463" target="_blank">arXiv:2401.00463</a>），上线前建议在自有数据实测。
+</p>
+
+<h3>text-text 候选：中文文本 embedding（C-MTEB 实测）</h3>
+<table>
+  <thead>
+    <tr><th>模型</th><th>参数量</th><th>维度</th><th>C-MTEB 平均</th><th>Retrieval</th><th>许可</th></tr>
+  </thead>
+  <tbody>
+    <tr><td><strong>bge-large-zh-v1.5</strong></td><td>326M</td><td>1024</td><td><strong>64.53</strong></td><td>70.46</td><td>MIT（可商用）</td></tr>
+    <tr><td>bge-base-zh-v1.5</td><td>~102M</td><td>768</td><td>63.13</td><td>69.49</td><td>MIT（可商用）</td></tr>
+    <tr><td>bge-small-zh-v1.5</td><td>~24M</td><td>512</td><td>57.82</td><td>61.77</td><td>MIT（可商用）</td></tr>
+    <tr><td>Qwen3-Embedding-0.6B*</td><td>0.6B</td><td>1024</td><td>—（MTEB 多语 64.33）</td><td>—</td><td>Apache-2.0</td></tr>
+  </tbody>
+</table>
+<p style="color:var(--muted);font-size:12.5px;">
+  来源：bge 系列 C-MTEB 分数取自 <a href="https://huggingface.co/BAAI/bge-large-zh-v1.5" target="_blank">BAAI 官方模型卡</a>（C-MTEB：31 数据集 / 6 任务，平均、Retrieval 等分任务分）；
+  bge-base/small 参数为社区通行值。*Qwen3-Embedding-0.6B 单模型即占满 0.6B 预算，<strong>并发场景下无余量再放视觉模型</strong>，仅在"单模型上限/可时分复用"时才适用；其 64.33 为 MTEB 多语口径，<strong>与 C-MTEB 不可直接横比</strong>（来源 siliconflow / Vercel 模型页）。
+</p>
+
+<div class="note">
+  <strong>落地要点：</strong>
+  ① 两个模型分别 int8/int4 量化后，索引存储与算力可再降，配合本机量化工具链即可；
+  ② DINOv2 走 Apache-2.0，商用最省心；若选 DINOv3 需确认其自定义 License 条款；
+  ③ 若担心 DINO 在编译工具链上的适配成本，可退而用 SigLIP2-Base 视觉塔（图搜图质量略降但集成更顺）；
+  ④ 本方案<strong>不含跨模态"文搜图"</strong>——若后续需要，需另配一个双塔 CLIP（如 Chinese-CLIP ViT-B/16，188M），届时要重新核算并发预算。
+</div>
+
+<footer>
+  数据与结论主要参考 MMEB / MMEB-V2 基准及 Qwen3-VL-Embedding、RzenEmbed、VLM2Vec 等技术报告，
+  部分内容经改写以符合引用规范。榜单为实时更新，具体分数请以
+  <a href="https://huggingface.co/spaces/TIGER-Lab/MMEB-Leaderboard" target="_blank">MMEB Leaderboard</a> 最新版本为准。<br>
+  生成时间：2026-07-02
+</footer>
+</div>
+</body>
+</html>
