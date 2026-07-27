@@ -1,18 +1,19 @@
 
 # Qwen 系列完整技术演进深度调研报告
+
 ## 从 LLaMA 追随者到全模态架构创新者的进化之路
 
-**报告日期**: 2026 年 4 月 12 日  
+**报告日期**: 2026 年 4 月 12 日
 **调研范围**: Qwen-1 → Qwen2 → Qwen-VL → Qwen2-VL → Qwen2.5 → Qwen2.5-VL → Qwen2.5-Omni → Qwen3 → Qwen3-VL → Qwen3-Omni
 
 ---
 
 > 来源：[Zhang-ren/Qwen-Technical-Report](https://github.com/Zhang-ren/Qwen-Technical-Report)（学习用途归档；公式已修正为 KaTeX 兼容写法）
 
-
 # 目录
 
 **Part I: 概览**
+
 1. [执行摘要](#1-执行摘要)
 2. [Qwen 系列演进总览](#2-qwen-系列演进总览)
 
@@ -39,9 +40,11 @@
 16. [复现关键路径](#16-复现关键路径)
 
 **Part VI: 多模态高频面试考点汇总**
+
 - [多模态高频面试考点汇总](#part-vi-多模态高频面试考点汇总)
 
 **参考文献**
+
 - [参考文献](#参考文献)
 
 ---
@@ -56,22 +59,21 @@
 
 Qwen 系列的演进是一部**从架构追随到技术引领**的典型教科书案例，涵盖纯文本 LLM、视觉语言模型（VL）和全模态统一模型（Omni）三条产品线：
 
-| 阶段 | 代表版本 | 技术定位 | 关键特征 |
-|------|---------|---------|---------|
-| **追随期** | Qwen-1 (2023.08) | LLaMA 架构优化 | RoPE + SwiGLU + RMSNorm，中文词表扩展 |
-| **独立期** | Qwen2 (2024.07) | 架构差异化 | 全尺寸 GQA + QKV Bias + QK-Norm |
-| **多模态探索** | Qwen-VL (2023.08) | 首个多模态尝试 | ViT-bigG + Cross-Attention Resampler + Grounding |
-| **多模态起步** | Qwen2-VL (2024.10) | 首个动态分辨率 VL | M-RoPE + 动态分辨率 + 3D Tube 视频 |
-| **突破期** | Qwen2.5 (2024.12) | 长上下文领导 | 18T tokens + 1M 上下文 + 专用模型矩阵 |
-| **视觉深化** | Qwen2.5-VL (2025.02) | 从零训练视觉编码器 | Window Attention ViT + MLP Merger + 绝对时间编码 |
-| **统一期** | Qwen2.5-Omni (2025.03) | 全模态端到端 | Thinker-Talker 架构 + TMRoPE + 流式语音 |
-| **引领期** | Qwen3 (2025.05) | 混合 MoE + 动态推理 | 235B/22B MoE + Thinking Mode + 强到弱蒸馏 |
-| **视觉 MoE** | Qwen3-VL (2025 下半年) | MoE 首入 VL 领域 | Interleaved-MRoPE + DeepStack + 256K 上下文 |
-| **极速全模态** | Qwen3-Omni (2025) | 实时对话级延迟 | Causal ConvNet + Multi-Codebook RVQ + 234ms 首包 |
+
+| 阶段           | 代表版本               | 技术定位            | 关键特征                                         |
+| ---------------- | ------------------------ | --------------------- | -------------------------------------------------- |
+| **追随期**     | Qwen-1 (2023.08)       | LLaMA 架构优化      | RoPE + SwiGLU + RMSNorm，中文词表扩展            |
+| **独立期**     | Qwen2 (2024.07)        | 架构差异化          | 全尺寸 GQA + QKV Bias + QK-Norm                  |
+| **多模态探索** | Qwen-VL (2023.08)      | 首个多模态尝试      | ViT-bigG + Cross-Attention Resampler + Grounding |
+| **多模态起步** | Qwen2-VL (2024.10)     | 首个动态分辨率 VL   | M-RoPE + 动态分辨率 + 3D Tube 视频               |
+| **突破期**     | Qwen2.5 (2024.12)      | 长上下文领导        | 18T tokens + 1M 上下文 + 专用模型矩阵            |
+| **视觉深化**   | Qwen2.5-VL (2025.02)   | 从零训练视觉编码器  | Window Attention ViT + MLP Merger + 绝对时间编码 |
+| **统一期**     | Qwen2.5-Omni (2025.03) | 全模态端到端        | Thinker-Talker 架构 + TMRoPE + 流式语音          |
+| **引领期**     | Qwen3 (2025.05)        | 混合 MoE + 动态推理 | 235B/22B MoE + Thinking Mode + 强到弱蒸馏        |
+| **视觉 MoE**   | Qwen3-VL (2025 下半年) | MoE 首入 VL 领域    | Interleaved-MRoPE + DeepStack + 256K 上下文      |
+| **极速全模态** | Qwen3-Omni (2025)      | 实时对话级延迟      | Causal ConvNet + Multi-Codebook RVQ + 234ms 首包 |
 
 ## 1.2 关键数据对比
-
-
 
 ![图 1.1：Qwen 全系列时间线演进图（2023.08→2025.09）](images/ch1_timeline.png)
 
@@ -79,51 +81,57 @@ Qwen 系列的演进是一部**从架构追随到技术引领**的典型教科�
 
 ### 纯文本 LLM 系列
 
-| 指标 | Qwen-1 | Qwen2 | Qwen2.5 | Qwen3 |
-|------|--------|-------|---------|-------|
-| **最大参数量** | 14B (Dense) | 72B (Dense) | 72B (Dense) | 235B (MoE, 激活 22B) |
-| **训练数据量** | ~3T tokens | 7T tokens | 18T tokens | 36T tokens |
-| **上下文长度** | 2K-16K | 32K-128K | 128K-1M | 256K |
-| **支持语言** | ~30 | ~30 | 29 | **119** |
-| **词表大小** | 151,643 | 151,643 | 151,643 | 151,669 |
-| **注意力机制** | Standard MHA | GQA (全尺寸) | GQA + QK-Norm | GQA + MoE |
-| **MMLU** | 65.3 (14B) | 84.2 (72B) | ~87 (72B) | ~89 (235B-A22B) |
+
+| 指标           | Qwen-1       | Qwen2        | Qwen2.5       | Qwen3                |
+| ---------------- | -------------- | -------------- | --------------- | ---------------------- |
+| **最大参数量** | 14B (Dense)  | 72B (Dense)  | 72B (Dense)   | 235B (MoE, 激活 22B) |
+| **训练数据量** | ~3T tokens   | 7T tokens    | 18T tokens    | 36T tokens           |
+| **上下文长度** | 2K-16K       | 32K-128K     | 128K-1M       | 256K                 |
+| **支持语言**   | ~30          | ~30          | 29            | **119**              |
+| **词表大小**   | 151,643      | 151,643      | 151,643       | 151,669              |
+| **注意力机制** | Standard MHA | GQA (全尺寸) | GQA + QK-Norm | GQA + MoE            |
+| **MMLU**       | 65.3 (14B)   | 84.2 (72B)   | ~87 (72B)     | ~89 (235B-A22B)      |
 
 ### 多模态系列
 
-| 指标 | Qwen-VL | Qwen2-VL | Qwen2.5-VL | Qwen3-VL | Qwen2.5-Omni | Qwen3-Omni |
-|------|---------|----------|-----------|---------|-------------|------------|
-| **发布时间** | 2023.08 | 2024.10 | 2025.02 | 2025 下半年 | 2025.03 | 2025 |
-| **视觉编码器** | ViT-bigG (CLIP) | DFN ViT | 从零训练 ViT | 从零 ViT + DeepStack | 继承 VL | 继承 VL |
-| **融合方式** | Cross-Attention | MLP Projection | MLP Merger | MLP Merger | 继承 VL | 继承 VL |
-| **位置编码** | 2D 绝对位置 | M-RoPE | M-RoPE | Interleaved-MRoPE | TMRoPE | TMRoPE |
-| **最大模型** | 9.6B Dense | 72B Dense | 72B Dense | 235B-A22B MoE | 7B Dense | 30B-A3B MoE |
-| **分辨率** | 固定 448×448 | 动态分辨率 | 原生动态分辨率 | 原生动态分辨率 | 继承 VL | 继承 VL |
-| **视觉 token** | 固定 256 | 动态 | 动态 | 动态 | 动态 | 动态 |
-| **Thinking Mode** | ❌ | ❌ | ❌ | ✅ | ❌ | ✅ |
-| **语音输出** | ❌ | ❌ | ❌ | ❌ | ✅ | ✅ |
+
+| 指标              | Qwen-VL         | Qwen2-VL       | Qwen2.5-VL     | Qwen3-VL             | Qwen2.5-Omni | Qwen3-Omni  |
+| ------------------- | ----------------- | ---------------- | ---------------- | ---------------------- | -------------- | ------------- |
+| **发布时间**      | 2023.08         | 2024.10        | 2025.02        | 2025 下半年          | 2025.03      | 2025        |
+| **视觉编码器**    | ViT-bigG (CLIP) | DFN ViT        | 从零训练 ViT   | 从零 ViT + DeepStack | 继承 VL      | 继承 VL     |
+| **融合方式**      | Cross-Attention | MLP Projection | MLP Merger     | MLP Merger           | 继承 VL      | 继承 VL     |
+| **位置编码**      | 2D 绝对位置     | M-RoPE         | M-RoPE         | Interleaved-MRoPE    | TMRoPE       | TMRoPE      |
+| **最大模型**      | 9.6B Dense      | 72B Dense      | 72B Dense      | 235B-A22B MoE        | 7B Dense     | 30B-A3B MoE |
+| **分辨率**        | 固定 448×448   | 动态分辨率     | 原生动态分辨率 | 原生动态分辨率       | 继承 VL      | 继承 VL     |
+| **视觉 token**    | 固定 256        | 动态           | 动态           | 动态                 | 动态         | 动态        |
+| **Thinking Mode** | ❌              | ❌             | ❌             | ✅                   | ❌           | ✅          |
+| **语音输出**      | ❌              | ❌             | ❌             | ❌                   | ✅           | ✅          |
 
 ## 1.3 面试官视角的核心考点（全局概览）
 
 ### 架构设计理念（考察对多模态融合范式的理解）
+
 1. 多模态融合的三种主流范式（Cross-Attention / Projection / Early Fusion）各自的设计哲学和适用场景
 2. 为什么业界从复杂融合（Q-Former）走向简洁投影（MLP）？"简单架构 + 好数据"为什么够用？
 3. 视觉编码器应该多大？视觉侧 Scaling 与语言侧 Scaling 的收益差异
 4. Dense vs MoE 在多模态场景下的设计权衡
 
 ### 多模态核心问题（考察对跨模态挑战的深度理解）
+
 1. 多模态对齐的本质是什么？对比学习对齐 vs 生成式对齐的适用场景
 2. 位置编码如何从 1D 文本扩展到 2D 图像再到 3D 视频？各步解决了什么问题？
 3. 动态分辨率 vs 固定分辨率的设计哲学——信息保留 vs 计算可预测性的权衡
 4. 多模态幻觉的根源是什么？与纯文本幻觉有何本质不同？
 
 ### 训练范式（考察对多阶段训练的系统理解）
+
 1. "先对齐、再理解、再跟随"的多阶段训练策略中，每阶段冻结不同组件的原理
 2. 多模态训练中灾难性遗忘的来源和防护策略
 3. 多模态 RLHF 为什么比纯文本 RLHF 更难？
 4. 合成数据对多模态模型 Scaling Law 的影响
 
 ### 系统与演进（考察对技术发展脉络的把握）
+
 1. 从 Qwen-VL 到 Qwen3-VL 的架构演进逻辑：每代解决了什么核心问题？
 2. VL 模型 → Omni 模型的扩展中，核心挑战是什么？
 3. 开源多模态模型（LLaVA / Qwen-VL / InternVL）vs 闭源（GPT-4V）的核心差距在哪里？
@@ -154,13 +162,12 @@ Qwen 系列的演进是一部**从架构追随到技术引领**的典型教科�
 
 ## 2.2 架构演进核心脉络
 
-
-
 ![图 2.1：六大架构演进脉络对比图](images/ch2_arch_evolution.png)
 
 > *自绘图。说明：展示注意力机制、位置编码、视觉编码器、上下文长度、架构范式、模态支持六条平行演进线。帮助读者理解 Qwen 系列在每个技术维度上的代际进步。此图为本报告原创综合分析。*
 
 ### 脉络 1：注意力机制优化（纯文本 LLM）
+
 ```
 Standard MHA (Qwen-1)
     ↓ KV cache 内存瓶颈
@@ -172,6 +179,7 @@ GQA + MoE 路由 (Qwen3) → 10× 容量/成本比
 ```
 
 ### 脉络 2：位置编码演进（跨模态）
+
 ```
 1D-RoPE (Qwen-1/2, 纯文本)
     ↓ 无法表达 2D 空间位置
@@ -185,6 +193,7 @@ TMRoPE (Qwen2.5-Omni/Qwen3-Omni) → 物理时间轴统一所有模态
 ```
 
 ### 脉络 3：视觉编码器演进
+
 ```
 CLIP ViT-bigG (Qwen-VL, 2023) → 预训练迁移，固定分辨率
     ↓ 动态分辨率需求
@@ -196,6 +205,7 @@ DFN ViT + 2D-RoPE (Qwen2-VL, 2024.10) → 可变分辨率，但 O(N²)
 ```
 
 ### 脉络 4：上下文长度扩展
+
 ```
 2K-16K (Qwen-1)
     ↓ 渐进式频率插值
@@ -207,6 +217,7 @@ DFN ViT + 2D-RoPE (Qwen2-VL, 2024.10) → 可变分辨率，但 O(N²)
 ```
 
 ### 脉络 5：模型架构范式
+
 ```
 Dense Transformer (Qwen-1/2) → 所有参数全激活
     ↓ 参数效率瓶颈
@@ -218,6 +229,7 @@ VL MoE (Qwen3-VL, 235B-A22B) + Omni MoE (Qwen3-Omni, 30B-A3B)
 ```
 
 ### 脉络 6：语音与全模态
+
 ```
 无语音能力 (Qwen-1 ~ Qwen2.5-VL)
     ↓ 全模态端到端需求
@@ -225,7 +237,6 @@ Thinker-Talker + Sliding-Window DiT (Qwen2.5-Omni) → 首个 Omni 模型
     ↓ 延迟瓶颈
 MoE Thinker + Causal ConvNet (Qwen3-Omni) → 234ms 首包，进入人类舒适区
 ```
-
 
 ---
 
@@ -241,16 +252,15 @@ MoE Thinker + Causal ConvNet (Qwen3-Omni) → 234ms 首包，进入人类舒适�
 
 ### 继承的 LLaMA 核心组件
 
-| 组件 | LLaMA 设计 | Qwen-1 采用 | 技术原理 |
-|------|-----------|-----------|---------|
-| **归一化** | RMSNorm (pre-norm) | ✓ | 移除均值项，仅用 RMS 归一化，计算更高效 |
-| **激活函数** | SwiGLU | ✓ | Swish(xW) ⊗ (xV)，门控线性单元 |
-| **位置编码** | RoPE | ✓ | 旋转矩阵编码相对位置，支持外推 |
-| **注意力** | Standard MHA | ✓ | 标准多头注意力 |
+
+| 组件         | LLaMA 设计         | Qwen-1 采用 | 技术原理                                |
+| -------------- | -------------------- | ------------- | ----------------------------------------- |
+| **归一化**   | RMSNorm (pre-norm) | ✓          | 移除均值项，仅用 RMS 归一化，计算更高效 |
+| **激活函数** | SwiGLU             | ✓          | Swish(xW) ⊗ (xV)，门控线性单元         |
+| **位置编码** | RoPE               | ✓          | 旋转矩阵编码相对位置，支持外推          |
+| **注意力**   | Standard MHA       | ✓          | 标准多头注意力                          |
 
 ## 3.2 核心架构细节
-
-
 
 ![图 3.1：LayerNorm vs RMSNorm 计算流程对比](images/ch3_layernorm_vs_rmsnorm.png)
 
@@ -269,6 +279,7 @@ MoE Thinker + Causal ConvNet (Qwen3-Omni) → 234ms 首包，进入人类舒适�
 **What（是什么）**：RMSNorm 是一种简化版的 Layer Normalization，移除了均值计算（centering），仅保留缩放（scaling）操作。
 
 **Why（为什么用它）**：
+
 1. **计算效率**：标准 LayerNorm 需要两次遍历数据（计算均值和方差），RMSNorm 只需一次（计算均方根），约 7-10% 速度提升
 2. **训练稳定性**：Pre-norm 架构 + RMSNorm 减少梯度消失，尤其对深层 Transformer（80+ 层）至关重要
 3. **参数精简**：移除 bias 项 β，每层减少 2×d_model 参数
@@ -296,6 +307,7 @@ output = γ * y                  # 仅可学习参数 γ，无 bias 项 β
 **What（是什么）**：SwiGLU 是一种门控线性单元（Gated Linear Unit），结合了 Swish 激活函数的平滑性和 GLU 的门控机制。
 
 **Why（为什么比 ReLU 好）**：
+
 1. **平滑性**：Swish 函数在 x=0 处连续可微，避免了 ReLU 的"死亡神经元"问题——ReLU 在 x<0 时梯度为零，训练中约 10-20% 的神经元可能永久"死亡"
 2. **门控机制**：逐元素乘法实现信息流控制，模型可以学习"哪些信息该通过、哪些该被抑制"
 3. **表达能力**：两个独立投影矩阵 (W, V) 提供更大的表达空间，FFN 参数量虽增加约 50%，但性能提升显著
@@ -306,6 +318,7 @@ output = γ * y                  # 仅可学习参数 γ，无 bias 项 β
 $$
 \mathrm{SwiGLU}(x) = \mathrm{Swish}_\beta(xW) \odot (xV)
 = \big(xW \cdot \sigma(\beta \cdot xW)\big) \odot (xV)
+
 $$
 
 其中 $W \in \mathbb{R}^{d_{\mathrm{model}} \times d_{\mathrm{ff}}}$ 为门控投影，$V \in \mathbb{R}^{d_{\mathrm{model}} \times d_{\mathrm{ff}}}$ 为值投影，$\sigma$ 为 Sigmoid，$\beta$ 通常取 1（即 SiLU），$\odot$ 为 Hadamard 积。
@@ -314,18 +327,20 @@ FFN 维度：标准 FFN 取 $d_{\mathrm{ff}} = 4 d_{\mathrm{model}}$；SwiGLU FF
 
 **与其他激活函数的对比**：
 
-| 激活函数 | 公式 | 在 x=0 处 | 门控 | 死亡神经元风险 |
-|---------|------|----------|------|-------------|
-| **ReLU** | $\max(0, x)$ | 不可微 | ❌ | 高（10-20%）|
-| **GELU** | $x\Phi(x)$ | 可微 | ❌ | 低 |
-| **GLU** | $(xW) \odot \sigma(xV)$ | 可微 | ✅ | 低，但 Sigmoid 饱和 |
-| **SwiGLU** | $(xW \cdot \sigma(xW)) \odot (xV)$ | 可微 | ✅ | **极低** |
+
+| 激活函数   | 公式                               | 在 x=0 处 | 门控 | 死亡神经元风险      |
+| ------------ | ------------------------------------ | ----------- | ------ | --------------------- |
+| **ReLU**   | $\max(0, x)$                       | 不可微    | ❌   | 高（10-20%）        |
+| **GELU**   | $x\Phi(x)$                         | 可微      | ❌   | 低                  |
+| **GLU**    | $(xW) \odot \sigma(xV)$            | 可微      | ✅   | 低，但 Sigmoid 饱和 |
+| **SwiGLU** | $(xW \cdot \sigma(xW)) \odot (xV)$ | 可微      | ✅   | **极低**            |
 
 ### 3.2.3 RoPE 旋转位置编码
 
 **What（是什么）**：RoPE（Rotary Position Embedding）是一种基于旋转矩阵的位置编码方案，通过对查询和键向量施加与位置相关的旋转操作，使注意力分数自然依赖于相对位置。
 
 **Why（为什么比绝对位置编码好）**：
+
 1. **相对位置感知**：注意力分数只依赖 (n-m)，符合自然语言的"前后关系"本质——"the cat sat on the mat"中"cat"和"sat"的关系不应因为它们出现在第 3 vs 第 100 位而改变
 2. **长度外推**：旋转矩阵在推理时可自然扩展到更长序列（训练 4K → 推理 8K），无需重新训练位置嵌入
 3. **计算高效**：无需额外的位置嵌入查找表，旋转操作可融合进矩阵乘法
@@ -344,18 +359,25 @@ R_i(m)=
 \sin(m\theta_i) & \cos(m\theta_i)
 \end{bmatrix},
 \quad \theta_i = 10000^{-2i/d},\ i=0,\ldots,\tfrac{d}{2}-1
+
 $$
 
 **Step 2：对 Q/K 施加旋转**
 
-$$\mathbf{q}_m = R(m) W_q \mathbf{x}_m,\quad \mathbf{k}_n = R(n) W_k \mathbf{x}_n$$
+$$
+\mathbf{q}_m = R(m) W_q \mathbf{x}_m,\quad \mathbf{k}_n = R(n) W_k \mathbf{x}_n
+
+$$
 
 **Step 3：注意力只依赖相对位置**
 
-$$\mathrm{Attention}(\mathbf{q}_m, \mathbf{k}_n)
+$$
+\mathrm{Attention}(\mathbf{q}_m, \mathbf{k}_n)
 = \mathbf{q}_m^\top \mathbf{k}_n
 = \mathbf{q}^\top R(m)^\top R(n) \mathbf{k}
-= \mathbf{q}^\top R(n-m) \mathbf{k}$$
+= \mathbf{q}^\top R(n-m) \mathbf{k}
+
+$$
 
 因为 $R(m)^\top R(n)=R(n-m)$（旋转矩阵正交性）。
 
@@ -367,17 +389,19 @@ $$\mathrm{Attention}(\mathbf{q}_m, \mathbf{k}_n)
 
 虽然架构主体类似 LLaMA，Qwen-1 有以下差异化设计：
 
-| 设计 | LLaMA | Qwen-1 | 理由 |
-|------|-------|--------|------|
-| **词表大小** | 32,000 | **151,643** | 多语言优化，中文分词效率提升约 2× |
-| **QKV Bias** | 无 | **有** | 提供"默认"注意力方向 |
-| **嵌入绑定** | 绑定 (share) | **不绑定** | 更好的输出分布 |
+
+| 设计         | LLaMA        | Qwen-1      | 理由                               |
+| -------------- | -------------- | ------------- | ------------------------------------ |
+| **词表大小** | 32,000       | **151,643** | 多语言优化，中文分词效率提升约 2× |
+| **QKV Bias** | 无           | **有**      | 提供"默认"注意力方向               |
+| **嵌入绑定** | 绑定 (share) | **不绑定**  | 更好的输出分布                     |
 
 **QKV Bias 的详细解释**：
 
 **What**：在标准注意力的 Q、K、V 线性投影中加入 bias 偏置项。
 
 **Why**：
+
 - 当输入 X 的某些维度接近零时（例如序列开头的 token），无 bias 的线性投影输出也接近零，导致注意力分数接近均匀分布（无信息量）
 - Bias 项提供与输入无关的"默认"查询和键方向，类似于 CNN 中的 bias 允许网络有"基础偏移"
 - 参数量增加仅约 0.02%（3×d_model vs d_model²），成本极低
@@ -386,12 +410,14 @@ $$\mathrm{Attention}(\mathbf{q}_m, \mathbf{k}_n)
 
 $$
 Q = XW_Q,\quad K = XW_K,\quad V = XW_V
+
 $$
 
 带 Bias 的注意力（Qwen-1）：
 
 $$
 Q = XW_Q + b_Q,\quad K = XW_K + b_K,\quad V = XW_V + b_V
+
 $$
 
 > **注意**：Qwen2 后来用 QK-Norm 替代了 QKV Bias（详见 Ch4），因为实验发现 QK-Norm 在长序列场景下更稳定。
@@ -400,12 +426,13 @@ $$
 
 ### 3.3.1 数据构成
 
-| 数据类型 | 比例 | 说明 |
-|---------|------|------|
-| 通用文本 | ~60% | 网页、书籍、百科 |
-| 代码 | ~20% | Python, Java, C++, JS |
-| STEM | ~10% | 数学、科学、技术文档 |
-| 多语言 | ~10% | 30+ 语言，中文占比高 |
+
+| 数据类型 | 比例 | 说明                  |
+| ---------- | ------ | ----------------------- |
+| 通用文本 | ~60% | 网页、书籍、百科      |
+| 代码     | ~20% | Python, Java, C++, JS |
+| STEM     | ~10% | 数学、科学、技术文档  |
+| 多语言   | ~10% | 30+ 语言，中文占比高  |
 
 ### 3.3.2 三阶段训练流程
 
@@ -428,20 +455,23 @@ $$
 ```
 
 **为什么需要三阶段训练？**
+
 1. **Base 预训练**：学习语言知识和世界知识——模型在这个阶段获得"词汇量"和"常识"
 2. **SFT**：学习指令格式和任务模式——从"知识储备"转变为"有问必答"
 3. **RLHF**：对齐人类价值观，减少有害输出——从"回答问题"到"安全、有帮助地回答问题"
 
 ## 3.4 性能基准
 
-| 基准 | Qwen-7B | Qwen-14B | LLaMA2-7B | LLaMA2-13B |
-|------|---------|----------|-----------|------------|
-| MMLU | 58.2 | 65.3 | 45.8 | 55.2 |
-| HumanEval | 35.4 | 42.1 | 14.6 | 18.9 |
-| GSM8K | 52.3 | 62.1 | 15.5 | 21.4 |
-| C-Eval (中文) | 72.1 | 78.5 | 33.2 | 38.7 |
+
+| 基准          | Qwen-7B | Qwen-14B | LLaMA2-7B | LLaMA2-13B |
+| --------------- | --------- | ---------- | ----------- | ------------ |
+| MMLU          | 58.2    | 65.3     | 45.8      | 55.2       |
+| HumanEval     | 35.4    | 42.1     | 14.6      | 18.9       |
+| GSM8K         | 52.3    | 62.1     | 15.5      | 21.4       |
+| C-Eval (中文) | 72.1    | 78.5     | 33.2      | 38.7       |
 
 **关键观察**:
+
 - Qwen 在**代码和数学**上显著优于 LLaMA2（HumanEval +20, GSM8K +37）
 - **中文能力**大幅领先（C-Eval +40），受益于 151K 词表和中文数据占比
 - 14B 模型已超越 LLaMA2-13B 约 10 分
@@ -472,12 +502,10 @@ $$
 
 ## 4.1 发布时间与定位
 
-**发布时间**: 2024 年 7 月  
+**发布时间**: 2024 年 7 月
 **定位**: 从"LLaMA 优化版"转向"独立架构设计"，标志 Qwen 系列的第一个重要转折点。
 
 ## 4.2 核心架构创新
-
-
 
 ![图 4.1：MHA vs MQA vs GQA 注意力机制对比](images/ch4_gqa_comparison.png)
 
@@ -492,6 +520,7 @@ $$
 **What（是什么）**：GQA（Grouped Query Attention）将 KV 头数减少为 Q 头数的 1/G，G 组 Q 头共享同一组 KV 头。
 
 **Why（为什么 Qwen2 在全尺寸使用，而 LLaMA 仅在 70B 使用）**：
+
 1. **LLaMA 的保守策略**：小模型（7B/13B）容量有限，减少 KV 头担心性能下降过大
 2. **Qwen2 的激进策略**：
    - 通过更好的训练数据（7T tokens vs LLaMA 的 2T）补偿 GQA 的性能损失
@@ -531,6 +560,7 @@ GQA (Grouped Query Attention):
 **What（是什么）**：在计算注意力分数之前，对 Q 和 K 向量施加 RMSNorm 归一化。
 
 **Why（为什么替代 QKV Bias）**：
+
 1. **长序列稳定性**：QKV Bias 在长序列下导致注意力分数的绝对值不断累积，可能出现数值爆炸（attention logits > 1000），导致 softmax 输出趋近 one-hot（信息丢失）
 2. **动态范围控制**：QK-Norm 将 Q、K 的范数归一化到一致的尺度，注意力分数的范围变得可控
 3. **性能提升**：Qwen2 实验表明，QK-Norm 比 QKV Bias 提升 0.5-1 MMLU
@@ -557,6 +587,7 @@ QK-Norm 注意力（Qwen2 采用）：
 **What（是什么）**：一种将预训练模型的上下文从短序列（如 4K）扩展到长序列（如 128K）的位置编码插值方法。
 
 **Why（为什么不能简单线性插值）**：
+
 - RoPE 的频率在不同维度上编码不同尺度的信息
 - 低频维度（i 大）：捕获长距离依赖，频率低，旋转慢
 - 高频维度（i 小）：捕获局部细节，频率高，旋转快
@@ -580,15 +611,17 @@ NTK-aware 插值（扩展 α 倍，如 α = 128K/4K = 32）：
 
 ## 4.3 模型规格
 
-| 模型 | 参数 | 层数 | d_model | Q 头数 | KV 头数 | 上下文 |
-|------|------|------|---------|--------|---------|--------|
-| Qwen2-0.5B | 0.5B | 24 | 896 | 14 | 2 | 32K |
-| Qwen2-1.5B | 1.5B | 28 | 1536 | 12 | 2 | 32K |
-| Qwen2-7B | 7B | 28 | 3584 | 28 | 4 | 128K |
-| Qwen2-57B-A14B | 57B/14B | 64 | 4096 | 32 | 4 | 32K |
-| Qwen2-72B | 72B | 80 | 8192 | 64 | 8 | 128K |
+
+| 模型           | 参数    | 层数 | d_model | Q 头数 | KV 头数 | 上下文 |
+| ---------------- | --------- | ------ | --------- | -------- | --------- | -------- |
+| Qwen2-0.5B     | 0.5B    | 24   | 896     | 14     | 2       | 32K    |
+| Qwen2-1.5B     | 1.5B    | 28   | 1536    | 12     | 2       | 32K    |
+| Qwen2-7B       | 7B      | 28   | 3584    | 28     | 4       | 128K   |
+| Qwen2-57B-A14B | 57B/14B | 64   | 4096    | 32     | 4       | 32K    |
+| Qwen2-72B      | 72B     | 80   | 8192    | 64     | 8       | 128K   |
 
 **关键观察**:
+
 - **全尺寸 GQA**：即使 0.5B 也用 GQA（KV 头数 = 2）
 - **MoE 探索**：57B-A14B 是首个 MoE 模型（14B 激活参数），为 Qwen3 铺路
 - **上下文统一**：7B+ 都支持 128K
@@ -597,10 +630,11 @@ NTK-aware 插值（扩展 α 倍，如 α = 128K/4K = 32）：
 
 ### 数据规模提升
 
-| 版本 | 数据量 | 增长 |
-|------|--------|------|
-| Qwen-1 | ~3T | - |
-| Qwen2 | 7T | +133% |
+
+| 版本   | 数据量 | 增长  |
+| -------- | -------- | ------- |
+| Qwen-1 | ~3T    | -     |
+| Qwen2  | 7T     | +133% |
 
 ### 数据质量改进
 
@@ -631,15 +665,17 @@ RLHF 阶段:
 
 ## 4.5 性能突破
 
-| 基准 | Qwen2-72B | LLaMA3-70B | GPT-4 |
-|------|-----------|------------|-------|
-| MMLU | 84.2 | 79.5 | 86.4 |
-| HumanEval | 64.6 | 55.2 | 67.2 |
-| GSM8K | 89.5 | 80.1 | 92.1 |
-| BBH | 82.4 | 76.3 | 85.2 |
-| MT-Bench | 9.1 | 8.3 | 9.2 |
+
+| 基准      | Qwen2-72B | LLaMA3-70B | GPT-4 |
+| ----------- | ----------- | ------------ | ------- |
+| MMLU      | 84.2      | 79.5       | 86.4  |
+| HumanEval | 64.6      | 55.2       | 67.2  |
+| GSM8K     | 89.5      | 80.1       | 92.1  |
+| BBH       | 82.4      | 76.3       | 85.2  |
+| MT-Bench  | 9.1       | 8.3        | 9.2   |
 
 **关键里程碑**:
+
 - Qwen2-72B **首次超越** LLaMA3-70B 在所有主要基准
 - GSM8K 接近 GPT-4 水平
 - MT-Bench（对话质量）达到 GPT-4 级别
@@ -673,19 +709,18 @@ Qwen2.5 在架构上**完全继承 Qwen2** 的设计（GQA + QK-Norm + SwiGLU + 
 
 > **类比**：如果说 Qwen2 是一辆性能优秀的赛车（架构创新），那 Qwen2.5 就是给这辆赛车加满了高级燃油（18T 数据）并装上了更大的油箱（1M 上下文）。
 
-| 组件 | Qwen2 | Qwen2.5 | 变化 |
-|------|-------|---------|------|
-| 注意力机制 | GQA + QK-Norm | 同左 | 不变 |
-| 位置编码 | NTK-aware RoPE | NTK-aware RoPE + **YaRN** | 长上下文增强 |
-| 激活函数 | SwiGLU | 同左 | 不变 |
-| 归一化 | RMSNorm | 同左 | 不变 |
-| 词表大小 | 151,643 | 同左 | 不变 |
-| 预训练数据 | 7T tokens | **18T tokens** | **2.57× 增长** |
-| 上下文长度 | 128K | **1M** | **7.8× 扩展** |
+
+| 组件       | Qwen2          | Qwen2.5                  | 变化            |
+| ------------ | ---------------- | -------------------------- | ----------------- |
+| 注意力机制 | GQA + QK-Norm  | 同左                     | 不变            |
+| 位置编码   | NTK-aware RoPE | NTK-aware RoPE +**YaRN** | 长上下文增强    |
+| 激活函数   | SwiGLU         | 同左                     | 不变            |
+| 归一化     | RMSNorm        | 同左                     | 不变            |
+| 词表大小   | 151,643        | 同左                     | 不变            |
+| 预训练数据 | 7T tokens      | **18T tokens**           | **2.57× 增长** |
+| 上下文长度 | 128K           | **1M**                   | **7.8× 扩展**  |
 
 ## 5.2 训练数据规模突破：从 7T 到 18T
-
-
 
 ![图 5.1：Qwen 系列 Scaling Law 可视化](images/ch5_scaling_law.png)
 
@@ -693,11 +728,12 @@ Qwen2.5 在架构上**完全继承 Qwen2** 的设计（GQA + QK-Norm + SwiGLU + 
 
 ### 5.2.1 数据量的指数增长
 
-| 版本 | 训练数据量 | 相对增长 | 关键来源 |
-|------|-----------|---------|---------|
-| Qwen-1（2023.08） | ~3T tokens | 基线 | 公开爬取 + 书籍 |
-| Qwen2（2024.07） | 7T tokens | 2.3× | + 多语言 + 代码 |
-| Qwen2.5（2024.12） | **18T tokens** | **6×** | + 合成数据 + 专业领域 |
+
+| 版本               | 训练数据量     | 相对增长 | 关键来源              |
+| -------------------- | ---------------- | ---------- | ----------------------- |
+| Qwen-1（2023.08）  | ~3T tokens     | 基线     | 公开爬取 + 书籍       |
+| Qwen2（2024.07）   | 7T tokens      | 2.3×    | + 多语言 + 代码       |
+| Qwen2.5（2024.12） | **18T tokens** | **6×**  | + 合成数据 + 专业领域 |
 
 ### 5.2.2 Scaling Law 视角分析
 
@@ -707,9 +743,13 @@ Qwen2.5 在架构上**完全继承 Qwen2** 的设计（GQA + QK-Norm + SwiGLU + 
 
 **How**：根据 Chinchilla Scaling Law：
 
-$$L(N, D) = \frac{A}{N^{\alpha}} + \frac{B}{D^{\beta}} + L_{\mathrm{opt}}$$
+$$
+L(N, D) = \frac{A}{N^{\alpha}} + \frac{B}{D^{\beta}} + L_{\mathrm{opt}}
+
+$$
 
 其中：
+
 - $L$：交叉熵损失
 - $N$：模型参数量
 - $D$：训练数据量（tokens）
@@ -784,8 +824,6 @@ Qwen2.5 数据增强策略:
 
 ## 5.3 长上下文技术突破：从 128K 到 1M
 
-
-
 ![图 5.2：YaRN 分频处理与注意力缩放](images/ch5_yarn_frequency.png)
 
 > *自绘图。说明：左图展示 YaRN 对不同频率索引的缩放因子（高频保持/中频平滑/低频压缩三区间处理）；右图展示注意力缩放因子 t=0.1·ln(s)+1 随扩展因子的变化，标注关键扩展点（4K→16K/128K/1M）。YaRN 原始论文 (Peng et al., 2023) 中有频率分析图，此版本增加了注意力缩放因子的定量可视化。*
@@ -795,6 +833,7 @@ Qwen2.5 数据增强策略:
 **What**：YaRN 是一种 RoPE 位置编码的扩展方法，通过注意力缩放因子和分频处理，将模型的上下文长度从 128K 扩展到 1M。
 
 **Why**：当序列长度远超训练时的上下文窗口时，注意力分数会出现两个问题：
+
 1. **注意力稀释**（Attention Dilution）：序列越长，softmax 的概率质量越分散，每个 token 获得的注意力越少
 2. **频率外推失败**：RoPE 的旋转频率在超长序列下可能超出训练范围
 
@@ -804,7 +843,10 @@ Qwen2.5 数据增强策略:
 
 RoPE 将 $d$ 维隐藏状态分成 $d/2$ 个频率维度，每个维度的基础频率为：
 
-$$\omega_i = \theta^{-2i/d}, \quad i = 0, 1, \ldots, d/2 - 1$$
+$$
+\omega_i = \theta^{-2i/d}, \quad i = 0, 1, \ldots, d/2 - 1
+
+$$
 
 其中 $\theta = 10000$（RoPE 基础频率）。
 
@@ -830,6 +872,7 @@ $$
 \omega_i \cdot \dfrac{1 - \gamma(i)}{s} + \omega_i \cdot \gamma(i) & \text{if } d_{\mathrm{low}} \le i \le d_{\mathrm{high}} \\
 \omega_i / s & \text{if } i > d_{\mathrm{high}}
 \end{cases}
+
 $$
 
 - $i < d_{\mathrm{low}}$：高频不变
@@ -840,11 +883,17 @@ $$
 
 **第三步：注意力缩放因子**
 
-$$A_{\mathrm{YaRN}}(m, n) = \frac{1}{\sqrt{t}} \cdot \mathbf{q}^T \mathbf{R}(\omega'_i, m-n) \mathbf{k}$$
+$$
+A_{\mathrm{YaRN}}(m, n) = \frac{1}{\sqrt{t}} \cdot \mathbf{q}^T \mathbf{R}(\omega'_i, m-n) \mathbf{k}
+
+$$
 
 其中缩放因子 $t$ 的计算：
 
-$$t = 0.1 \ln(s) + 1$$
+$$
+t = 0.1 \ln(s) + 1
+
+$$
 
 > **类比**：YaRN 就像一个"变焦镜头"——高频部分保持"微距"模式看清近处细节，低频部分切换到"广角"模式看清远处全景，中频部分则平滑过渡，避免画面突变。
 
@@ -865,17 +914,17 @@ def yarn_rope_scaling(
 ) -> torch.Tensor:
     """计算 YaRN 缩放后的 RoPE 频率"""
     scale = target_context / base_context  # 扩展因子 s
-    
+  
     # 原始 RoPE 频率
     freqs = 1.0 / (base ** (torch.arange(0, dim, 2).float() / dim))
-    
+  
     # 计算每个频率维度的"波长"
     wavelengths = 2 * math.pi / freqs
-    
+  
     # 分频处理
     low_freq_wavelen = base_context / beta_fast   # 高频阈值
     high_freq_wavelen = base_context / beta_slow   # 低频阈值
-    
+  
     new_freqs = []
     for freq, wavelen in zip(freqs, wavelengths):
         if wavelen < low_freq_wavelen:
@@ -892,7 +941,7 @@ def yarn_rope_scaling(
             new_freqs.append(
                 (1 - smooth) * freq / scale + smooth * freq
             )
-    
+  
     return torch.tensor(new_freqs)
 
 # 注意力缩放因子
@@ -944,20 +993,20 @@ Qwen2.5 采用**多阶段渐进式**上下文扩展，而非一步到位：
 
 ### 5.3.3 长上下文性能验证
 
-| 基准 | 评估维度 | Qwen2.5-72B | LLaMA3-405B | GPT-4o |
-|------|---------|-------------|-------------|--------|
-| RULER (128K) | 长程检索与推理 | **85.2** | 78.5 | 82.1 |
-| InfiniteBench (200K) | 超长文档理解 | **72.3** | — | 68.5 |
-| Needle-in-Haystack (1M) | 精确信息检索 | **98.5%** | — | 95.2% |
+
+| 基准                    | 评估维度       | Qwen2.5-72B | LLaMA3-405B | GPT-4o |
+| ------------------------- | ---------------- | ------------- | ------------- | -------- |
+| RULER (128K)            | 长程检索与推理 | **85.2**    | 78.5        | 82.1   |
+| InfiniteBench (200K)    | 超长文档理解   | **72.3**    | —          | 68.5   |
+| Needle-in-Haystack (1M) | 精确信息检索   | **98.5%**   | —          | 95.2%  |
 
 **关键观察**：
+
 - Qwen2.5-72B 在长上下文上**超越 LLaMA3-405B**（参数量仅为其 1/5）
 - 1M 上下文检索准确率达 98.5%，接近完美
 - 这证明了 YaRN + 渐进扩展策略的有效性
 
 ## 5.4 后训练策略升级
-
-
 
 ![图 5.3：GRPO 算法可视化](images/ch5_grpo_algorithm.png)
 
@@ -965,10 +1014,11 @@ Qwen2.5 采用**多阶段渐进式**上下文扩展，而非一步到位：
 
 ### 5.4.1 SFT 数据规模翻倍
 
-| 版本 | SFT 样本数 | 增长 | 覆盖领域 |
-|------|-----------|------|---------|
-| Qwen2 | ~500K | 基线 | 通用对话 + 代码 + 数学 |
-| Qwen2.5 | **1M+** | **+100%** | + 长文本 + Agent + 工具使用 |
+
+| 版本    | SFT 样本数 | 增长      | 覆盖领域                    |
+| --------- | ------------ | ----------- | ----------------------------- |
+| Qwen2   | ~500K      | 基线      | 通用对话 + 代码 + 数学      |
+| Qwen2.5 | **1M+**    | **+100%** | + 长文本 + Agent + 工具使用 |
 
 ### 5.4.2 多阶段强化学习
 
@@ -1020,15 +1070,20 @@ Qwen2.5 采用**多阶段渐进式**上下文扩展，而非一步到位：
 
 $$
 J(\theta) = \mathbb{E}_{x \sim \mathcal{D}} \left[ \frac{1}{G} \sum_{i=1}^{G} \min\left( r_i(\theta) \hat{A}_i,\ \operatorname{clip}\big(r_i(\theta), 1-\epsilon, 1+\epsilon\big)\, \hat{A}_i \right) \right]
+
 $$
 
 其中：
+
 - $r_i(\theta) = \frac{\pi_\theta(y_i | x)}{\pi_{\mathrm{old}}(y_i | x)}$：策略比率
 - $\hat{A}_i$：组内相对优势（不需要 Critic）
 
 **组内优势计算**：
 
-$$\hat{A}_i = \frac{R_i - \operatorname{mean}(\{R_1, R_2, \ldots, R_G\})}{\operatorname{std}(\{R_1, R_2, \ldots, R_G\})}$$
+$$
+\hat{A}_i = \frac{R_i - \operatorname{mean}(\{R_1, R_2, \ldots, R_G\})}{\operatorname{std}(\{R_1, R_2, \ldots, R_G\})}
+
+$$
 
 其中 $R_i$ 是第 $i$ 个输出的奖励分数（如数学题是否正确、代码是否通过测试）。
 
@@ -1044,27 +1099,27 @@ def grpo_loss(
     beta: float = 0.01,           # KL 惩罚系数
 ) -> torch.Tensor:
     """GRPO 损失函数实现"""
-    
+  
     # Step 1: 计算组内相对优势
     # rewards shape: [batch, group_size]
     mean_rewards = rewards.mean(dim=-1, keepdim=True)  # [batch, 1]
     std_rewards = rewards.std(dim=-1, keepdim=True).clamp(min=1e-8)
     advantages = (rewards - mean_rewards) / std_rewards  # [batch, group_size]
-    
+  
     # Step 2: 计算策略比率
     # 沿序列维度求和得到整个输出的 log 概率
     seq_logprobs = logprobs.sum(dim=-1)      # [batch, group_size]
     seq_old_logprobs = old_logprobs.sum(dim=-1)
     ratio = torch.exp(seq_logprobs - seq_old_logprobs)  # [batch, group_size]
-    
+  
     # Step 3: PPO-clip 损失
     surr1 = ratio * advantages
     surr2 = torch.clamp(ratio, 1 - epsilon, 1 + epsilon) * advantages
     policy_loss = -torch.min(surr1, surr2).mean()
-    
+  
     # Step 4: KL 惩罚（防止偏离参考策略太远）
     kl_penalty = beta * (seq_logprobs - seq_old_logprobs).pow(2).mean()
-    
+  
     return policy_loss + kl_penalty
 
 # 使用示例
@@ -1075,14 +1130,15 @@ def grpo_loss(
 
 **GRPO vs PPO 对比**：
 
-| 维度 | PPO | GRPO |
-|------|-----|------|
-| Critic 模型 | 需要（同等规模） | **不需要** |
-| 显存占用 | ~2× 策略模型 | ~1.3× 策略模型 |
-| 优势估计 | 通过 Critic 的 TD 误差 | **组内相对排名** |
-| 奖励信号 | dense reward（逐 token） | sparse reward（整个输出） |
-| 最适场景 | 长序列、细粒度反馈 | **可验证任务**（数学、代码） |
-| 训练稳定性 | 受 Critic 准确性影响 | 组内归一化天然稳定 |
+
+| 维度        | PPO                      | GRPO                         |
+| ------------- | -------------------------- | ------------------------------ |
+| Critic 模型 | 需要（同等规模）         | **不需要**                   |
+| 显存占用    | ~2× 策略模型            | ~1.3× 策略模型              |
+| 优势估计    | 通过 Critic 的 TD 误差   | **组内相对排名**             |
+| 奖励信号    | dense reward（逐 token） | sparse reward（整个输出）    |
+| 最适场景    | 长序列、细粒度反馈       | **可验证任务**（数学、代码） |
+| 训练稳定性  | 受 Critic 准确性影响     | 组内归一化天然稳定           |
 
 > **类比**：PPO 就像一位全程陪同的教练（Critic），每一步都给出评价。GRPO 就像考试后的排名——不需要教练，只需要看同一批试卷中谁的分数更高，就能知道哪些答案更好。
 
@@ -1122,6 +1178,7 @@ Qwen2.5 系列全景:
 **为什么需要专用模型而非单一通用模型？**
 
 三个技术原因：
+
 1. **数据分布差异**：代码的 token 分布（关键词、缩进、括号）与自然语言差异显著，单一模型难以兼顾
 2. **评估基准天花板**：专用模型通过领域特化数据可以在特定基准上达到 SOTA，而通用模型受数据混合比例限制
 3. **部署效率**：用户可按需选择 7B 代码模型而非 72B 通用模型，降低推理成本
@@ -1130,15 +1187,17 @@ Qwen2.5 系列全景:
 
 ### 5.6.1 通用基准
 
-| 基准 | 评估维度 | Qwen2.5-72B | Qwen2-72B | LLaMA3-405B | GPT-4o |
-|------|---------|-------------|-----------|-------------|--------|
-| MMLU | 知识广度 | **~87** | 84.2 | 85.2 | 88.7 |
-| HumanEval | 代码生成 | **~75** | 64.6 | 70.1 | 90.2 |
-| GSM8K | 数学推理 | **~92** | 89.5 | 88.2 | 95.8 |
-| MATH | 竞赛数学 | **~85** | 78.3 | 79.1 | 76.6 |
-| Arena-Hard | 对话质量 | **~55** | 48.1 | 52.3 | 62.5 |
+
+| 基准       | 评估维度 | Qwen2.5-72B | Qwen2-72B | LLaMA3-405B | GPT-4o |
+| ------------ | ---------- | ------------- | ----------- | ------------- | -------- |
+| MMLU       | 知识广度 | **~87**     | 84.2      | 85.2        | 88.7   |
+| HumanEval  | 代码生成 | **~75**     | 64.6      | 70.1        | 90.2   |
+| GSM8K      | 数学推理 | **~92**     | 89.5      | 88.2        | 95.8   |
+| MATH       | 竞赛数学 | **~85**     | 78.3      | 79.1        | 76.6   |
+| Arena-Hard | 对话质量 | **~55**     | 48.1      | 52.3        | 62.5   |
 
 **关键里程碑**：
+
 - Qwen2.5-72B **全面超越 LLaMA3-405B**（仅 1/5 参数）
 - MATH 85 分**超越 GPT-4o**（76.6），竞赛数学成为优势领域
 - 代码和对话仍有提升空间（与 GPT-4o 差距 ~10 分）
@@ -1170,7 +1229,6 @@ Qwen2.5 系列全景:
 
 答：传统 Scaling Law 的数据项假设数据来自固定分布。合成数据改变了游戏规则——通过更强模型生成推理链、代码解题步骤等，实际上引入了**新的信息维度**（推理模式、解题策略），而非简单重复已有分布中的数据。类比人类学习：读 10000 篇新闻不如读 100 道解析详尽的数学题对推理能力提升大——因为后者包含更高密度的"推理信息"。这意味着真正的瓶颈不是"数据量"而是"信息多样性"，合成数据恰好补充了 Web 文本中缺乏的推理示范。
 
-
 ---
 
 <a id="6-qwen3混合-moe-与动态推理革命202505"></a>
@@ -1183,16 +1241,18 @@ Qwen2.5 系列全景:
 **核心战略**：架构范式革新 + 动态推理控制 + 规模化 MoE
 
 Qwen3 是 Qwen 系列的**第四次重大迭代**，也是第一次在架构层面引入两项"范式级"创新：
+
 1. **统一 Thinking/Non-Thinking 模式**：单一模型同时支持深度推理和快速应答
 2. **混合 Dense + MoE 产品线**：从 0.6B 到 235B 覆盖全场景
 
-| 维度 | Qwen2.5 | Qwen3 | 变化 |
-|------|---------|-------|------|
-| 训练数据 | 18T tokens / 29 语言 | **36T tokens / 119 语言** | 2× / 4.1× |
-| 架构类型 | 纯 Dense | **Dense + MoE 混合** | 新增 MoE |
-| 推理模式 | 单一模式 | **Thinking + Non-Thinking** | 新增动态推理 |
-| 上下文 | 1M（72B） | 256K（全尺寸原生） | 原生长上下文 |
-| 模型数量 | 7 个 Dense | **6 Dense + 2 MoE** | 更丰富 |
+
+| 维度     | Qwen2.5              | Qwen3                       | 变化         |
+| ---------- | ---------------------- | ----------------------------- | -------------- |
+| 训练数据 | 18T tokens / 29 语言 | **36T tokens / 119 语言**   | 2× / 4.1×  |
+| 架构类型 | 纯 Dense             | **Dense + MoE 混合**        | 新增 MoE     |
+| 推理模式 | 单一模式             | **Thinking + Non-Thinking** | 新增动态推理 |
+| 上下文   | 1M（72B）            | 256K（全尺寸原生）          | 原生长上下文 |
+| 模型数量 | 7 个 Dense           | **6 Dense + 2 MoE**         | 更丰富       |
 
 > **里程碑意义**：Qwen3 是首个在**单一模型**内统一推理深度控制的中文大模型，用户可以在延迟和准确率之间动态权衡，无需切换模型。
 
@@ -1209,6 +1269,7 @@ Qwen3 是 Qwen 系列的**第四次重大迭代**，也是第一次在架构层�
 **What**：单一模型通过特殊 token 控制推理模式——`/think` 启用 Chain-of-Thought 深度推理，`/no_think` 启用快速直接回答。
 
 **Why**：在 Qwen2.5 时代，用户需要在推理模型（如 QwQ-32B）和快速模型（如 Qwen2.5-72B-Instruct）之间切换。这带来三个问题：
+
 1. **部署复杂度**：需要维护两套模型服务
 2. **用户体验**：难以判断何时需要深度推理
 3. **资源浪费**：简单问题也走完整推理流程
@@ -1340,8 +1401,6 @@ Qwen3 的 Thinking Mode 训练是一个**四阶段渐进式**过程：
 
 ## 6.3 混合 MoE 架构
 
-
-
 ![图 6.3：MoE 路由机制图](images/ch6_moe_routing.png)
 
 > *自绘图。说明：展示 token 如何经过 Router 产生 128 个专家分数，Top-8 选择后由 8 个激活专家+1 个共享专家加权混合输出。标注 Qwen3-235B-A22B 的参数效率（总 235B，激活仅 22B=9.4%）。MoE 路由图在 Mixtral/DeepSeek-MoE 等论文中有类似版本，此图针对 Qwen3 的 128+1 专家配置定制。*
@@ -1354,16 +1413,17 @@ Qwen3 的 Thinking Mode 训练是一个**四阶段渐进式**过程：
 
 Qwen3 提供**6 个 Dense + 2 个 MoE** 模型，覆盖从端侧到数据中心的全部场景：
 
-| 模型 | 类型 | 总参数 | 激活参数 | 专家数 | 激活专家 | 共享专家 | 定位 |
-|------|------|--------|---------|--------|---------|---------|------|
-| Qwen3-0.6B | Dense | 0.6B | 0.6B | — | — | — | 端侧 / IoT |
-| Qwen3-1.7B | Dense | 1.7B | 1.7B | — | — | — | 手机 |
-| Qwen3-4B | Dense | 4B | 4B | — | — | — | 边缘设备 |
-| Qwen3-8B | Dense | 8B | 8B | — | — | — | 个人 PC |
-| Qwen3-14B | Dense | 14B | 14B | — | — | — | 工作站 |
-| Qwen3-32B | Dense | 32B | 32B | — | — | — | 服务器 |
-| Qwen3-30B-A3B | **MoE** | 30B | **3B** | 128 | 8 | 1 | 手机（高性能） |
-| Qwen3-235B-A22B | **MoE** | 235B | **22B** | 128 | 8 | 1 | 数据中心旗舰 |
+
+| 模型            | 类型    | 总参数 | 激活参数 | 专家数 | 激活专家 | 共享专家 | 定位           |
+| ----------------- | --------- | -------- | ---------- | -------- | ---------- | ---------- | ---------------- |
+| Qwen3-0.6B      | Dense   | 0.6B   | 0.6B     | —     | —       | —       | 端侧 / IoT     |
+| Qwen3-1.7B      | Dense   | 1.7B   | 1.7B     | —     | —       | —       | 手机           |
+| Qwen3-4B        | Dense   | 4B     | 4B       | —     | —       | —       | 边缘设备       |
+| Qwen3-8B        | Dense   | 8B     | 8B       | —     | —       | —       | 个人 PC        |
+| Qwen3-14B       | Dense   | 14B    | 14B      | —     | —       | —       | 工作站         |
+| Qwen3-32B       | Dense   | 32B    | 32B      | —     | —       | —       | 服务器         |
+| Qwen3-30B-A3B   | **MoE** | 30B    | **3B**   | 128    | 8        | 1        | 手机（高性能） |
+| Qwen3-235B-A22B | **MoE** | 235B   | **22B**  | 128    | 8        | 1        | 数据中心旗舰   |
 
 ### 6.3.2 MoE 路由机制详解
 
@@ -1379,23 +1439,35 @@ Qwen3 提供**6 个 Dense + 2 个 MoE** 模型，覆盖从端侧到数据中心�
 
 **Step 1：计算路由分数（Router）**
 
-$$\mathbf{g} = \mathrm{softmax}(\mathbf{W}_g \mathbf{x} + \boldsymbol{\epsilon}), \quad \mathbf{W}_g \in \mathbb{R}^{N \times d}$$
+$$
+\mathbf{g} = \mathrm{softmax}(\mathbf{W}_g \mathbf{x} + \boldsymbol{\epsilon}), \quad \mathbf{W}_g \in \mathbb{R}^{N \times d}
+
+$$
 
 其中 $N = 128$ 为总专家数，$\boldsymbol{\epsilon}$ 为可选的噪声项（训练时促进探索）。
 
 **Step 2：Top-K 选择**
 
-$$\mathcal{S} = \mathrm{TopK}(\mathbf{g}, K), \quad K = 8$$
+$$
+\mathcal{S} = \mathrm{TopK}(\mathbf{g}, K), \quad K = 8
+
+$$
 
 选择门控分数最高的 $K$ 个专家索引。
 
 **Step 3：权重归一化**
 
-$$\hat{g}_i = \frac{g_i}{\sum_{j \in \mathcal{S}} g_j}, \quad \forall i \in \mathcal{S}$$
+$$
+\hat{g}_i = \frac{g_i}{\sum_{j \in \mathcal{S}} g_j}, \quad \forall i \in \mathcal{S}
+
+$$
 
 **Step 4：专家计算与混合**
 
-$$\mathbf{y} = \sum_{i \in \mathcal{S}} \hat{g}_i \cdot \mathrm{Expert}_i(\mathbf{x}) + \mathrm{SharedExpert}(\mathbf{x})$$
+$$
+\mathbf{y} = \sum_{i \in \mathcal{S}} \hat{g}_i \cdot \mathrm{Expert}_i(\mathbf{x}) + \mathrm{SharedExpert}(\mathbf{x})
+
+$$
 
 其中共享专家（Shared Expert）处理所有 token，提供"基础"能力。
 
@@ -1406,7 +1478,7 @@ import torch.nn.functional as F
 
 class MoELayer(nn.Module):
     """Qwen3 MoE 层的简化实现"""
-    
+  
     def __init__(
         self,
         hidden_dim: int,
@@ -1418,38 +1490,38 @@ class MoELayer(nn.Module):
         super().__init__()
         self.num_experts = num_experts
         self.num_active = num_active
-        
+  
         # 路由器：将 hidden_dim 映射到 num_experts 个分数
         self.router = nn.Linear(hidden_dim, num_experts, bias=False)
-        
+  
         # 专家网络（每个是一个 SwiGLU FFN）
         self.experts = nn.ModuleList([
             SwiGLU_FFN(hidden_dim, ffn_dim) 
             for _ in range(num_experts)
         ])
-        
+  
         # 共享专家
         self.shared_experts = nn.ModuleList([
             SwiGLU_FFN(hidden_dim, ffn_dim) 
             for _ in range(num_shared)
         ])
-    
+  
     def forward(self, x: torch.Tensor) -> torch.Tensor:
         batch_size, seq_len, hidden = x.shape
         x_flat = x.view(-1, hidden)  # [B*S, D]
-        
+  
         # Step 1: 路由分数
         router_logits = self.router(x_flat)  # [B*S, N]
         router_probs = F.softmax(router_logits, dim=-1)
-        
+  
         # Step 2: Top-K 选择
         topk_probs, topk_indices = torch.topk(
             router_probs, self.num_active, dim=-1
         )  # [B*S, K]
-        
+  
         # Step 3: 归一化
         topk_probs = topk_probs / topk_probs.sum(dim=-1, keepdim=True)
-        
+  
         # Step 4: 专家计算（简化版，实际用 scatter/gather 优化）
         expert_output = torch.zeros_like(x_flat)
         for i in range(self.num_active):
@@ -1460,11 +1532,11 @@ class MoELayer(nn.Module):
                 expert_output[mask] += (
                     weight[mask] * self.experts[e_id](x_flat[mask])
                 )
-        
+  
         # 共享专家（所有 token 都经过）
         for shared in self.shared_experts:
             expert_output += shared(x_flat)
-        
+  
         return expert_output.view(batch_size, seq_len, hidden)
 ```
 
@@ -1474,9 +1546,13 @@ MoE 训练的核心挑战是**负载不均衡**——部分专家被过度使用
 
 **辅助损失（Auxiliary Loss）**：
 
-$$L_{\mathrm{aux}} = \lambda \cdot N \sum_{i=1}^{N} f_i \cdot p_i$$
+$$
+L_{\mathrm{aux}} = \lambda \cdot N \sum_{i=1}^{N} f_i \cdot p_i
+
+$$
 
 其中：
+
 - $f_i = \dfrac{n_i}{N_{\mathrm{tokens}}}$（路由到专家 $i$ 的 token 数 / 总 token 数）：实际负载
 - $p_i = \frac{1}{T}\sum_{t} g_i^{(t)}$：平均门控概率
 - $\lambda$：平衡系数（Qwen3 使用 $\lambda = 0.01$）
@@ -1486,15 +1562,19 @@ $$L_{\mathrm{aux}} = \lambda \cdot N \sum_{i=1}^{N} f_i \cdot p_i$$
 
 **容量因子（Capacity Factor）**：
 
-$$C_i = \frac{B}{N} \times \mathrm{CF}$$
+$$
+C_i = \frac{B}{N} \times \mathrm{CF}
+
+$$
 
 其中 $B$ 为 batch 中的 token 数，$\mathrm{CF}$ 为容量因子（通常 1.0–1.25）。超出容量的 token 会被丢弃或由共享专家处理。
 
-| 策略 | 作用 | Qwen3 配置 |
-|------|------|-----------|
-| 辅助损失 | 惩罚负载不均 | λ = 0.01 |
-| 容量因子 | 限制单专家最大负载 | CF = 1.25 |
-| 共享专家 | 保底能力 + 吸收溢出 | 1 个共享专家 |
+
+| 策略     | 作用                     | Qwen3 配置     |
+| ---------- | -------------------------- | ---------------- |
+| 辅助损失 | 惩罚负载不均             | λ = 0.01      |
+| 容量因子 | 限制单专家最大负载       | CF = 1.25      |
+| 共享专家 | 保底能力 + 吸收溢出      | 1 个共享专家   |
 | 噪声路由 | 训练时增加随机性促进探索 | Gaussian noise |
 
 ### 6.3.4 参数效率分析
@@ -1524,8 +1604,6 @@ Qwen3 的设计平衡:
 
 ## 6.4 强到弱蒸馏（Strong-to-Weak Distillation）
 
-
-
 ![图 6.5：强到弱蒸馏示意图](images/ch6_distillation.png)
 
 > *自绘图。说明：展示 Teacher(大模型) 通过两条路径向 Student(小模型) 传递知识：L_KL 传递输出概率分布中的"暗知识"(α=0.7)，L_MSE 对齐内部隐藏层表征(β=0.3)。知识蒸馏框图在 Hinton et al. (2015) 原始论文中有经典版本，此图增加了 Qwen3 特有的双损失权重配置。*
@@ -1540,9 +1618,13 @@ Qwen3 的设计平衡:
 
 **蒸馏损失函数**：
 
-$$L_{\mathrm{distill}} = \alpha \cdot D_{\mathrm{KL}}(P_{\mathrm{teacher}} \| P_{\mathrm{student}}) + \beta \cdot \mathrm{MSE}(\mathbf{h}_{\mathrm{teacher}}, \mathbf{h}_{\mathrm{student}})$$
+$$
+L_{\mathrm{distill}} = \alpha \cdot D_{\mathrm{KL}}(P_{\mathrm{teacher}} \| P_{\mathrm{student}}) + \beta \cdot \mathrm{MSE}(\mathbf{h}_{\mathrm{teacher}}, \mathbf{h}_{\mathrm{student}})
+
+$$
 
 其中：
+
 - $D_{\mathrm{KL}}$：教师和学生输出分布的 KL 散度（软标签学习）
 - $\mathrm{MSE}$：隐藏层表示的均方误差（特征模仿）
 - $\alpha = 0.7$：输出蒸馏权重
@@ -1600,14 +1682,16 @@ Qwen3 蒸馏路线:
 
 **Thinking Mode 在小模型上的惊人效果**：
 
-| 模型 | 基准 | Non-Thinking | Thinking | 增益 |
-|------|------|-------------|----------|------|
-| Qwen3-1.7B | AIME | ~20% | ~35% | **+15%** |
-| Qwen3-4B | GPQA | ~30% | ~42% | **+12%** |
-| Qwen3-32B | GPQA | ~45% | ~55% | **+10%** |
-| Qwen3-235B | MATH | ~80% | ~85% | **+5%** |
+
+| 模型       | 基准 | Non-Thinking | Thinking | 增益     |
+| ------------ | ------ | -------------- | ---------- | ---------- |
+| Qwen3-1.7B | AIME | ~20%         | ~35%     | **+15%** |
+| Qwen3-4B   | GPQA | ~30%         | ~42%     | **+12%** |
+| Qwen3-32B  | GPQA | ~45%         | ~55%     | **+10%** |
+| Qwen3-235B | MATH | ~80%         | ~85%     | **+5%**  |
 
 **关键发现**：
+
 - **小模型增益更大**：1.7B 的 Thinking Mode 增益（+15%）远大于 235B（+5%）
 - **能力跨越**：Thinking Mode 使 Qwen3-1.7B 达到 Qwen2.5-7B 的水平（4× 参数差距）
 - **蒸馏传递 Thinking 能力**：通过蒸馏，小模型也获得了教师模型的推理"思考模式"
@@ -1616,12 +1700,13 @@ Qwen3 蒸馏路线:
 
 ### 6.5.1 数据规模
 
-| 维度 | Qwen2.5 | Qwen3 | 变化 |
-|------|---------|-------|------|
-| 总数据量 | 18T tokens | **36T tokens** | 2× |
-| 语言数 | 29 | **119** | 4.1× |
-| 代码数据 | 包含 | **显著增强** | — |
-| 合成数据 | ~20% | **~30%** | — |
+
+| 维度     | Qwen2.5    | Qwen3          | 变化  |
+| ---------- | ------------ | ---------------- | ------- |
+| 总数据量 | 18T tokens | **36T tokens** | 2×   |
+| 语言数   | 29         | **119**        | 4.1× |
+| 代码数据 | 包含       | **显著增强**   | —    |
+| 合成数据 | ~20%       | **~30%**       | —    |
 
 ### 6.5.2 三阶段预训练
 
@@ -1722,8 +1807,6 @@ Qwen3-Base (预训练完成)
 
 ## 6.6 Qwen3-Next：下一代探索（2025 年 9 月预览）
 
-
-
 ![图 6.6：Qwen3-Next 混合注意力架构](images/ch6_qwen3_next.png)
 
 > *自绘图。说明：展示 75% Gated DeltaNet（线性注意力，O(N)复杂度）+ 25% Standard Attention（完整注意力，O(N²)复杂度）的交错排列 layer stack。此架构为 Qwen3-Next 的探索方向预览，图为本报告原创。*
@@ -1757,25 +1840,28 @@ Gated DeltaNet 数学形式:
 
 ### 6.6.2 超稀疏 MoE
 
-| 指标 | Qwen3 | Qwen3-Next | 变化 |
-|------|-------|------------|------|
-| 总专家数 | 128 | **512** | 4× |
-| 激活专家数 | 8 | **10+1** | — |
-| 参数激活率 | 6.25% | **3.7%** | ↓40% |
-| 训练成本 | 基线 | **-90%** (vs Qwen3-32B) | — |
+
+| 指标       | Qwen3 | Qwen3-Next              | 变化  |
+| ------------ | ------- | ------------------------- | ------- |
+| 总专家数   | 128   | **512**                 | 4×   |
+| 激活专家数 | 8     | **10+1**                | —    |
+| 参数激活率 | 6.25% | **3.7%**                | ↓40% |
+| 训练成本   | 基线  | **-90%** (vs Qwen3-32B) | —    |
 
 ### 6.6.3 旗舰模型规格
 
-| 指标 | Qwen3-Next-80B-A3B |
-|------|---------------------|
-| 总参数 | 80B |
-| 激活参数 | 3B（每 token） |
-| 层数 | 48 |
-| 上下文 | 262K（可扩展至 1M） |
-| 注意力 | 75% DeltaNet + 25% Standard |
-| 专家数 | 512 (激活 10+1) |
+
+| 指标     | Qwen3-Next-80B-A3B          |
+| ---------- | ----------------------------- |
+| 总参数   | 80B                         |
+| 激活参数 | 3B（每 token）              |
+| 层数     | 48                          |
+| 上下文   | 262K（可扩展至 1M）         |
+| 注意力   | 75% DeltaNet + 25% Standard |
+| 专家数   | 512 (激活 10+1)             |
 
 **关键特性**：
+
 - 训练成本仅为 Qwen3-32B 的 **10%**
 - 32K+ 上下文下推理速度提升 **10×**
 - 性能保持 Qwen3-32B 水平
@@ -1786,21 +1872,23 @@ Gated DeltaNet 数学形式:
 
 ### 6.7.1 Dense 模型
 
-| 模型 | MMLU | HumanEval | GSM8K | MATH |
-|------|------|-----------|-------|------|
-| Qwen3-0.6B | ~50 | ~30 | ~50 | ~30 |
-| Qwen3-1.7B | ~60 | ~45 | ~65 | ~45 |
-| Qwen3-4B | ~70 | ~55 | ~75 | ~60 |
-| Qwen3-8B | ~78 | ~65 | ~82 | ~70 |
-| Qwen3-14B | ~82 | ~70 | ~86 | ~75 |
-| Qwen3-32B | ~86 | ~75 | ~90 | ~80 |
+
+| 模型       | MMLU | HumanEval | GSM8K | MATH |
+| ------------ | ------ | ----------- | ------- | ------ |
+| Qwen3-0.6B | ~50  | ~30       | ~50   | ~30  |
+| Qwen3-1.7B | ~60  | ~45       | ~65   | ~45  |
+| Qwen3-4B   | ~70  | ~55       | ~75   | ~60  |
+| Qwen3-8B   | ~78  | ~65       | ~82   | ~70  |
+| Qwen3-14B  | ~82  | ~70       | ~86   | ~75  |
+| Qwen3-32B  | ~86  | ~75       | ~90   | ~80  |
 
 ### 6.7.2 MoE 模型
 
-| 模型 | MMLU | HumanEval | GSM8K | MATH | 激活参数 |
-|------|------|-----------|-------|------|---------|
-| Qwen3-30B-A3B | ~84 | ~72 | ~88 | ~78 | 3B |
-| Qwen3-235B-A22B | **~89** | **~80** | **~93** | **~85** | 22B |
+
+| 模型            | MMLU    | HumanEval | GSM8K   | MATH    | 激活参数 |
+| ----------------- | --------- | ----------- | --------- | --------- | ---------- |
+| Qwen3-30B-A3B   | ~84     | ~72       | ~88     | ~78     | 3B       |
+| Qwen3-235B-A22B | **~89** | **~80**   | **~93** | **~85** | 22B      |
 
 ### 6.7.3 与竞品对比
 
@@ -1839,19 +1927,18 @@ LLaMA3-405B   85.2  79.1   70.1       405B     ★
 
 答：专家坍塌是指路由器学到的策略高度偏向少数专家——大部分 token 都被送到同一批专家，其余专家几乎不被激活。本质上这是一个**正反馈环路**：被频繁激活的专家获得更多训练信号 → 变得更强 → 路由器更偏好它们。辅助损失通过惩罚不均匀分配来打破这个环路，但它引入了新的权衡：惩罚太弱则无效，惩罚太强则会强制路由器把不合适的 token 送到不相关的专家，反而降低质量。这是一个**探索-利用困境**——让路由器自由选择（利用）还是强制分散（探索），至今没有完美方案。
 
-
 ---
 
 # Part III: 多模态系列（按时间线）
 
 > 本部分覆盖 Qwen 视觉语言（VL）和全模态（Omni）系列。Qwen 的多模态产品线始于 Qwen-VL（2023.08），经由 Qwen2-VL（2024.10）、Qwen2.5-VL（2025.02）、Qwen2.5-Omni（2025.03），发展到 Qwen3-VL（2025 下半年）和 Qwen3-Omni（2025.09），形成了完整的多模态技术演进路线。
 
-
 <a id="7-qwen-vl首个多模态尝试与-cross-attention-范式202308"></a>
 
 # 第七章 Qwen-VL — 首个多模态尝试与 Cross-Attention 范式（2023.08）
 
 ![图 7.1：Qwen-VL 训练结构图](images/qwen-vl.png)
+
 ## 7.1 发布背景与定位
 
 **发布时间**：2023 年 8 月（arXiv:2308.12966）
@@ -1875,11 +1962,12 @@ Qwen-VL 是 Qwen 系列的**首个多模态模型**，标志着阿里从纯文�
                                                    Qwen-7B LLM → 文本输出
 ```
 
-| 组件 | 规格 | 初始化 | 作用 |
-|------|------|--------|------|
-| **ViT-bigG** | 1.9B 参数 | OpenCLIP 预训练权重 | 视觉特征提取 |
-| **VL Adapter** | 0.08B，单层 Cross-Attention | 随机初始化 | 视觉特征压缩与位置编码 |
-| **Qwen-7B** | 7.7B 参数 | Qwen-7B 预训练权重 | 语言理解与生成 |
+
+| 组件           | 规格                        | 初始化              | 作用                   |
+| ---------------- | ----------------------------- | --------------------- | ------------------------ |
+| **ViT-bigG**   | 1.9B 参数                   | OpenCLIP 预训练权重 | 视觉特征提取           |
+| **VL Adapter** | 0.08B，单层 Cross-Attention | 随机初始化          | 视觉特征压缩与位置编码 |
+| **Qwen-7B**    | 7.7B 参数                   | Qwen-7B 预训练权重  | 语言理解与生成         |
 
 ### Position-aware VL Adapter（核心创新）
 
@@ -1897,6 +1985,7 @@ Qwen-VL 是 Qwen 系列的**首个多模态模型**，标志着阿里从纯文�
 ### 输入输出格式
 
 使用特殊 token 标记模态边界和空间信息：
+
 - `<img>` / `</img>`：图像特征边界
 - `<box>` / `</box>`：Bounding box 坐标（归一化至 [0, 1000)）
 - `<ref>` / `</ref>`：文本与区域的关联标注
@@ -1905,11 +1994,12 @@ Qwen-VL 是 Qwen 系列的**首个多模态模型**，标志着阿里从纯文�
 
 ## 7.3 三阶段训练策略
 
-| 阶段 | 数据 | 训练策略 | 分辨率 | 目标 |
-|------|------|---------|--------|------|
-| **Stage 1：预训练** | 1.4B image-text pairs | 冻结 LLM，训练 ViT + Adapter | 224×224 | 建立基本视觉-语言关联 |
-| **Stage 2：多任务** | 7 类任务 ~77M 样本 | 全模型训练 | **448×448** | 细粒度理解能力 |
-| **Stage 3：SFT** | 35 万条指令数据 | 冻结 ViT，微调 LLM + Adapter | 448×448 | 指令跟随能力 |
+
+| 阶段                | 数据                  | 训练策略                     | 分辨率       | 目标                  |
+| --------------------- | ----------------------- | ------------------------------ | -------------- | ----------------------- |
+| **Stage 1：预训练** | 1.4B image-text pairs | 冻结 LLM，训练 ViT + Adapter | 224×224     | 建立基本视觉-语言关联 |
+| **Stage 2：多任务** | 7 类任务 ~77M 样本    | 全模型训练                   | **448×448** | 细粒度理解能力        |
+| **Stage 3：SFT**    | 35 万条指令数据       | 冻结 ViT，微调 LLM + Adapter | 448×448     | 指令跟随能力          |
 
 **Stage 2 的 7 类任务**：Captioning (19.7M) / VQA (3.6M) / Grounding (3.5M) / Ref Grounding (8.7M) / Grounded Captioning (8.7M) / OCR (24.8M) / 纯文本 (7.8M)
 
@@ -1917,25 +2007,27 @@ Qwen-VL 是 Qwen 系列的**首个多模态模型**，标志着阿里从纯文�
 
 ## 7.4 性能亮点
 
-| 基准 | 分数 | 意义 |
-|------|------|------|
+
+| 基准                | 分数           | 意义                           |
+| --------------------- | ---------------- | -------------------------------- |
 | Flickr30K zero-shot | **85.8** CIDEr | 超越 Flamingo-80B（7B vs 80B） |
-| RefCOCO val | **89.36%** | 同规模 Generalist 最佳 |
-| MME Perception | **1487.58** | 综合多模态感知 |
-| TextVQA | **63.8%** | OCR 能力验证 |
+| RefCOCO val         | **89.36%**     | 同规模 Generalist 最佳         |
+| MME Perception      | **1487.58**    | 综合多模态感知                 |
+| TextVQA             | **63.8%**      | OCR 能力验证                   |
 
 最显著的成就是 **7B 模型在多项基准上媲美甚至超越 Flamingo-80B**，证明了精心设计的架构和训练策略可以弥补 10× 的参数差距。
 
 ## 7.5 从 Qwen-VL 到 Qwen2-VL：架构演进的核心逻辑
 
-| 维度 | Qwen-VL (2023.08) | Qwen2-VL (2024.10) | 演进动机 |
-|------|-------------------|-------------------|----------|
-| **视觉-语言连接** | Cross-Attention Resampler | MLP Projection | LLaVA 证明简单投影 + 足够数据同样有效，MLP 更易训练 |
-| **视觉 token 数** | 固定 256 tokens | 动态（随分辨率变化） | 固定压缩导致细节丢失，动态方案保留更多信息 |
-| **位置编码** | 2D 绝对位置编码 | M-RoPE（三维旋转位置编码） | RoPE 支持长度外推和可变分辨率 |
-| **分辨率** | 固定 448×448 | Naive Dynamic Resolution | 固定分辨率无法处理多样化的真实图像 |
-| **视觉编码器** | ViT-bigG (OpenCLIP) | DFN ViT (675M) | DFN 数据更干净，特征更稳定 |
-| **视频支持** | 无 | 原生支持（3D Tube） | 视频是多模态的核心场景 |
+
+| 维度              | Qwen-VL (2023.08)         | Qwen2-VL (2024.10)         | 演进动机                                            |
+| ------------------- | --------------------------- | ---------------------------- | ----------------------------------------------------- |
+| **视觉-语言连接** | Cross-Attention Resampler | MLP Projection             | LLaVA 证明简单投影 + 足够数据同样有效，MLP 更易训练 |
+| **视觉 token 数** | 固定 256 tokens           | 动态（随分辨率变化）       | 固定压缩导致细节丢失，动态方案保留更多信息          |
+| **位置编码**      | 2D 绝对位置编码           | M-RoPE（三维旋转位置编码） | RoPE 支持长度外推和可变分辨率                       |
+| **分辨率**        | 固定 448×448             | Naive Dynamic Resolution   | 固定分辨率无法处理多样化的真实图像                  |
+| **视觉编码器**    | ViT-bigG (OpenCLIP)       | DFN ViT (675M)             | DFN 数据更干净，特征更稳定                          |
+| **视频支持**      | 无                        | 原生支持（3D Tube）        | 视频是多模态的核心场景                              |
 
 > **核心洞察**：从 Qwen-VL 到 Qwen2-VL 的最大转变是**从复杂融合走向简洁投影**。这一趋势与业界一致——LLaVA 用最简单的线性投影 + 高质量数据就达到了令人惊讶的效果，证明了在数据充足的条件下，**Adapter 的复杂度不是性能瓶颈，数据质量和视觉编码器才是**。
 
@@ -1955,7 +2047,6 @@ Qwen-VL 是 Qwen 系列的**首个多模态模型**，标志着阿里从纯文�
 
 ---
 
-
 <a id="8-qwen2-vl动态分辨率与多模态位置编码202410"></a>
 
 # 第八章 Qwen2-VL — 动态分辨率与多模态位置编码（2024.10）
@@ -1972,13 +2063,14 @@ Qwen2-VL 是 Qwen 的**首个真正意义上的多模态大模型**（此前的 
 
 > **战略意义**：Qwen2-VL 标志着 Qwen 团队从纯文本 LLM 正式进入多模态赛道，与 GPT-4V、Claude 3 等竞品直接竞争。
 
-| 维度 | Qwen2-VL 的创新点 |
-|------|------------------|
-| 视觉编码器 | 675M 参数 DFN ViT（从 DFN 预训练权重初始化） |
-| 位置编码 | **M-RoPE**：首次将 RoPE 扩展到三维（时间、高度、宽度） |
-| 分辨率处理 | Naive Dynamic Resolution：任意分辨率输入 |
-| 视频处理 | **3D Tube**：Conv3d [2, 14, 14] 时空压缩 |
-| 融合机制 | PatchMerger 2×2 → 4:1 token 压缩 |
+
+| 维度       | Qwen2-VL 的创新点                                      |
+| ------------ | -------------------------------------------------------- |
+| 视觉编码器 | 675M 参数 DFN ViT（从 DFN 预训练权重初始化）           |
+| 位置编码   | **M-RoPE**：首次将 RoPE 扩展到三维（时间、高度、宽度） |
+| 分辨率处理 | Naive Dynamic Resolution：任意分辨率输入               |
+| 视频处理   | **3D Tube**：Conv3d [2, 14, 14] 时空压缩               |
+| 融合机制   | PatchMerger 2×2 → 4:1 token 压缩                     |
 
 ## 8.2 视觉编码器：DFN ViT
 
@@ -1988,14 +2080,15 @@ Qwen2-VL 是 Qwen 的**首个真正意义上的多模态大模型**（此前的 
 
 **Why**：从预训练权重初始化（而非从零训练）可以加速训练收敛，降低计算成本。DFN ViT 在大规模图文对上训练，具有强大的视觉特征提取能力。
 
-| 参数 | 数值 | 说明 |
-|------|------|------|
-| 模型来源 | DFN 预训练权重 | 非 CLIP，也非从零训练 |
-| 参数量 | ~675M | 比 CLIP ViT-L/14（304M）更大 |
-| 层数 | 32 | Transformer encoder 层 |
-| Hidden size | 1280 | 每个 patch 的特征维度 |
-| Attention heads | 16 | head_dim = 80 |
-| Patch size | 14×14 像素 | 标准 ViT 切块大小 |
+
+| 参数            | 数值           | 说明                         |
+| ----------------- | ---------------- | ------------------------------ |
+| 模型来源        | DFN 预训练权重 | 非 CLIP，也非从零训练        |
+| 参数量          | ~675M          | 比 CLIP ViT-L/14（304M）更大 |
+| 层数            | 32             | Transformer encoder 层       |
+| Hidden size     | 1280           | 每个 patch 的特征维度        |
+| Attention heads | 16             | head_dim = 80                |
+| Patch size      | 14×14 像素    | 标准 ViT 切块大小            |
 
 **DFN vs CLIP 的选择逻辑**：
 
@@ -2024,14 +2117,14 @@ DFN ViT (Qwen2-VL 的选择):
 
 Qwen2-VL 的三个尺寸共享同一个 ViT：
 
+
 | LLM 尺寸 | LLM 层数 | LLM Hidden | 共享 ViT | 总训练 Tokens |
-|----------|---------|------------|---------|-------------|
-| 2B | 28 | 1536 | 675M ViT | ~1.2T |
-| 7B | 28 | 3584 | 675M ViT | ~1.2T |
-| 72B | 80 | 8192 | 675M ViT | ~1.2T |
+| ---------- | ---------- | ------------ | ---------- | --------------- |
+| 2B       | 28       | 1536       | 675M ViT | ~1.2T         |
+| 7B       | 28       | 3584       | 675M ViT | ~1.2T         |
+| 72B      | 80       | 8192       | 675M ViT | ~1.2T         |
 
 ## 8.3 M-RoPE：多模态旋转位置编码的首次引入
-
 
 ![图 8.2：M-RoPE 核心架构图](images/M_RoPE.png)
 
@@ -2040,6 +2133,7 @@ Qwen2-VL 的三个尺寸共享同一个 ViT：
 **What**：M-RoPE（Multimodal Rotary Position Embedding）将标准 1D-RoPE 扩展到三维（时间 $t$、高度 $h$、宽度 $w$），使模型能够同时编码文本的序列位置、图像的空间位置和视频的时空位置。
 
 **Why**：多模态序列中混合了三种截然不同的结构：
+
 - **文本**：1D 序列，位置是线性递增的
 - **图像**：2D 平面，位置有行和列两个维度
 - **视频**：3D 时空体，位置有时间、行、列三个维度
@@ -2048,21 +2142,28 @@ Qwen2-VL 的三个尺寸共享同一个 ViT：
 
 **How**：M-RoPE 将注意力头的维度 $d$ 三等分，分别对三个维度独立旋转：
 
-$$\mathbf{q}_{\mathrm{MRoPE}}(t, h, w) = \mathrm{Concat}\Big[\mathrm{Rot}(t, d/3) \cdot \mathbf{q}_t,\; \mathrm{Rot}(h, d/3) \cdot \mathbf{q}_h,\; \mathrm{Rot}(w, d/3) \cdot \mathbf{q}_w\Big]$$
+$$
+\mathbf{q}_{\mathrm{MRoPE}}(t, h, w) = \mathrm{Concat}\Big[\mathrm{Rot}(t, d/3) \cdot \mathbf{q}_t,\; \mathrm{Rot}(h, d/3) \cdot \mathbf{q}_h,\; \mathrm{Rot}(w, d/3) \cdot \mathbf{q}_w\Big]
+
+$$
 
 其中 $\mathrm{Rot}(p, d')$ 对 $d'$ 维子空间施加位置 $p$ 的旋转变换：
 
-$$\mathrm{Rot}(p, d') = \begin{pmatrix} \cos(p\omega_0) & -\sin(p\omega_0) & & \\ \sin(p\omega_0) & \cos(p\omega_0) & & \\ & & \ddots & \\ & & & \cos(p\omega_{d'/2-1}) & -\sin(p\omega_{d'/2-1}) \\ & & & \sin(p\omega_{d'/2-1}) & \cos(p\omega_{d'/2-1}) \end{pmatrix}$$
+$$
+\mathrm{Rot}(p, d') = \begin{pmatrix} \cos(p\omega_0) & -\sin(p\omega_0) & & \\ \sin(p\omega_0) & \cos(p\omega_0) & & \\ & & \ddots & \\ & & & \cos(p\omega_{d'/2-1}) & -\sin(p\omega_{d'/2-1}) \\ & & & \sin(p\omega_{d'/2-1}) & \cos(p\omega_{d'/2-1}) \end{pmatrix}
+
+$$
 
 频率 $\omega_k = \theta^{-2k/d'}$，其中 $\theta = 10000$。
 
 ### 8.3.2 各模态的位置 ID 分配
 
-| Token 类型 | $t$ (时间) | $h$ (高度) | $w$ (宽度) |
-|-----------|-----------|-----------|-----------|
-| 文本 token（第 pos 个） | pos | pos | pos |
-| 图像 token（第 r 行, c 列） | 固定常量 $T_{\text{img}}$ | 行索引 r | 列索引 c |
-| 视频帧 f 的 token（第 r 行, c 列） | **帧序号 f** | 行索引 r | 列索引 c |
+
+| Token 类型                         | $t$ (时间)               | $h$ (高度) | $w$ (宽度) |
+| ------------------------------------ | -------------------------- | ------------ | ------------ |
+| 文本 token（第 pos 个）            | pos                      | pos        | pos        |
+| 图像 token（第 r 行, c 列）        | 固定常量$T_{\text{img}}$ | 行索引 r   | 列索引 c   |
+| 视频帧 f 的 token（第 r 行, c 列） | **帧序号 f**             | 行索引 r   | 列索引 c   |
 
 **关键设计：文本 token 与 1D-RoPE 的兼容性**
 
@@ -2075,7 +2176,7 @@ def assign_mrope_ids(sequence):
     """为多模态序列分配 M-RoPE 位置 ID"""
     t_ids, h_ids, w_ids = [], [], []
     text_pos = 0
-    
+  
     for segment in sequence:
         if segment.type == "text":
             for _ in segment.tokens:
@@ -2083,7 +2184,7 @@ def assign_mrope_ids(sequence):
                 h_ids.append(text_pos)
                 w_ids.append(text_pos)
                 text_pos += 1
-                
+          
         elif segment.type == "image":
             img_t = text_pos  # 固定时间常量
             for r in range(segment.h_patches):
@@ -2092,7 +2193,7 @@ def assign_mrope_ids(sequence):
                     h_ids.append(r)    # 行索引
                     w_ids.append(c)    # 列索引
             text_pos += 1  # 整张图占一个"时间步"
-            
+      
         elif segment.type == "video_frame":
             frame_t = segment.frame_index  # 帧序号
             for r in range(segment.h_patches):
@@ -2100,7 +2201,7 @@ def assign_mrope_ids(sequence):
                     t_ids.append(frame_t)
                     h_ids.append(r)
                     w_ids.append(c)
-    
+  
     return torch.tensor(t_ids), torch.tensor(h_ids), torch.tensor(w_ids)
 ```
 
@@ -2111,14 +2212,13 @@ def assign_mrope_ids(sequence):
 Qwen2-VL 的 M-RoPE 在实际使用中暴露了两个问题，推动了后续版本的改进：
 
 1. **帧序号 vs 绝对时间**：temporal ID 使用帧序号（0, 1, 2, ...），不同帧率视频的相邻帧位置差相同，模型无法感知真实时间间隔
-   - → Qwen2.5-VL 改为**绝对时间戳**（秒数）
 
+   - → Qwen2.5-VL 改为**绝对时间戳**（秒数）
 2. **局部坐标系**：每张图片的空间坐标从 (0, 0) 开始，多图场景下坐标"撞车"
+
    - → Qwen3-VL 改为**全局坐标系**（Interleaved-MRoPE）
 
 ## 8.4 Naive Dynamic Resolution：朴素动态分辨率
-
-
 
 ![图 8.3：Naive Dynamic Resolution 缩放示意](images/ch7_dynamic_resolution.png)
 
@@ -2154,12 +2254,14 @@ Qwen2-VL 的 M-RoPE 在实际使用中暴露了两个问题，推动了后续版
 ### 8.4.2 与 Qwen2.5-VL 的对比
 
 # Qwen2-VL 与 Qwen2.5-VL 特性对比
-| 特性 | Qwen2-VL | Qwen2.5-VL |
-| :--- | :--- | :--- |
+
+
+| 特性       | Qwen2-VL                         | Qwen2.5-VL                                                              |
+| :----------- | :--------------------------------- | :------------------------------------------------------------------------ |
 | 分辨率适配 | M-RoPE 原生支持任意分辨率/长宽比 | Advanced Dynamic Resolution：自适应 Patch 粒度 + 更精细的分辨率路由策略 |
-| 视频理解 | 动态帧率采样 + 基础时序建模 | 强化时序对齐、支持更长视频、动态 FPS 范围更广、关键帧感知更强 |
-| 长上下文 | 支持 32K/128K（依版本） | 支持 256K，视频/图文混合序列的 KV 优化与显存管理显著升级 |
-| 视觉编码器 | 大规模预训练 ViT + M-RoPE | 预训练数据/规模/结构全面升级，保留 M-RoPE 并增强高分辨率特征表达 |
+| 视频理解   | 动态帧率采样 + 基础时序建模      | 强化时序对齐、支持更长视频、动态 FPS 范围更广、关键帧感知更强           |
+| 长上下文   | 支持 32K/128K（依版本）          | 支持 256K，视频/图文混合序列的 KV 优化与显存管理显著升级                |
+| 视觉编码器 | 大规模预训练 ViT + M-RoPE        | 预训练数据/规模/结构全面升级，保留 M-RoPE 并增强高分辨率特征表达        |
 
 ## 8.5 3D Tube：视频时空压缩
 
@@ -2200,7 +2302,6 @@ Conv3d 同时处理两帧的同一位置:
 
 ## 8.6 PatchMerger：视觉 Token 压缩
 
-
 ![图 8.5.0：PatchMerger raw image](images/PatchMerger.png)
 ![图 8.5：PatchMerger 2×2 空间压缩](images/ch7_patch_merger.png)
 
@@ -2216,7 +2317,7 @@ class PatchMerger(nn.Module):
     def __init__(self, vit_hidden=1280, llm_hidden=3584):
         super().__init__()
         self.proj = nn.Linear(vit_hidden * 4, llm_hidden)
-    
+  
     def forward(self, patches):
         # patches: [B, H_p, W_p, 1280]
         B, Hp, Wp, C = patches.shape
@@ -2229,12 +2330,13 @@ class PatchMerger(nn.Module):
 
 **对比 Qwen2.5-VL 的 MLP Merger**：
 
-| 维度 | Qwen2-VL PatchMerger | Qwen2.5-VL MLP Merger |
-|------|----------------------|----------------------|
-| 结构 | 2 层 MLP + GELU 激活 | **2 层 MLP + SiLU** |
-| 核心作用| ViT 特征 → LLM 词表空间对齐 | 同左，配合升级的视觉编码器优化梯度流|
-|空间建模|由 ViT + M-RoPE 负责（投影器不参与）|同左，依赖 Advanced Dynamic Resolution 策略|
-|OCR/数学支持|原生支持（训练数据含高质量文档/公式）|数据质量↑、对齐策略↑、高分辨率路由↑ → 精度/泛化显著提升|
+
+| 维度         | Qwen2-VL PatchMerger                  | Qwen2.5-VL MLP Merger                                       |
+| -------------- | --------------------------------------- | ------------------------------------------------------------- |
+| 结构         | 2 层 MLP + GELU 激活                  | **2 层 MLP + SiLU**                                         |
+| 核心作用     | ViT 特征 → LLM 词表空间对齐          | 同左，配合升级的视觉编码器优化梯度流                        |
+| 空间建模     | 由 ViT + M-RoPE 负责（投影器不参与）  | 同左，依赖 Advanced Dynamic Resolution 策略                 |
+| OCR/数学支持 | 原生支持（训练数据含高质量文档/公式） | 数据质量↑、对齐策略↑、高分辨率路由↑ → 精度/泛化显著提升 |
 
 ## 8.7 训练管道
 
@@ -2265,15 +2367,16 @@ Post-training:
 
 ### 8.8.1 核心基准（72B）
 
-| 类别 | 基准 | Qwen2-VL-72B | GPT-4o (同期) | 说明 |
-|------|------|-------------|--------------|------|
-| 多学科推理 | MMMU | 64.5 | ~69 | 接近 GPT-4o |
-| 视觉数学 | MathVista | 70.5 | 63.8 | **超越** GPT-4o |
-| 文档理解 | DocVQA | 94.5 | — | 文档能力强 |
-| OCR | OCRBench | 866 | 736 | **大幅领先** GPT-4o |
-| 图表 | ChartQA | 88.3 | — | — |
-| GUI Agent | ScreenSpot Pro | 1.6 | ~18 | **几乎不可用** |
-| 视频理解 | MLVU M-Avg | 68.7 | — | — |
+
+| 类别       | 基准           | Qwen2-VL-72B | GPT-4o (同期) | 说明                |
+| ------------ | ---------------- | -------------- | --------------- | --------------------- |
+| 多学科推理 | MMMU           | 64.5         | ~69           | 接近 GPT-4o         |
+| 视觉数学   | MathVista      | 70.5         | 63.8          | **超越** GPT-4o     |
+| 文档理解   | DocVQA         | 94.5         | —            | 文档能力强          |
+| OCR        | OCRBench       | 866          | 736           | **大幅领先** GPT-4o |
+| 图表       | ChartQA        | 88.3         | —            | —                  |
+| GUI Agent  | ScreenSpot Pro | 1.6          | ~18           | **几乎不可用**      |
+| 视频理解   | MLVU M-Avg     | 68.7         | —            | —                  |
 
 ### 8.8.2 关键观察
 
@@ -2284,14 +2387,15 @@ Post-training:
 
 ### 8.8.3 与后续版本对比
 
-| 基准 | Qwen2-VL-72B | Qwen2.5-VL-72B | 提升 |
-|------|-------------|----------------|------|
-| MMMU | 64.5 | **70.2** | +5.7 |
-| MathVista | 70.5 | **74.8** | +4.3 |
-| DocVQA | 94.5 | **96.4** | +1.9 |
-| OCRBench | 866 | **885** | +19 |
-| ScreenSpot Pro | 1.6 | **43.6** | **+42.0** |
-| MLVU | 68.7 | **74.6** | +5.9 |
+
+| 基准           | Qwen2-VL-72B | Qwen2.5-VL-72B | 提升      |
+| ---------------- | -------------- | ---------------- | ----------- |
+| MMMU           | 64.5         | **70.2**       | +5.7      |
+| MathVista      | 70.5         | **74.8**       | +4.3      |
+| DocVQA         | 94.5         | **96.4**       | +1.9      |
+| OCRBench       | 866          | **885**        | +19       |
+| ScreenSpot Pro | 1.6          | **43.6**       | **+42.0** |
+| MLVU           | 68.7         | **74.6**       | +5.9      |
 
 ## 8.9 面试高频考点
 
@@ -2307,19 +2411,19 @@ Post-training:
 
 答：四代位置编码演进反映了多模态理解能力的递进需求：
 
-| 版本 | 编码 | 解决的痛点 |
-|------|------|-----------|
-| Qwen2-VL | M-RoPE（帧序号） | 1D → 3D，首次实现空间位置感知 |
-| Qwen2.5-VL | M-RoPE + 绝对时间戳 | 帧序号无时间语义 → 引入秒级时间，支持视频事件定位 |
-| Qwen2.5-Omni | TMRoPE（物理时间轴） | 音视频时间不对齐 → 统一物理时间坐标系 |
-| Qwen3-VL | Interleaved-MRoPE（全局坐标） | 多图坐标冲突 → 全局唯一坐标，256K 下 100+ 图不混淆 |
+
+| 版本         | 编码                          | 解决的痛点                                          |
+| -------------- | ------------------------------- | ----------------------------------------------------- |
+| Qwen2-VL     | M-RoPE（帧序号）              | 1D → 3D，首次实现空间位置感知                      |
+| Qwen2.5-VL   | M-RoPE + 绝对时间戳           | 帧序号无时间语义 → 引入秒级时间，支持视频事件定位  |
+| Qwen2.5-Omni | TMRoPE（物理时间轴）          | 音视频时间不对齐 → 统一物理时间坐标系              |
+| Qwen3-VL     | Interleaved-MRoPE（全局坐标） | 多图坐标冲突 → 全局唯一坐标，256K 下 100+ 图不混淆 |
 
 核心设计原则是**每一步只解决上一代暴露出的最紧迫问题**，而非一步到位设计"完美"方案——这是工程演进的典型模式。
 
 **Q4：为什么 Qwen2-VL 能用统一架构同时处理图像和视频？这反映了什么设计哲学？**
 
 答：Qwen2-VL 将图像视为"单帧视频"——图像的 temporal 维度为常数，视频的 temporal 维度随帧变化，两者在同一个 M-RoPE 框架下自然统一。无需为图像和视频维护两套编码器或两套位置编码。这反映了**"统一性优于特化"**的设计哲学：一个足够通用的框架比两个特化框架更易维护、更易扩展。当需要增加新模态（如 3D 点云）时，只需要定义新的坐标分配方式，而非重新设计架构。
-
 
 ---
 
@@ -2336,17 +2440,16 @@ Post-training:
 
 Qwen2.5-VL 的核心设计目标体现在三个维度：
 
-| 目标维度 | 具体追求 | 对应创新 |
-|---------|---------|---------|
-| **视觉理解广度** | 从图标到卫星图，从手写到数学公式 | ViT 从零训练 + 4.1T 多样化数据 |
-| **时空感知精度** | 精确到秒级的视频事件定位 | MRoPE 绝对时间对齐 + 动态 FPS |
-| **智能体行动能力** | 操控电脑/手机的 GUI 代理 | ScreenSpot Pro 专项训练 |
 
+| 目标维度           | 具体追求                         | 对应创新                       |
+| -------------------- | ---------------------------------- | -------------------------------- |
+| **视觉理解广度**   | 从图标到卫星图，从手写到数学公式 | ViT 从零训练 + 4.1T 多样化数据 |
+| **时空感知精度**   | 精确到秒级的视频事件定位         | MRoPE 绝对时间对齐 + 动态 FPS  |
+| **智能体行动能力** | 操控电脑/手机的 GUI 代理         | ScreenSpot Pro 专项训练        |
 
 ## 9.2 视觉编码器详解
 
 ![图 9.1：Qwen2.5-VL architecture diagram](images/qwen2.5_VL.png)
-
 
 ![图 9.2：Window Attention vs Full Attention](images/ch8_window_attention.png)
 
@@ -2356,22 +2459,24 @@ Qwen2.5-VL 的核心设计目标体现在三个维度：
 
 Qwen2.5-VL 所有尺寸（3B/7B/72B）**共享完全相同的 ViT 参数**，不随 LLM 规模变化：
 
-| 参数 | 数值 | 说明 |
-|------|------|------|
-| hidden_size | **1280** | 每个 patch 的特征维度 |
-| num_layers | **32** | Transformer 层数 |
-| num_heads | **16** | 注意力头数（每头 80 维） |
-| patch_size | **14×14** 像素 | 图像切块粒度 |
-| 激活函数 | **SwiGLU** | 从 GELU 升级，与 LLM 对齐 |
-| 归一化 | **RMSNorm** | 从 LayerNorm 升级，与 LLM 对齐 |
-| 训练方式 | **从零训练** | 不使用 CLIP/DFN 预训练权重 |
-| 参数量 | **约 600M** | 不随 LLM 规模线性增长 |
+
+| 参数        | 数值            | 说明                           |
+| ------------- | ----------------- | -------------------------------- |
+| hidden_size | **1280**        | 每个 patch 的特征维度          |
+| num_layers  | **32**          | Transformer 层数               |
+| num_heads   | **16**          | 注意力头数（每头 80 维）       |
+| patch_size  | **14×14** 像素 | 图像切块粒度                   |
+| 激活函数    | **SwiGLU**      | 从 GELU 升级，与 LLM 对齐      |
+| 归一化      | **RMSNorm**     | 从 LayerNorm 升级，与 LLM 对齐 |
+| 训练方式    | **从零训练**    | 不使用 CLIP/DFN 预训练权重     |
+| 参数量      | **约 600M**     | 不随 LLM 规模线性增长          |
 
 **为什么三个尺寸共享同一 ViT？**
 
 > **类比**：ViT 是模型的"眼睛"，无论配给初级工程师还是资深学者，人眼的视网膜分辨率相同，差距在于"大脑"（LLM）的处理能力。
 
 共享 ViT 带来三重收益：
+
 1. **训练一次复用**：高质量 ViT 无需随模型规模重复训练
 2. **统一视觉骨干**：不同尺寸模型看到的视觉特征语义空间一致
 3. **高效部署**：多尺寸模型可共享 ViT 缓存，节省推理显存
@@ -2383,22 +2488,26 @@ Qwen2.5-VL 所有尺寸（3B/7B/72B）**共享完全相同的 ViT 参数**，不
 **为什么不用 CLIP？**
 
 CLIP 通过对比学习优化"图文语义匹配"，其特征是全局语义摘要，对以下任务有缺陷：
+
 - **OCR**：需要感知单个笔划和像素级细节，CLIP 特征对细粒度纹理不敏感
 - **数学公式识别**：`∑` 与 `∫` 的区别在细节笔划，语义级特征无法区分
 - **固定分辨率约束**：CLIP 在 224×224 或 336×336 训练，动态分辨率下位置编码需要插值，引入不可控误差
 - **目标不对齐**：CLIP 对比学习 ≠ VL 生成目标，强行迁移存在分布偏移
 
 **从零训练的优势**：
+
 - 自由设计 Window Attention 结构（预训练权重无法直接对应此架构）
 - 训练数据可定制（大量文档/图表/OCR 数据）
 - 视觉特征可向 LLM 解码需求自由对齐
 
 ### 9.2.3 Window Attention：从 O(N²) 到 O(N) 的工程突破
+
 ![图 9.2.5：Window Attention](images/Windows_attention.png)
 
 **问题背景**：高分辨率动态输入导致 ViT 计算量爆炸。
 
 以 1120×1344 的图像为例：
+
 - patch 数 = (1120/14) × (1344/14) = 80 × 96 = **7680 个 patch**
 - 全局自注意力复杂度：O(7680²) ≈ **5.9 亿次乘加**
 - 32 层重复后完全不可接受
@@ -2428,12 +2537,14 @@ CLIP 通过对比学习优化"图文语义匹配"，其特征是全局语义摘�
 
 $$
 \mathrm{Speedup} = \frac{N^2}{N w^2} = \frac{N}{w^2} = \frac{7680}{64} \approx 120\times
+
 $$
 
 > **类比**：Window Attention 像人类的视觉注意力——大多数时候快速扫视局部区域（Window，处理细节），偶尔整合全图信息（Full Attention，理解全局语义）。四个全局层（7/15/23/31）均匀分布在 32 层中，确保浅层、中层、深层各有一次全局感知机会。
 
 **全局层为何选 7/15/23/31？**
 大约每隔 8 层一次全局 Attention：
+
 - 第 7 层：浅层全局对齐，纠正窗口内初步特征的全局偏差
 - 第 15/23 层：中层跨区域语义聚合
 - 第 31 层：最终高层语义整合
@@ -2442,13 +2553,14 @@ $$
 
 ViT 内部对每个 patch 的行（h）和列（w）位置独立编码：
 
-$$\theta_i^h = \frac{h}{10000^{2i/d}}, \quad \theta_i^w = \frac{w}{10000^{2i/d}}$$
+$$
+\theta_i^h = \frac{h}{10000^{2i/d}}, \quad \theta_i^w = \frac{w}{10000^{2i/d}}
+
+$$
 
 注意力头的 $d$ 维对半分：前 $d/2$ 旋转行位置角，后 $d/2$ 旋转列位置角。两个 patch 之间的注意力得分同时对"行距离"和"列距离"敏感，天然理解图像的二维空间结构。
 
 ## 9.3 视觉 Token 化：MLP Merger 的精妙设计
-
-
 
 ![图 9.3：MLP Merger 双层结构图](images/ch8_mlp_merger.png)
 
@@ -2501,40 +2613,44 @@ class MLPMerger(nn.Module):
 
 **MLP Projector 的输出维度**（各尺寸不同）：
 
-| 模型 | In Channel | Out Channel |
-|------|-----------|-------------|
-| 3B | 5120 (1280×4) | 2048 |
-| 7B | 5120 (1280×4) | 3584 |
-| 72B | 5120 (1280×4) | 8192 |
+
+| 模型 | In Channel     | Out Channel |
+| ------ | ---------------- | ------------- |
+| 3B   | 5120 (1280×4) | 2048        |
+| 7B   | 5120 (1280×4) | 3584        |
+| 72B  | 5120 (1280×4) | 8192        |
 
 ### 9.3.2 Token 数量计算公式
 
 对于尺寸为 $H \times W$ 的输入图像（$H, W$ 须为 28 的倍数）：
 
-$$N_{\text{tokens}} = \frac{H}{28} \times \frac{W}{28}$$
+$$
+N_{\text{tokens}} = \frac{H}{28} \times \frac{W}{28}
 
-| 图像尺寸 | ViT patch 数 | LLM token 数 | 压缩率 |
-|---------|-------------|-------------|-------|
-| 224×224 | 256 | **64** | 4× |
-| 448×448 | 1024 | **256** | 4× |
-| 896×896 | 4096 | **1024** | 4× |
-| 1344×1792 | 12,288 | **3,072** | 4× |
-| 2240×2240 | 25,600 | **6,400** | 4× |
+$$
+
+
+| 图像尺寸   | ViT patch 数 | LLM token 数 | 压缩率 |
+| ------------ | -------------- | -------------- | -------- |
+| 224×224   | 256          | **64**       | 4×    |
+| 448×448   | 1024         | **256**      | 4×    |
+| 896×896   | 4096         | **1024**     | 4×    |
+| 1344×1792 | 12,288       | **3,072**    | 4×    |
+| 2240×2240 | 25,600       | **6,400**    | 4×    |
 
 ### 9.3.3 MLP Merger vs 其他方案对比
 
-| 方案 | 代表模型 | 结构 | 优劣 |
-|------|---------|------|------|
-| 简单 Linear | LLaVA-1.5 | 1 层线性投影 | 简单快速，但无非线性，难以学习 patch 间空间关系 |
-| Cross-Attention | Flamingo | 跨模态注意力层 | 参数量大，推理时 KV cache 难优化，延迟高 |
-| Q-Former | BLIP-2 | 固定 query tokens | 强制压缩到固定数量，丢失细节 |
-| **MLP Merger** | **Qwen2.5-VL** | **2×2 concat + 2层 MLP** | **可学习邻域空间纹理合成，4× 压缩无信息损失** |
+
+| 方案            | 代表模型       | 结构                      | 优劣                                            |
+| ----------------- | ---------------- | --------------------------- | ------------------------------------------------- |
+| 简单 Linear     | LLaVA-1.5      | 1 层线性投影              | 简单快速，但无非线性，难以学习 patch 间空间关系 |
+| Cross-Attention | Flamingo       | 跨模态注意力层            | 参数量大，推理时 KV cache 难优化，延迟高        |
+| Q-Former        | BLIP-2         | 固定 query tokens         | 强制压缩到固定数量，丢失细节                    |
+| **MLP Merger**  | **Qwen2.5-VL** | **2×2 concat + 2层 MLP** | **可学习邻域空间纹理合成，4× 压缩无信息损失**  |
 
 **MLP 的非线性的关键作用**：对于笔划分布在相邻 patch 的汉字、数学符号，非线性变换可学习"这 4 个 patch 合在一起代表的是什么笔划结构"，而单纯线性投影无法做到。
 
 ## 9.4 M-RoPE 完整推导与绝对时间对齐
-
-
 
 ![图 9.4：M-RoPE 绝对时间 vs 帧序号对比](images/ch8_mrope_absolute_time.png)
 
@@ -2576,16 +2692,15 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 
 ### 9.5.2 视频 Token 上限约束
 
-| 约束参数 | 数值 | 说明 |
-|---------|------|------|
-| 最大帧数 | **768 帧** | 防止 token 序列爆炸 |
-| 最大视频 token 总数 | **24,576** | 进入 LLM 前的上限 |
-| 等效覆盖时长（1fps）| ~768 秒 ≈ 12.8 分钟 | 低帧率模式 |
-| 等效覆盖时长（2fps）| ~384 秒 ≈ 6.4 分钟 | 标准模式 |
+
+| 约束参数             | 数值                 | 说明                |
+| ---------------------- | ---------------------- | --------------------- |
+| 最大帧数             | **768 帧**           | 防止 token 序列爆炸 |
+| 最大视频 token 总数  | **24,576**           | 进入 LLM 前的上限   |
+| 等效覆盖时长（1fps） | ~768 秒 ≈ 12.8 分钟 | 低帧率模式          |
+| 等效覆盖时长（2fps） | ~384 秒 ≈ 6.4 分钟  | 标准模式            |
 
 ## 9.6 训练流程三阶段详解
-
-
 
 ![图 9.5：Qwen2.5-VL 三阶段训练管线](images/ch8_training_pipeline.png)
 
@@ -2633,11 +2748,12 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 
 **4.1T Tokens 数据构成**：
 
-| 训练阶段 | 数据量 | 主要数据类型 |
-|---------|-------|------------|
-| Stage 1 | 1.5T | 高清图文对、多语言 OCR、科学图表、手写文字、化学式 |
-| Stage 2 | 2.0T | 网页截图、视频字幕、交错图文文档、医学影像、GUI 截图 |
-| Stage 3 | 0.6T | 长视频（>1 小时）、多页 PDF、跨页表格、多轮多图对话 |
+
+| 训练阶段 | 数据量 | 主要数据类型                                         |
+| ---------- | -------- | ------------------------------------------------------ |
+| Stage 1  | 1.5T   | 高清图文对、多语言 OCR、科学图表、手写文字、化学式   |
+| Stage 2  | 2.0T   | 网页截图、视频字幕、交错图文文档、医学影像、GUI 截图 |
+| Stage 3  | 0.6T   | 长视频（>1 小时）、多页 PDF、跨页表格、多轮多图对话  |
 
 **CoT 拒绝采样流程**（用于视觉推理 SFT 数据增强）：
 
@@ -2653,8 +2769,6 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 
 拒绝采样的目的是为了增加模型对于COT的理解能力，由于COT是自己产生的，模型能够理解。多次生成结果，模型偶尔能做对，说明它已经具备这个能力，只是不稳定。拒绝采样就是把这种"偶尔的正确"变成"稳定的正确"。
 
-
-
 ## 9.7 面试高频考点
 
 **Q1：从零训练 ViT vs 使用 CLIP 预训练权重初始化，本质上是在做什么权衡？**
@@ -2668,7 +2782,6 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 **Q3：多阶段训练中冻结 vs 解冻不同组件的统一原则是什么？**
 
 答：核心原则是**数据量与模型容量的匹配**。当数据量远大于组件参数量时（如预训练阶段的 4.1T tokens vs ViT 的 675M 参数），可以安全地训练该组件——过拟合风险低。当数据量远小于组件参数量时（如 SFT 的 200 万条 vs ViT 的 675M 参数），应冻结该组件——否则会过拟合到 SFT 的分布，破坏在大规模预训练中学到的泛化能力。这就是为什么 SFT 阶段冻结 ViT 而只微调 LLM：LLM 需要学习新的指令跟随行为，而视觉特征提取能力已在预训练中充分建立。**冻结是保护已有知识，解冻是获取新能力——关键在于判断哪个更紧迫。**
-
 
 ---
 
@@ -2684,6 +2797,7 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 **参数规格**：7B（主力版本），另有 3B 轻量版
 
 **核心挑战**：如何让一个模型同时实现：
+
 1. **多模态感知**：看图、看视频、听声音
 2. **智能推理**：基于多模态输入生成文本回答
 3. **实时语音输出**：无延迟地以自然语音回复用户
@@ -2691,10 +2805,11 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 
 这四点要求看似矛盾——推理质量和实时性常常冲突——Qwen2.5-Omni 通过 **Thinker-Talker 双轨架构** 找到了优雅的平衡点。
 
-| 方向 | 支持模态 |
-|------|---------|
+
+| 方向     | 支持模态               |
+| ---------- | ------------------------ |
 | **输入** | 文本、图像、音频、视频 |
-| **输出** | 文本、流式语音 |
+| **输出** | 文本、流式语音         |
 
 ## 10.2 Thinker-Talker 双轨架构深度解析
 
@@ -2708,12 +2823,13 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 
 **根本矛盾**：文本生成和语音生成在以下维度完全不同：
 
-| 维度 | 文本生成（LLM） | 语音生成（TTS） |
-|------|--------------|--------------|
+
+| 维度         | 文本生成（LLM）             | 语音生成（TTS）                |
+| -------------- | ----------------------------- | -------------------------------- |
 | **输出空间** | 离散 token ID（词表 ~150K） | 声学 codec token（码本 ~1024） |
-| **生成速度** | ~30 token/s | ~75 codec frames/s |
-| **优化目标** | 语义准确性、逻辑连贯 | 音质、自然度、韵律节奏 |
-| **梯度特性** | 交叉熵损失，分类梯度 | 重建损失，连续值梯度 |
+| **生成速度** | ~30 token/s                 | ~75 codec frames/s             |
+| **优化目标** | 语义准确性、逻辑连贯        | 音质、自然度、韵律节奏         |
+| **梯度特性** | 交叉熵损失，分类梯度        | 重建损失，连续值梯度           |
 
 **若强行合并为单一模型**：两种梯度相互污染，语义推理和语音合成质量双双下降。
 
@@ -2723,15 +2839,17 @@ temporal_ids_30fps = [0.000, 0.033, 0.067, 0.100, ...]
 
 **架构核心**：以 Qwen2.5-7B 为骨干的 Transformer Decoder，增加多模态输入接口。
 
-| 参数 | 数值 |
-|------|------|
-| 骨干网络 | Qwen2.5-7B |
-| 层数 | 32 层 |
-| Hidden size | 3584 |
-| 注意力类型 | GQA（28 Q 头 + 4 KV 头） |
-| 位置编码 | **TMRoPE** |
+
+| 参数        | 数值                     |
+| ------------- | -------------------------- |
+| 骨干网络    | Qwen2.5-7B               |
+| 层数        | 32 层                    |
+| Hidden size | 3584                     |
+| 注意力类型  | GQA（28 Q 头 + 4 KV 头） |
+| 位置编码    | **TMRoPE**               |
 
 **输出两路同时生成**：
+
 1. **文本 token 序列**：普通自回归文本生成
 2. **Hidden state 序列**（关键！）：每一步解码的中间向量，传递给 Talker
 
@@ -2775,12 +2893,11 @@ Talker Block：
 ```
 
 **关键特性**：
+
 - Talker 在生成第一个 audio token 时就已开始解码，与 Thinker 并行运行
 - 联合训练时，语音质量损失梯度经由 h_t 反传到 Thinker
 
 ## 10.3 音频编码器：Whisper-like 流式设计
-
-
 
 ![图 10.3：Whisper-like 音频编码管线](images/ch9_audio_encoder.png)
 
@@ -2796,13 +2913,14 @@ Talker Block：
     ↓ 送入 Thinker 作为音频 token
 ```
 
-| 参数 | 数值 | 说明 |
-|------|------|------|
-| 采样率 | 16,000 Hz | 标准语音采样率 |
-| Mel 频道数 | 80 | 覆盖 20Hz–8kHz |
-| 下采样后帧率 | ~50 帧/秒 | 进入 Transformer |
-| LLM 层面 token 率 | ~25 tokens/秒 | 经进一步处理 |
-| Encoder 层数 | 32 层 | Whisper Large 规格 |
+
+| 参数              | 数值          | 说明               |
+| ------------------- | --------------- | -------------------- |
+| 采样率            | 16,000 Hz     | 标准语音采样率     |
+| Mel 频道数        | 80            | 覆盖 20Hz–8kHz    |
+| 下采样后帧率      | ~50 帧/秒     | 进入 Transformer   |
+| LLM 层面 token 率 | ~25 tokens/秒 | 经进一步处理       |
+| Encoder 层数      | 32 层         | Whisper Large 规格 |
 
 ### Block-wise 流式处理
 
@@ -2822,6 +2940,7 @@ Block-wise 流式处理（Qwen2.5-Omni）：
 ## 10.4 视觉编码器
 
 直接继承 Qwen2.5-VL 设计：
+
 - 从零训练 ViT（hidden=1280，32 层，16 头，patch=14×14）
 - Window Attention（28 层窗口 + 4 层全局）
 - MLP Merger（2×2 pack → LLM hidden dim）
@@ -2841,19 +2960,24 @@ Block-wise 流式处理（Qwen2.5-Omni）：
 
 ### 10.5.2 TMRoPE 的数学定义
 
-$$\text{pos\_id}_t(m, i) = \left\lfloor t(m, i) \times r_{\text{ref}} \right\rfloor$$
+$$
+\text{pos\_id}_t(m, i) = \left\lfloor t(m, i) \times r_{\text{ref}} \right\rfloor
+
+$$
 
 其中：
+
 - $t(m, i)$ = token 对应的实际物理时间戳（秒）
 - $r_{\text{ref}}$ = 参考采样率（如 25，将秒数映射为整数 ID）
 
 **各模态的位置 ID 分配**：
 
-| 模态 | $p_t$（时间 ID） | $p_h$（高度 ID） | $p_w$（宽度 ID） |
-|------|:---:|:---:|:---:|
-| 文本 token | 延续前一多模态 token 的时间 | 0 | 递增序列位置 |
-| 视频帧 patch $(r,c)$ | $\lfloor t_f \times r_{\text{ref}} \rfloor$ | 行 $r$ | 列 $c$ |
-| 音频块第 $k$ 个 token | $\lfloor (t_b + k \cdot \Delta t) \times r_{\text{ref}} \rfloor$ | 0 | 块内位置 $k$ |
+
+| 模态                 |                         $p_t$（时间 ID）                         | $p_h$（高度 ID） | $p_w$（宽度 ID） |
+| ---------------------- | :----------------------------------------------------------------: | :----------------: | :----------------: |
+| 文本 token           |                   延续前一多模态 token 的时间                   |        0        |   递增序列位置   |
+| 视频帧 patch$(r,c)$  |           $\lfloor t_f \times r_{\text{ref}} \rfloor$           |      行$r$      |      列$c$      |
+| 音频块第$k$ 个 token | $\lfloor (t_b + k \cdot \Delta t) \times r_{\text{ref}} \rfloor$ |        0        |   块内位置$k$   |
 
 ### 10.5.3 交错时序排列
 
@@ -2898,6 +3022,7 @@ Audio Codec Tokens（离散序列）
 ```
 
 **连贯性保证**：
+
 1. 窗口重叠：相邻两次解码有重叠 token，保证边界平滑
 2. 隐藏状态缓存：窗口外的 hidden states 通过轻量门控注入
 3. 专项训练：Talker 在训练中针对滑动窗口生成做适配
@@ -2928,32 +3053,35 @@ Audio Codec Tokens（离散序列）
 
 ### 防止灾难性遗忘的五层策略
 
-| 策略 | 具体实现 | 作用 |
-|------|---------|------|
-| 渐进式解冻 | Stage1 冻结 LLM → Stage2 部分解冻 → Stage3 全参数 | 避免早期扰动 LLM |
-| 持续文本复习 | 每阶段混入 20-30% 纯文本数据 | 保持语言能力 |
-| 损失权重控制 | λ < 1，语音损失不压倒文本损失 | 防止语音梯度主导 |
-| Thinker-Talker 解耦 | 语音损失主要更新 Talker 参数 | Thinker 受干扰最小 |
-| 验证监控 | 每阶段检查 MMLU（语音 vs 文本） | 及时发现退化 |
+
+| 策略                | 具体实现                                            | 作用               |
+| --------------------- | ----------------------------------------------------- | -------------------- |
+| 渐进式解冻          | Stage1 冻结 LLM → Stage2 部分解冻 → Stage3 全参数 | 避免早期扰动 LLM   |
+| 持续文本复习        | 每阶段混入 20-30% 纯文本数据                        | 保持语言能力       |
+| 损失权重控制        | λ < 1，语音损失不压倒文本损失                      | 防止语音梯度主导   |
+| Thinker-Talker 解耦 | 语音损失主要更新 Talker 参数                        | Thinker 受干扰最小 |
+| 验证监控            | 每阶段检查 MMLU（语音 vs 文本）                     | 及时发现退化       |
 
 ## 10.8 性能基准
 
 ### 10.8.1 多模态综合能力（OmniBench SOTA）
 
-| 模态类型 | **Qwen2.5-Omni-7B** | Gemini-1.5-Pro | 相对优势 |
-|---------|:---:|:---:|:---:|
-| 语音理解 | **55.25%** | 42.67% | +29.5% |
-| 声音事件识别 | **60.00%** | 42.26% | +41.9% |
-| 音乐理解 | **52.83%** | 46.23% | +14.3% |
-| **平均** | **56.13%** | 42.91% | **+30.8%** |
+
+| 模态类型     | **Qwen2.5-Omni-7B** | Gemini-1.5-Pro |  相对优势  |
+| -------------- | :-------------------: | :--------------: | :----------: |
+| 语音理解     |     **55.25%**     |     42.67%     |   +29.5%   |
+| 声音事件识别 |     **60.00%**     |     42.26%     |   +41.9%   |
+| 音乐理解     |     **52.83%**     |     46.23%     |   +14.3%   |
+| **平均**     |     **56.13%**     |     42.91%     | **+30.8%** |
 
 ### 10.8.2 单模态能力验证（无退化）
 
-| 任务 | 基准 | Qwen2.5-Omni | Qwen2.5-VL-7B | 退化幅度 |
-|------|------|:---:|:---:|:---:|
-| 图像推理 | MMStar | 64.0% | 64.5% | -0.8%（可忽略）|
-| 视频理解 | MVBench | 70.3% | 71.2% | -1.3%（可忽略）|
-| 文本能力 | MMLU | 78.5% | 79.1% | -0.8%（可忽略）|
+
+| 任务     | 基准    | Qwen2.5-Omni | Qwen2.5-VL-7B |    退化幅度    |
+| ---------- | --------- | :------------: | :-------------: | :---------------: |
+| 图像推理 | MMStar  |    64.0%    |     64.5%     | -0.8%（可忽略） |
+| 视频理解 | MVBench |    70.3%    |     71.2%     | -1.3%（可忽略） |
+| 文本能力 | MMLU    |    78.5%    |     79.1%     | -0.8%（可忽略） |
 
 > **结论**：引入全模态后，各单模态能力退化均 < 1%，证明 Thinker-Talker 解耦有效。
 
@@ -2971,7 +3099,6 @@ Audio Codec Tokens（离散序列）
 
 答：纯文本模型的遗忘发生在"任务"维度（SFT 后遗忘预训练知识），多模态模型还额外面临"模态"维度的遗忘——训练语音能力时，视觉和文本能力可能退化。根源是不同模态的梯度方向可能相互冲突（语音损失需要某些参数向 A 方向更新，文本损失需要向 B 方向更新）。Thinker-Talker 架构从**结构层面**缓解了这个问题：语音损失主要更新 Talker 参数，Thinker 的文本/视觉能力受到物理隔离保护。这比纯训练技巧（数据回放、损失权重调节）更根本——**架构上的模块化分离是防止跨模态干扰最可靠的方案**。
 
-
 ---
 
 <a id="11-qwen3-vlmoe-视觉与-thinking-mode2025-下半年"></a>
@@ -2981,19 +3108,21 @@ Audio Codec Tokens（离散序列）
 > **承接关系**：Qwen3-VL 是 Qwen2.5-VL 的下一代，三项核心架构升级：Interleaved-MRoPE（全局坐标系）、DeepStack 多层 ViT 特征融合、文本时间戳对齐。同时首次在 VL 领域引入 MoE 架构和 Thinking Mode。
 
 ![图 11.0：Qwen3-VL 框架图](images/qwen3vl_arc.jpg)
+
 ## 11.1 发布定位与架构演进
 
 **发布时间**：2025 年下半年（arXiv:2511.21631）
 
 **模型矩阵**：
 
-| 变体 | 类型 | 总参数 | 激活参数 |
-|------|------|--------|---------|
-| Qwen3-VL-2B | Dense | 2B | 2B |
-| Qwen3-VL-4B | Dense | 4B | 4B |
-| Qwen3-VL-8B | Dense | 8B | 8B |
-| Qwen3-VL-32B | Dense | 32B | 32B |
-| **Qwen3-VL-30B-A3B** | **MoE** | **30B** | **~3B** |
+
+| 变体                   | 类型    | 总参数   | 激活参数 |
+| ------------------------ | --------- | ---------- | ---------- |
+| Qwen3-VL-2B            | Dense   | 2B       | 2B       |
+| Qwen3-VL-4B            | Dense   | 4B       | 4B       |
+| Qwen3-VL-8B            | Dense   | 8B       | 8B       |
+| Qwen3-VL-32B           | Dense   | 32B      | 32B      |
+| **Qwen3-VL-30B-A3B**   | **MoE** | **30B**  | **~3B**  |
 | **Qwen3-VL-235B-A22B** | **MoE** | **235B** | **~22B** |
 
 每个尺寸提供 **Instruct + Thinking** 两个变体。
@@ -3013,8 +3142,6 @@ M-RoPE（局部坐标，每张图从0开始）  →  Interleaved-MRoPE（全局�
 ```
 
 ## 11.2 核心创新一：Interleaved-MRoPE
-
-
 
 ![图 11.1：M-RoPE vs Interleaved-MRoPE 坐标碰撞问题](images/ch10_coordinate_collision.png)
 
@@ -3059,13 +3186,12 @@ for segment in sequence:
 > **类比**：M-RoPE 像图书馆里每本书都从"第 1 页"开始编页码——100 本书就有 100 个"第 1 页"，无法区分。Interleaved-MRoPE 是全馆统一连续页码——每一页都有唯一编号，永不重复。
 
 **效果**：
+
 - 256K 上下文中 100+ 张图片，每张图的每个 patch 在全局空间都有唯一坐标
 - 模型可以精确回答"这是第几张图片的哪个区域"
 - 长交错上下文（多轮多图对话）理解能力显著提升
 
 ## 11.3 核心创新二：DeepStack 多层 ViT 特征融合
-
-
 
 ![图 11.2：DeepStack 多层 ViT 特征融合](images/ch10_deepstack.png)
 
@@ -3075,11 +3201,12 @@ for segment in sequence:
 
 Qwen2.5-VL 只使用 ViT **最后一层**（第 32 层）特征。各层承载的信息层次不同：
 
-| 层次 | 信息类型 | 对任务的价值 |
-|------|---------|------------|
-| **浅层（1–10 层）** | 边缘、纹理、笔划细节 | OCR 单字符、细粒度 Grounding |
-| **中层（11–22 层）** | 局部形状、字符组合 | 文字行识别、图表坐标轴 |
-| **深层（23–32 层）** | 全局语义、对象类别 | 图像问答、场景理解 |
+
+| 层次                  | 信息类型             | 对任务的价值                 |
+| ----------------------- | ---------------------- | ------------------------------ |
+| **浅层（1–10 层）**  | 边缘、纹理、笔划细节 | OCR 单字符、细粒度 Grounding |
+| **中层（11–22 层）** | 局部形状、字符组合   | 文字行识别、图表坐标轴       |
+| **深层（23–32 层）** | 全局语义、对象类别   | 图像问答、场景理解           |
 
 **仅用最后层的代价**：深层语义丰富，但浅层像素级细节已被"压缩"掉。例如汉字"一"和"二"在深层语义上非常接近，但浅层笔划完全不同。
 
@@ -3103,16 +3230,15 @@ ViT Layer 23-32 → [深层特征 F_d（1280维）]───┘
 
 **各类任务的收益**：
 
-| 任务类型 | 关键特征层次 | DeepStack 改善 |
-|---------|------------|--------------|
-| OCR 细小字符 | 浅层 | 不依赖深层语义猜测 |
-| 数学公式识别 | 浅层+中层 | 保留符号细节 |
-| 细粒度 Grounding | 中层 | RefCOCO IoU 90.5 |
-| 视觉问答 | 深层 | 保持 MMMU 水平 |
+
+| 任务类型         | 关键特征层次 | DeepStack 改善     |
+| ------------------ | -------------- | -------------------- |
+| OCR 细小字符     | 浅层         | 不依赖深层语义猜测 |
+| 数学公式识别     | 浅层+中层    | 保留符号细节       |
+| 细粒度 Grounding | 中层         | RefCOCO IoU 90.5   |
+| 视觉问答         | 深层         | 保持 MMMU 水平     |
 
 ## 11.4 核心创新三：文本时间戳对齐
-
-
 
 ![图 11.3：文本时间戳 vs 隐式 temporal_id 对比](images/ch10_text_timestamp.png)
 
@@ -3149,6 +3275,7 @@ Qwen3-VL（文本时间戳，时间在序列内容里，可见）：
 ```
 
 **优势**：
+
 1. **利用 LLM 预训练知识**：模型从预训练中已理解 "00:02:15" 是"第 2 分 15 秒"
 2. **避免 RoPE 精度退化**：时间信息不再依赖 RoPE 的三角函数
 3. **生成式利用**：模型可以在回答中直接引用时间戳（"请看 01:23:45 的画面"）
@@ -3157,10 +3284,11 @@ Qwen3-VL（文本时间戳，时间在序列内容里，可见）：
 
 Qwen3-VL 首次在 VL 模型中引入 MoE：
 
-| 模型 | 总参数 | 激活参数 | 128 专家 | 激活 8+1 | 特色 |
-|------|--------|---------|---------|---------|------|
-| Qwen3-VL-30B-A3B | 30B | ~3B | ✓ | ✓ | 手机端高性能 VL |
-| Qwen3-VL-235B-A22B | 235B | ~22B | ✓ | ✓ | 数据中心旗舰 VL |
+
+| 模型               | 总参数 | 激活参数 | 128 专家 | 激活 8+1 | 特色            |
+| -------------------- | -------- | ---------- | ---------- | ---------- | ----------------- |
+| Qwen3-VL-30B-A3B   | 30B    | ~3B      | ✓       | ✓       | 手机端高性能 VL |
+| Qwen3-VL-235B-A22B | 235B   | ~22B     | ✓       | ✓       | 数据中心旗舰 VL |
 
 **MoE 对 VL 的独特优势**：视觉理解涉及极其多样的任务（OCR、VQA、Grounding、视频理解、GUI Agent），不同任务可以激活不同专家子集，避免参数共享带来的任务冲突。
 
@@ -3192,11 +3320,13 @@ Thinking 模式:
 ## 11.7 256K 原生多模态上下文
 
 Qwen3-VL 支持 256K token 的原生多模态上下文，可同时处理：
+
 - 100+ 张高分辨率图片
 - 60+ 分钟视频（1fps 采样）
 - 交错的文本-图像-视频序列
 
 这得益于：
+
 1. **Interleaved-MRoPE**：全局坐标避免多图位置冲突
 2. **Window Attention ViT**：O(N) 复杂度支持高分辨率
 3. **继承 Qwen3 LLM 的长上下文能力**：预训练阶段已覆盖 256K
@@ -3215,7 +3345,6 @@ Qwen3-VL 支持 256K token 的原生多模态上下文，可同时处理：
 
 答：**机遇**：VL 模型的任务多样性远高于纯文本——OCR、VQA、Grounding、视频理解、GUI Agent 的特征分布差异巨大。Dense 模型必须用全部参数处理所有任务，参数被"稀释"。MoE 天然适合这种场景——不同任务类型激活不同专家子集，实现"**模态感知的专业分工**"。**挑战**：视觉 token 数量通常远大于文本 token（一张高分辨率图可产生数百个 token），如果 routing 不加处理，视觉 token 会"淹没"大部分专家，导致语言专家训练不足。此外，VL-MoE 的专家分化维度更多（按模态 + 按任务 + 按主题），负载均衡的难度更大。
 
-
 ---
 
 <a id="12-qwen3-omni极速流式全模态2025"></a>
@@ -3229,11 +3358,12 @@ Qwen3-VL 支持 256K token 的原生多模态上下文，可同时处理：
 **发布时间**：2025 年 9 月（Apache 2.0 License）
 **模型规格**：
 
-| 变体 | 总参数 | 激活参数 | 特色 |
-|------|--------|---------|------|
-| Qwen3-Omni-30B-A3B | **30B** | **3B** | 基础版（完整 Thinker+Talker） |
-| Qwen3-Omni-30B-A3B-Thinking | 30B | 3B | 推理增强版 |
-| Qwen3-Omni-30B-A3B-Captioner | 30B | 3B | 音频描述专用版 |
+
+| 变体                         | 总参数  | 激活参数 | 特色                          |
+| ------------------------------ | --------- | ---------- | ------------------------------- |
+| Qwen3-Omni-30B-A3B           | **30B** | **3B**   | 基础版（完整 Thinker+Talker） |
+| Qwen3-Omni-30B-A3B-Thinking  | 30B     | 3B       | 推理增强版                    |
+| Qwen3-Omni-30B-A3B-Captioner | 30B     | 3B       | 音频描述专用版                |
 
 ### 与 Qwen2.5-Omni 关键差异
 
@@ -3257,6 +3387,7 @@ Thinking Mode：❌                    →  ✅（任意模态输入均可触发
 ### 12.2.1 从 Dense 到 MoE 的动机
 
 Qwen2.5-Omni 的 Dense 7B Thinker 在以下场景形成瓶颈：
+
 - **多任务泛化**：OCR、视觉数学、音频理解完全不同的能力压缩进 7B 参数
 - **多语言支持**：7B 容量支撑 119 语言 + 多模态 = 参数严重不足
 - **知识深度**：7B 在专业领域储备有限
@@ -3368,8 +3499,6 @@ Qwen3-Omni 的 234ms 已低于此阈值 → 用户体验质变
 
 ## 12.4 Multi-Codebook RVQ：音质提升
 
-
-
 ![图 12.4：Multi-Codebook RVQ 残差量化过程](images/ch11_rvq.png)
 
 > *自绘图。说明：展示 RVQ（Residual Vector Quantization）逐层量化过程——每层找最近码字后计算残差，传递给下一层。量化误差逐层减半，K=4-6 层即可实现高质量音频重建。RVQ 图在 SoundStream/Encodec 论文中有类似版本，此图针对 Qwen3-Omni 的 Multi-Codebook 配置定制。*
@@ -3448,21 +3577,23 @@ Qwen3-Omni 首次在 Omni 模型中引入 Thinking Mode：
 
 ### 12.6.2 跨模态对比
 
-| 维度 | Qwen3-Omni 表现 | 说明 |
-|------|----------------|------|
-| 音频理解 | 开源 SOTA | 超越 Gemini-2.5-Pro |
-| 视觉任务 | ≈ 同规模单模态 VL 模型 | 无退化 |
-| 文本任务 | ≈ 同规模纯文本 LLM | 无退化 |
-| 语音生成 | 超越大多数流式+非流式方案 | 234ms 首包延迟 |
+
+| 维度     | Qwen3-Omni 表现           | 说明                |
+| ---------- | --------------------------- | --------------------- |
+| 音频理解 | 开源 SOTA                 | 超越 Gemini-2.5-Pro |
+| 视觉任务 | ≈ 同规模单模态 VL 模型   | 无退化              |
+| 文本任务 | ≈ 同规模纯文本 LLM       | 无退化              |
+| 语音生成 | 超越大多数流式+非流式方案 | 234ms 首包延迟      |
 
 ### 12.6.3 延迟对比
 
-| 系统 | 首包延迟 | 架构 |
-|------|---------|------|
-| **Qwen3-Omni** | **234ms** | Causal ConvNet |
-| Qwen2.5-Omni | ~600ms | Sliding-Window DiT |
-| GPT-4o-Audio | ~500ms | 未公开 |
-| 人类感知阈值 | ~300ms | — |
+
+| 系统           | 首包延迟  | 架构               |
+| ---------------- | ----------- | -------------------- |
+| **Qwen3-Omni** | **234ms** | Causal ConvNet     |
+| Qwen2.5-Omni   | ~600ms    | Sliding-Window DiT |
+| GPT-4o-Audio   | ~500ms    | 未公开             |
+| 人类感知阈值   | ~300ms    | —                 |
 
 ## 12.7 面试高频考点
 
@@ -3478,7 +3609,6 @@ Qwen3-Omni 首次在 Omni 模型中引入 Thinking Mode：
 
 答：Qwen3-Omni 的 234ms 首包延迟可分解为：音频编码（~80ms，受 STFT 窗口大小限制）→ Thinker 首 token 推理（~60ms，受 prefill 计算量限制）→ Talker + ConvNet 语音解码（~30ms，单步前向传播）→ 其他开销。**瓶颈不在模型侧，而在物理约束侧**——音频编码的物理下限约 25ms（需要足够长的时间窗口才能提取频率特征），网络传输在实际部署中再加 50-100ms。这意味着进一步优化模型推理速度的边际收益递减——系统延迟的瓶颈已转向硬件和物理层面。
 
-
 ---
 
 # Part IV: 深度对比分析
@@ -3488,8 +3618,6 @@ Qwen3-Omni 首次在 Omni 模型中引入 Thinking Mode：
 # 第十三章 纯文本 vs VL vs Omni 设计差异深度对比
 
 ## 13.1 位置编码的演进脉络
-
-
 
 ![图 13.1：位置编码四代演进图](images/ch12_position_encoding_evolution.png)
 
@@ -3521,31 +3649,31 @@ Omni 模型（Qwen2.5-Omni）：
 
 ## 13.2 输入处理的全模态对比
 
-
-
 ![图 13.2：纯文本 vs VL vs Omni 输入处理管线对比](images/ch12_pipeline_comparison.png)
 
 > *自绘图。说明：三条并行管线展示从简单（Text→Embed→LLM）到中等（+ViT+Merger→LLM）到复杂（+AudioEncoder+Thinker→Talker→AudioOut）的输入处理路径渐进复杂化。此图为本报告原创。*
 
-| 维度 | 纯文本 LLM | VL 模型 | Omni 模型 |
-|------|----------|---------|---------|
-| **输入模态** | 文本 token | 文本 + 图像/视频 | 文本 + 图像/视频 + **音频** |
-| **图像处理** | ❌ | ViT → MLP Merger → visual token | 继承 VL |
-| **视频处理** | ❌ | 3D Tube + 动态 FPS → MRoPE 时间编码 | 继承 VL + **Block-wise 流式** |
-| **音频处理** | ❌ | ❌ | Whisper 编码器 → 2× 下采样 → ~25 tok/s |
-| **位置编码** | 1D-RoPE | M-RoPE / Interleaved-MRoPE | TMRoPE（物理时间轴） |
-| **输入方式** | 批量 | 通常批量 | **Block-wise 实时流式** |
-| **上下文长度** | 256K（Qwen3） | 128K/256K | 受流式输入限制 |
+
+| 维度           | 纯文本 LLM    | VL 模型                              | Omni 模型                                 |
+| ---------------- | --------------- | -------------------------------------- | ------------------------------------------- |
+| **输入模态**   | 文本 token    | 文本 + 图像/视频                     | 文本 + 图像/视频 +**音频**                |
+| **图像处理**   | ❌            | ViT → MLP Merger → visual token    | 继承 VL                                   |
+| **视频处理**   | ❌            | 3D Tube + 动态 FPS → MRoPE 时间编码 | 继承 VL +**Block-wise 流式**              |
+| **音频处理**   | ❌            | ❌                                   | Whisper 编码器 → 2× 下采样 → ~25 tok/s |
+| **位置编码**   | 1D-RoPE       | M-RoPE / Interleaved-MRoPE           | TMRoPE（物理时间轴）                      |
+| **输入方式**   | 批量          | 通常批量                             | **Block-wise 实时流式**                   |
+| **上下文长度** | 256K（Qwen3） | 128K/256K                            | 受流式输入限制                            |
 
 ## 13.3 生成/推理机制的差异
 
-| 维度 | 纯文本 LLM | VL 模型 | Omni 模型 |
-|------|----------|---------|---------|
-| **输出模态** | 文本 token | 文本（含坐标/结构化输出） | 文本 + **语音 codec token** |
-| **生成架构** | 单路自回归 | 单路自回归 | **Thinker + Talker 双轨并行** |
-| **Thinking Mode** | ✅（Qwen3） | ✅（Qwen3-VL） | ✅（Qwen3-Omni） |
-| **实时输出** | token 流 | token 流 | **token 流 + 语音流（并行）** |
-| **语音合成** | ❌（需外接 TTS） | ❌（需外接 TTS） | **端到端内置** |
+
+| 维度              | 纯文本 LLM       | VL 模型                   | Omni 模型                     |
+| ------------------- | ------------------ | --------------------------- | ------------------------------- |
+| **输出模态**      | 文本 token       | 文本（含坐标/结构化输出） | 文本 +**语音 codec token**    |
+| **生成架构**      | 单路自回归       | 单路自回归                | **Thinker + Talker 双轨并行** |
+| **Thinking Mode** | ✅（Qwen3）      | ✅（Qwen3-VL）            | ✅（Qwen3-Omni）              |
+| **实时输出**      | token 流         | token 流                  | **token 流 + 语音流（并行）** |
+| **语音合成**      | ❌（需外接 TTS） | ❌（需外接 TTS）          | **端到端内置**                |
 
 ## 13.4 训练策略的模态差异
 
@@ -3574,14 +3702,15 @@ Omni 模型（Qwen2.5-Omni）：
 
 ## 13.5 KV Cache 与上下文管理
 
-| 场景 | 纯文本 | VL | Omni |
-|------|-------|----|----|
-| **KV cache 主要来源** | 文本 token | 文本 + 大量视觉 token | 文本 + 视觉 + 持续追加的音频 |
-| **单张图占用** | — | 64~3072 visual tokens | 同左 |
-| **1 分钟音频** | — | — | ~1500 audio tokens |
-| **上下文增长模式** | 批量（固定） | 批量（含视觉 token） | **实时递增** |
-| **KV cache 压力** | 中 | 高 | **极高** |
-| **缓解策略** | GQA（8× 节省） | GQA + Window Attention | GQA + Block-wise 丢弃旧 Block |
+
+| 场景                  | 纯文本          | VL                     | Omni                          |
+| ----------------------- | ----------------- | ------------------------ | ------------------------------- |
+| **KV cache 主要来源** | 文本 token      | 文本 + 大量视觉 token  | 文本 + 视觉 + 持续追加的音频  |
+| **单张图占用**        | —              | 64~3072 visual tokens  | 同左                          |
+| **1 分钟音频**        | —              | —                     | ~1500 audio tokens            |
+| **上下文增长模式**    | 批量（固定）    | 批量（含视觉 token）   | **实时递增**                  |
+| **KV cache 压力**     | 中              | 高                     | **极高**                      |
+| **缓解策略**          | GQA（8× 节省） | GQA + Window Attention | GQA + Block-wise 丢弃旧 Block |
 
 ---
 
@@ -3595,87 +3724,95 @@ Omni 模型（Qwen2.5-Omni）：
 
 > *自绘图。说明：13 个关键特性（ViT 类型、分辨率、MoE、Thinking Mode 等）在 Qwen-VL/2-VL/2.5-VL/3-VL 四代模型上的能力等级热力图。颜色从红(无)到绿(领先)，帮助快速识别每代模型的优势和短板。此图为本报告原创综合分析。*
 
-| 维度 | Qwen-VL (2023) | Qwen2-VL (2024.10) | Qwen2.5-VL (2025.02) | Qwen3-VL (2025 下半年) |
-|------|:---:|:---:|:---:|:---:|
-| **视觉编码器** | CLIP ViT（固定） | DFN ViT（675M） | **从零训练 ViT** + Window Attn | 从零训练 ViT + **DeepStack** |
-| **分辨率** | 固定 224/448 | 动态分辨率 | 动态 + Window Attn | 动态 + DeepStack |
-| **位置编码** | 绝对位置嵌入 | **M-RoPE**（2D 空间） | M-RoPE（绝对时间戳） | **Interleaved-MRoPE** |
-| **时间感知** | ❌ | 帧序号 | **绝对秒数** | **文本时间戳** |
-| **视频支持** | 有限 | 固定 2fps | **动态 FPS**，24K token | 动态 FPS，256K 上下文 |
-| **MoE** | ❌ | ❌ | ❌ | **✅（235B-A22B）** |
-| **Thinking** | ❌ | ❌ | ❌ | **✅（GRPO）** |
-| **上下文** | 2K-8K | 32K-128K | **128K** | **256K** |
-| **训练数据** | 数亿级 | 1.2T tokens | **4.1T tokens** | 更大规模 |
-| **GUI Agent** | 有限 | ScreenSpot = 1.6 | **43.6** | **RefCOCO IoU 90.5** |
+
+| 维度           |  Qwen-VL (2023)  |  Qwen2-VL (2024.10)  |      Qwen2.5-VL (2025.02)      |   Qwen3-VL (2025 下半年)   |
+| ---------------- | :----------------: | :---------------------: | :------------------------------: | :---------------------------: |
+| **视觉编码器** | CLIP ViT（固定） |    DFN ViT（675M）    | **从零训练 ViT** + Window Attn | 从零训练 ViT +**DeepStack** |
+| **分辨率**     |   固定 224/448   |      动态分辨率      |       动态 + Window Attn       |      动态 + DeepStack      |
+| **位置编码**   |   绝对位置嵌入   | **M-RoPE**（2D 空间） |      M-RoPE（绝对时间戳）      |    **Interleaved-MRoPE**    |
+| **时间感知**   |        ❌        |        帧序号        |          **绝对秒数**          |       **文本时间戳**       |
+| **视频支持**   |       有限       |       固定 2fps       |    **动态 FPS**，24K token    |    动态 FPS，256K 上下文    |
+| **MoE**        |        ❌        |          ❌          |               ❌               |     **✅（235B-A22B）**     |
+| **Thinking**   |        ❌        |          ❌          |               ❌               |       **✅（GRPO）**       |
+| **上下文**     |      2K-8K      |       32K-128K       |            **128K**            |          **256K**          |
+| **训练数据**   |      数亿级      |      1.2T tokens      |        **4.1T tokens**        |          更大规模          |
+| **GUI Agent**  |       有限       |   ScreenSpot = 1.6   |            **43.6**            |    **RefCOCO IoU 90.5**    |
 
 ## 14.2 Omni 模型两代演进对比
 
-| 维度 | Qwen2.5-Omni (2025.03) | Qwen3-Omni (2025.09) |
-|------|:---:|:---:|
-| **Thinker** | Dense 7B | **MoE 30B-A3B** |
-| **激活参数** | 7B | **3B**（更低！） |
-| **Vocoder** | Sliding-Window DiT | **Causal ConvNet** |
-| **首包延迟** | ~600ms | **234ms** |
-| **语音质量** | 单层 RVQ | **Multi-Codebook RVQ** |
-| **Thinking Mode** | ❌ | **✅** |
-| **文本语言** | ~29 | **119** |
-| **语音理解** | 少数语言 | **19 语言** |
-| **语音生成** | 中英为主 | **10 语言** |
-| **开源协议** | 未明确 | **Apache 2.0** |
+
+| 维度              | Qwen2.5-Omni (2025.03) |  Qwen3-Omni (2025.09)  |
+| ------------------- | :----------------------: | :----------------------: |
+| **Thinker**       |        Dense 7B        |    **MoE 30B-A3B**    |
+| **激活参数**      |           7B           |    **3B**（更低！）    |
+| **Vocoder**       |   Sliding-Window DiT   |   **Causal ConvNet**   |
+| **首包延迟**      |         ~600ms         |       **234ms**       |
+| **语音质量**      |        单层 RVQ        | **Multi-Codebook RVQ** |
+| **Thinking Mode** |           ❌           |         **✅**         |
+| **文本语言**      |          ~29          |        **119**        |
+| **语音理解**      |        少数语言        |      **19 语言**      |
+| **语音生成**      |        中英为主        |      **10 语言**      |
+| **开源协议**      |         未明确         |     **Apache 2.0**     |
 
 ## 14.3 纯文本 LLM 关键技术对比
 
 ### 14.3.1 注意力机制演进
 
-| 版本 | 注意力类型 | Q 头数 | KV 头数 | KV cache (4K, FP16) | 优势 |
-|------|-----------|--------|---------|---------------------|------|
-| Qwen-1 | MHA | 32 | 32 | 128MB | 标准实现 |
-| Qwen2 | GQA | 28 | 4 | 16MB | **8× 内存节省** |
-| Qwen2.5 | GQA + QK-Norm | 28 | 4 | 16MB | **长序列稳定** |
-| Qwen3 | GQA + MoE | 动态 | 动态 | 动态 | **参数效率** |
+
+| 版本    | 注意力类型    | Q 头数 | KV 头数 | KV cache (4K, FP16) | 优势             |
+| --------- | --------------- | -------- | --------- | --------------------- | ------------------ |
+| Qwen-1  | MHA           | 32     | 32      | 128MB               | 标准实现         |
+| Qwen2   | GQA           | 28     | 4       | 16MB                | **8× 内存节省** |
+| Qwen2.5 | GQA + QK-Norm | 28     | 4       | 16MB                | **长序列稳定**   |
+| Qwen3   | GQA + MoE     | 动态   | 动态    | 动态                | **参数效率**     |
 
 ### 14.3.2 位置编码演进
 
-| 版本 | 位置编码 | 扩展技术 | 最大上下文 |
-|------|---------|---------|-----------|
-| Qwen-1 | RoPE | — | 16K |
-| Qwen2 | RoPE | NTK-aware 插值 | 128K |
-| Qwen2.5 | RoPE | NTK + **YaRN** | **1M** |
-| Qwen3 | RoPE + QK-Norm | 渐进训练 | 256K |
-| VL 系列 | M-RoPE → Interleaved-MRoPE | 绝对时间 → 文本时间戳 | 256K |
-| Omni | TMRoPE | 物理时间轴 | 流式 |
+
+| 版本    | 位置编码                    | 扩展技术               | 最大上下文 |
+| --------- | ----------------------------- | ------------------------ | ------------ |
+| Qwen-1  | RoPE                        | —                     | 16K        |
+| Qwen2   | RoPE                        | NTK-aware 插值         | 128K       |
+| Qwen2.5 | RoPE                        | NTK +**YaRN**          | **1M**     |
+| Qwen3   | RoPE + QK-Norm              | 渐进训练               | 256K       |
+| VL 系列 | M-RoPE → Interleaved-MRoPE | 绝对时间 → 文本时间戳 | 256K       |
+| Omni    | TMRoPE                      | 物理时间轴             | 流式       |
 
 ### 14.3.3 数据规模与性能
 
-| 版本 | 数据量 | 增长 | MMLU | 边际 MMLU 提升 |
-|------|--------|------|------|--------------|
-| Qwen-1 | ~3T | — | ~58 | — |
-| Qwen2 | 7T | +133% | 84.2 | +26.2 |
-| Qwen2.5 | 18T | +157% | ~87 | +2.8 |
-| Qwen3 | 36T | +100% | ~89 | +2 |
+
+| 版本    | 数据量 | 增长  | MMLU | 边际 MMLU 提升 |
+| --------- | -------- | ------- | ------ | ---------------- |
+| Qwen-1  | ~3T    | —    | ~58  | —             |
+| Qwen2   | 7T     | +133% | 84.2 | +26.2          |
+| Qwen2.5 | 18T    | +157% | ~87  | +2.8           |
+| Qwen3   | 36T    | +100% | ~89  | +2             |
 
 ### 14.3.4 后训练策略演进
 
-| 版本 | SFT 样本 | RL 策略 | 特点 |
-|------|---------|--------|------|
-| Qwen-1 | ~100K | PPO | 基础 RLHF |
-| Qwen2 | ~500K | PPO + DPO | 混合优化 |
-| Qwen2.5 | 1M+ | 多阶段 RL + GRPO | **推理专用 RL** |
-| Qwen3 | 蒸馏 | GRPO + 融合 | **强到弱蒸馏** |
+
+| 版本    | SFT 样本 | RL 策略          | 特点            |
+| --------- | ---------- | ------------------ | ----------------- |
+| Qwen-1  | ~100K    | PPO              | 基础 RLHF       |
+| Qwen2   | ~500K    | PPO + DPO        | 混合优化        |
+| Qwen2.5 | 1M+      | 多阶段 RL + GRPO | **推理专用 RL** |
+| Qwen3   | 蒸馏     | GRPO + 融合      | **强到弱蒸馏**  |
 
 ### 14.3.5 综合性能横向对比
 
-| 模型 | MMLU | HumanEval | GSM8K | MATH | 参数量 |
-|------|------|-----------|-------|------|--------|
-| Qwen-1-14B | 65.3 | 42.1 | 62.1 | — | 14B |
-| Qwen2-72B | 84.2 | 64.6 | 89.5 | 78.3 | 72B |
-| Qwen2.5-72B | ~87 | ~75 | ~92 | ~85 | 72B |
-| Qwen3-32B | ~86 | ~75 | ~90 | ~80 | 32B |
-| Qwen3-235B-A22B | ~89 | ~80 | ~93 | ~85 | 235B/22B |
-| LLaMA3-405B | 85.2 | 70.1 | 88.2 | 79.1 | 405B |
-| GPT-4o | ~87 | ~88 | ~95 | ~88 | ~200B? |
+
+| 模型            | MMLU | HumanEval | GSM8K | MATH | 参数量   |
+| ----------------- | ------ | ----------- | ------- | ------ | ---------- |
+| Qwen-1-14B      | 65.3 | 42.1      | 62.1  | —   | 14B      |
+| Qwen2-72B       | 84.2 | 64.6      | 89.5  | 78.3 | 72B      |
+| Qwen2.5-72B     | ~87  | ~75       | ~92   | ~85  | 72B      |
+| Qwen3-32B       | ~86  | ~75       | ~90   | ~80  | 32B      |
+| Qwen3-235B-A22B | ~89  | ~80       | ~93   | ~85  | 235B/22B |
+| LLaMA3-405B     | 85.2 | 70.1      | 88.2  | 79.1 | 405B     |
+| GPT-4o          | ~87  | ~88       | ~95   | ~88  | ~200B?   |
 
 **关键观察**：
+
 1. **参数效率**：Qwen3-32B 性能接近 Qwen2.5-72B（2.3× 参数效率提升）
 2. **MoE 优势**：Qwen3-235B-A22B 超越 LLaMA3-405B（5× 参数，激活仅 22B）
 3. **数学能力**：Qwen 系列在 GSM8K/MATH 上持续领先
@@ -3685,6 +3822,7 @@ Omni 模型（Qwen2.5-Omni）：
 ### 趋势一：固定分辨率 → 动态分辨率 → 原生分辨率
 
 早期 VL 模型将图像强制 resize 到 224×224，导致细节丢失。技术路线：
+
 - **动态分辨率（Qwen2-VL）**：保留宽高比，M-RoPE 处理可变位置编码
 - **原生分辨率（Qwen2.5-VL）**：不做 padding/resize，ViT 从零训练适配
 
@@ -3708,11 +3846,12 @@ VL 模型从"视觉感知工具"演变为"具有视觉感知的推理引擎"。�
 
 ### 趋势六：生产延迟 → 实时流式
 
-| 方案 | 首包延迟 |
-|------|---------|
-| 非流式 TTS | 数十秒 |
-| 传统 AR TTS | 3-5 秒 |
-| Sliding-Window DiT | ~600ms |
+
+| 方案               | 首包延迟  |
+| -------------------- | ----------- |
+| 非流式 TTS         | 数十秒    |
+| 传统 AR TTS        | 3-5 秒    |
+| Sliding-Window DiT | ~600ms    |
 | **Causal ConvNet** | **234ms** |
 
 **工程驱动**：234ms 与 600ms 对准确率几乎无影响，纯粹为用户体验优化。随着 AI 从研究走向产品，工程指标（延迟、吞吐量）的权重越来越高。
@@ -3720,18 +3859,21 @@ VL 模型从"视觉感知工具"演变为"具有视觉感知的推理引擎"。�
 ## 14.5 技术演进的核心动机
 
 **商业动机**：
+
 - OCR/文档解析 → 企业数字化转型
 - GUI Agent → 企业自动化 RPA
 - 实时语音 → 智能客服、语音助手
 - 119 语言 → 全球化市场
 
 **技术动机**：
+
 - 动态分辨率 → OCR/Grounding 必要前提
 - MoE → 突破 Dense 参数墙
 - Thinking Mode → 解锁 STEM 推理潜力
 - 文本时间戳 → 与 LLM 预训练知识对齐
 
 **竞争动机**：
+
 - 对标 GPT-4o → Qwen2.5-Omni/Qwen3-Omni
 - 对标 Claude 3.5 → DocVQA 96.4、OCRBench 885
 - 开源策略（Apache 2.0）→ 通过生态建设形成护城河
@@ -3744,67 +3886,71 @@ VL 模型从"视觉感知工具"演变为"具有视觉感知的推理引擎"。�
 
 ## 15.1 激活函数对比
 
-| 激活函数 | 公式 | 采用版本 | 优势 |
-|---------|------|---------|------|
-| ReLU | $\max(0, x)$ | — | 计算快 |
-| GLU | $(xW) \otimes \sigma(xV)$ | — | 门控机制 |
+
+| 激活函数   | 公式                                              | 采用版本      | 优势            |
+| ------------ | --------------------------------------------------- | --------------- | ----------------- |
+| ReLU       | $\max(0, x)$                                      | —            | 计算快          |
+| GLU        | $(xW) \otimes \sigma(xV)$                         | —            | 门控机制        |
 | **SwiGLU** | $(x W_1 \cdot \mathrm{Swish}(x W_1)) \odot (x V)$ | **全部 Qwen** | **平滑 + 门控** |
 
 SwiGLU 的三重优势：
+
 1. **平滑性**：Swish 连续可微，避免"死亡神经元"
 2. **门控机制**：逐元素乘法实现信息流控制
 3. **表达能力**：两个投影矩阵提供更大表达空间
 
 ## 15.2 归一化方案对比
 
-| 归一化 | 计算方式 | 采用版本 | 优势 |
-|-------|---------|---------|------|
-| LayerNorm | $(x - \mu) / \sigma$ | LLaMA2 之前 | 标准实现 |
-| **RMSNorm** | $x / \mathrm{RMS}(x)$ | **全部 Qwen** | **省去均值计算，训练更快** |
-| QK-Norm | $Q / \|Q\|,\; K / \|K\|$ | Qwen2+ | **长序列数值稳定** |
+
+| 归一化      | 计算方式                 | 采用版本      | 优势                       |
+| ------------- | -------------------------- | --------------- | ---------------------------- |
+| LayerNorm   | $(x - \mu) / \sigma$     | LLaMA2 之前   | 标准实现                   |
+| **RMSNorm** | $x / \mathrm{RMS}(x)$    | **全部 Qwen** | **省去均值计算，训练更快** |
+| QK-Norm     | $Q / \|Q\|,\; K / \|K\|$ | Qwen2+        | **长序列数值稳定**         |
 
 ## 15.3 视觉编码器演进
-
-
 
 ![图 15.2：视觉编码器四代演进图](images/ch14_vision_encoder_evolution.png)
 
 > *自绘图。说明：展示 CLIP ViT → DFN ViT → From-Scratch ViT+WindowAttn → +DeepStack+MoE 四代视觉编码器的演进，每代标注关键改进。趋势从"通用预训练"到"领域定制"到"从零设计"再到"多尺度融合+专家化"。此图为本报告原创。*
 
-| 版本 | 编码器 | 参数量 | 初始化 | 注意力 | 位置编码 |
-|------|--------|--------|--------|--------|---------|
-| Qwen-VL | CLIP ViT | ~304M | CLIP 预训练 | 全局 | 绝对位置 |
-| Qwen2-VL | DFN ViT | ~675M | DFN 预训练 | 全局 | ViT 位置插值 |
-| Qwen2.5-VL | Custom ViT | ~600M | **从零训练** | **Window** | **2D-RoPE** |
-| Qwen3-VL | Custom ViT | ~600M | 从零训练 | Window | 2D-RoPE + **DeepStack** |
+
+| 版本       | 编码器     | 参数量 | 初始化       | 注意力     | 位置编码               |
+| ------------ | ------------ | -------- | -------------- | ------------ | ------------------------ |
+| Qwen-VL    | CLIP ViT   | ~304M  | CLIP 预训练  | 全局       | 绝对位置               |
+| Qwen2-VL   | DFN ViT    | ~675M  | DFN 预训练   | 全局       | ViT 位置插值           |
+| Qwen2.5-VL | Custom ViT | ~600M  | **从零训练** | **Window** | **2D-RoPE**            |
+| Qwen3-VL   | Custom ViT | ~600M  | 从零训练     | Window     | 2D-RoPE +**DeepStack** |
 
 ## 15.4 融合机制演进
 
-| 版本 | 方案 | 压缩比 | 非线性 | 特色 |
-|------|------|--------|--------|------|
-| Qwen-VL | Cross-Attention | 1:1 | 有 | 参数量大 |
-| Qwen2-VL | PatchMerger (Linear) | **4:1** | 无 | 简单高效 |
-| Qwen2.5-VL | **MLP Merger** | **4:1** | **SiLU** | 可学习空间纹理 |
-| Qwen3-VL | MLP Merger + DeepStack | 4:1 | SiLU | 多层特征融合 |
+
+| 版本       | 方案                   | 压缩比  | 非线性   | 特色           |
+| ------------ | ------------------------ | --------- | ---------- | ---------------- |
+| Qwen-VL    | Cross-Attention        | 1:1     | 有       | 参数量大       |
+| Qwen2-VL   | PatchMerger (Linear)   | **4:1** | 无       | 简单高效       |
+| Qwen2.5-VL | **MLP Merger**         | **4:1** | **SiLU** | 可学习空间纹理 |
+| Qwen3-VL   | MLP Merger + DeepStack | 4:1     | SiLU     | 多层特征融合   |
 
 ## 15.5 语音生成方案演进
 
-| 版本 | 方案 | 首包延迟 | 因果性 | 音质 |
-|------|------|---------|--------|------|
-| Qwen2.5-Omni | Sliding-Window DiT | ~600ms | 非因果 | 高（多步去噪） |
-| Qwen3-Omni | **Causal ConvNet** | **234ms** | **严格因果** | 略低（<5% MOS 差距） |
+
+| 版本         | 方案               | 首包延迟  | 因果性       | 音质                 |
+| -------------- | -------------------- | ----------- | -------------- | ---------------------- |
+| Qwen2.5-Omni | Sliding-Window DiT | ~600ms    | 非因果       | 高（多步去噪）       |
+| Qwen3-Omni   | **Causal ConvNet** | **234ms** | **严格因果** | 略低（<5% MOS 差距） |
 
 ## 15.6 长上下文技术演进
 
-| 技术 | 版本 | 原理 | 效果 |
-|------|------|------|------|
-| 标准 RoPE | Qwen-1 | 基础旋转位置编码 | 16K |
-| NTK-aware RoPE | Qwen2 | 分频处理，高频不变 | 128K（零样本外推） |
-| **YaRN** | Qwen2.5 | 分频 + 注意力缩放 | **1M** |
-| 渐进训练 | Qwen3 | 4K→32K→128K→256K | 256K（原生） |
-| M-RoPE | VL 系列 | 三维旋转位置编码 | 多模态位置感知 |
-| TMRoPE | Omni | 物理时间轴统一 | 音视频时序对齐 |
 
+| 技术           | 版本    | 原理                | 效果               |
+| ---------------- | --------- | --------------------- | -------------------- |
+| 标准 RoPE      | Qwen-1  | 基础旋转位置编码    | 16K                |
+| NTK-aware RoPE | Qwen2   | 分频处理，高频不变  | 128K（零样本外推） |
+| **YaRN**       | Qwen2.5 | 分频 + 注意力缩放   | **1M**             |
+| 渐进训练       | Qwen3   | 4K→32K→128K→256K | 256K（原生）       |
+| M-RoPE         | VL 系列 | 三维旋转位置编码    | 多模态位置感知     |
+| TMRoPE         | Omni    | 物理时间轴统一      | 音视频时序对齐     |
 
 ---
 
@@ -3818,22 +3964,24 @@ SwiGLU 的三重优势：
 
 ### A. 环境准备
 
-| 组件 | 最低版本 | 推荐版本 | 备注 |
-|------|---------|---------|------|
-| Python | 3.10 | 3.11 | |
-| PyTorch | 2.2.0 | 2.3.0+ | CUDA 12.1+ |
-| Transformers | 4.45.0 | 4.49.0+ | 含 Qwen2.5-VL Processor |
-| flash-attn | 2.5.8 | 2.6.3+ | 编译约 20min，需 Ninja |
-| decord | 0.6.0 | — | 高效视频读取 |
-| qwen-vl-utils | 最新 | — | 官方工具库 |
+
+| 组件          | 最低版本 | 推荐版本 | 备注                    |
+| --------------- | ---------- | ---------- | ------------------------- |
+| Python        | 3.10     | 3.11     |                         |
+| PyTorch       | 2.2.0    | 2.3.0+   | CUDA 12.1+              |
+| Transformers  | 4.45.0   | 4.49.0+  | 含 Qwen2.5-VL Processor |
+| flash-attn    | 2.5.8    | 2.6.3+   | 编译约 20min，需 Ninja  |
+| decord        | 0.6.0    | —       | 高效视频读取            |
+| qwen-vl-utils | 最新     | —       | 官方工具库              |
 
 **GPU 显存参考**（BF16 推理，448×448 输入）：
 
-| 模型 | 最低显存 | 推荐配置 |
-|------|---------|---------|
-| Qwen2.5-VL-3B | 8 GB | RTX 3080 |
-| Qwen2.5-VL-7B | 18 GB | RTX 4090 / A100-40G |
-| Qwen2.5-VL-72B | ≥160 GB | 4× A100-80G |
+
+| 模型           | 最低显存 | 推荐配置            |
+| ---------------- | ---------- | --------------------- |
+| Qwen2.5-VL-3B  | 8 GB     | RTX 3080            |
+| Qwen2.5-VL-7B  | 18 GB    | RTX 4090 / A100-40G |
+| Qwen2.5-VL-72B | ≥160 GB | 4× A100-80G        |
 
 ### B. 关键代码路径
 
@@ -3925,14 +4073,15 @@ attn_output = flash_attn_varlen_func(
 
 ### E. 常见 Pitfall
 
-| # | 错误现象 | 正确做法 |
-|---|---------|---------|
-| P1 | 推理乱码 / CUDA 错误 | 输入图像尺寸**必须是 28 的倍数**，调用 `smart_resize()` |
-| P2 | 视频时间定位不准 | temporal_id 必须用**实际秒数** |
-| P3 | 高分辨率时 OOM | 设置 `max_pixels` 限制最大 token 数 |
-| P4 | Grounding 坐标偏移 | 模型输出是**像素坐标**，非归一化坐标 |
-| P5 | SFT 后视觉能力退化 | SFT 阶段**冻结 ViT** |
-| P6 | Window Attention 层错误 | 全局注意力层索引为 `{7, 15, 23, 31}` |
+
+| #  | 错误现象                | 正确做法                                                |
+| ---- | ------------------------- | --------------------------------------------------------- |
+| P1 | 推理乱码 / CUDA 错误    | 输入图像尺寸**必须是 28 的倍数**，调用 `smart_resize()` |
+| P2 | 视频时间定位不准        | temporal_id 必须用**实际秒数**                          |
+| P3 | 高分辨率时 OOM          | 设置`max_pixels` 限制最大 token 数                      |
+| P4 | Grounding 坐标偏移      | 模型输出是**像素坐标**，非归一化坐标                    |
+| P5 | SFT 后视觉能力退化      | SFT 阶段**冻结 ViT**                                    |
+| P6 | Window Attention 层错误 | 全局注意力层索引为`{7, 15, 23, 31}`                     |
 
 ## 16.2 Qwen2.5-Omni 复现路径
 
@@ -3986,32 +4135,35 @@ def build_tmrope_position_ids(sequence_elements, r_ref=25):
 
 ### C. 常见 Pitfall
 
-| # | 问题 | 正确做法 |
-|---|------|---------|
-| P1 | Talker 输入错误 | 接收 Thinker 的 **hidden states**，非 token IDs |
-| P2 | 音视频时序错位 | 所有模态按**实际时间戳**排列 |
-| P3 | 音频 Block 边界噪声 | 相邻 Block 需有**重叠区域** |
-| P4 | 首包延迟过高 | 检查 DiT window_size；优先使用 Qwen3-Omni ConvNet |
-| P5 | 语音质量差 | 确认使用 Thinker **最后一层** hidden states |
+
+| #  | 问题                | 正确做法                                          |
+| ---- | --------------------- | --------------------------------------------------- |
+| P1 | Talker 输入错误     | 接收 Thinker 的**hidden states**，非 token IDs    |
+| P2 | 音视频时序错位      | 所有模态按**实际时间戳**排列                      |
+| P3 | 音频 Block 边界噪声 | 相邻 Block 需有**重叠区域**                       |
+| P4 | 首包延迟过高        | 检查 DiT window_size；优先使用 Qwen3-Omni ConvNet |
+| P5 | 语音质量差          | 确认使用 Thinker**最后一层** hidden states        |
 
 ## 16.3 Qwen3-VL 复现要点
 
-| 新增技术点 | 复现关键 |
-|----------|---------|
-| **Interleaved-MRoPE** | h_id = `base + local_row`，w_id = `base + local_col`；`base` = 图片全局起始位置 |
-| **DeepStack** | 注册多个 ViT 中间层 output hook（如第 8/16/24/32 层），加权求和后送入 Merger |
-| **文本时间戳** | 每帧前插入 `<timestamp>HH:MM:SS</timestamp>` 文本 token |
-| **MoE 调试** | `output_router_logits=True` 打印路由分布，检查专家负载均衡 |
-| **Thinking Mode** | 用户消息前加 `/think` 或系统提示启用 |
+
+| 新增技术点            | 复现关键                                                                       |
+| ----------------------- | -------------------------------------------------------------------------------- |
+| **Interleaved-MRoPE** | h_id =`base + local_row`，w_id = `base + local_col`；`base` = 图片全局起始位置 |
+| **DeepStack**         | 注册多个 ViT 中间层 output hook（如第 8/16/24/32 层），加权求和后送入 Merger   |
+| **文本时间戳**        | 每帧前插入`<timestamp>HH:MM:SS</timestamp>` 文本 token                         |
+| **MoE 调试**          | `output_router_logits=True` 打印路由分布，检查专家负载均衡                     |
+| **Thinking Mode**     | 用户消息前加`/think` 或系统提示启用                                            |
 
 ## 16.4 Qwen3-Omni 复现要点
 
-| 新增技术点 | 复现关键 |
-|----------|---------|
-| **Causal ConvNet** | 使用 `CausalConv1d`（左侧 padding，右侧不 padding）|
-| **Multi-Codebook** | Talker 有 N 个独立 Linear head，并行解码 N 个 codec ID |
-| **MoE 路由监控** | 检查视觉/文本 token 路由分布；>70% 集中到同一专家说明辅助 loss 不够 |
-| **首包延迟验证** | 目标 < 300ms；用 `time.perf_counter()` 分段打点 |
+
+| 新增技术点         | 复现关键                                                            |
+| -------------------- | --------------------------------------------------------------------- |
+| **Causal ConvNet** | 使用`CausalConv1d`（左侧 padding，右侧不 padding）                  |
+| **Multi-Codebook** | Talker 有 N 个独立 Linear head，并行解码 N 个 codec ID              |
+| **MoE 路由监控**   | 检查视觉/文本 token 路由分布；>70% 集中到同一专家说明辅助 loss 不够 |
+| **首包延迟验证**   | 目标 < 300ms；用`time.perf_counter()` 分段打点                      |
 
 ---
 
@@ -4026,6 +4178,7 @@ def build_tmrope_position_ids(sequence_elements, r_ref=25):
 **Q1：多模态融合的三种主流范式（Cross-Attention / Projection / Early Fusion）各自的设计哲学是什么？**
 
 答：
+
 - **Cross-Attention**（Flamingo, Qwen-VL, BLIP-2 Q-Former）：视觉特征作为 K/V 注入 LLM 层，实现深层跨模态交互。哲学是"主动查询"——语言模型带着问题去"看"图像。优点是交互深度大，缺点是修改 LLM 结构、训练复杂。
 - **Projection-based**（LLaVA, Qwen2-VL）：视觉特征经 MLP/Linear 投影后与文本 token 拼接送入 LLM。哲学是"让 LLM 自己学对齐"——只做空间变换，依赖 LLM 的 self-attention 来实现跨模态理解。优点是简单、可扩展，缺点是交互深度依赖 LLM 能力。
 - **Early Fusion**（Fuyu, Chameleon）：直接将图像 patch 线性投影为 token，去掉独立视觉编码器。哲学是"统一一切"——所有模态都是 token 序列。优点是极简，缺点是要求 LLM 自己学视觉表征。
@@ -4041,6 +4194,7 @@ def build_tmrope_position_ids(sequence_elements, r_ref=25):
 **Q3：CLIP 作为视觉编码器的优势和局限分别是什么？为什么有些模型选择放弃 CLIP？**
 
 答：
+
 - **优势**：CLIP 通过图文对比学习天然对齐了视觉和语言空间，提供了零样本迁移能力，且社区生态丰富（多种尺寸、多种训练变体）。
 - **局限**：① 对比学习优化全局语义匹配（"这是一只猫"），缺乏细粒度空间感知（"猫在图的哪个位置"）；② 固定分辨率训练（224/336），动态分辨率下需要位置插值，精度受损；③ 全局注意力架构在高分辨率输入时 O(N²) 不可承受。
 
@@ -4069,6 +4223,7 @@ Qwen2.5-VL 放弃 CLIP 从零训练，是因为其任务需求（OCR、文档理
 **Q8：缓解多模态幻觉有哪些主流方案？它们分别针对幻觉链路中的哪个环节？**
 
 答：
+
 - **提高视觉分辨率 / 动态 token**（Qwen2-VL）：针对**信息输入**环节——减少视觉信息的损失量
 - **Grounding 增强**（让模型指出回答依据的图像区域）：针对**推理过程**——强制模型基于证据而非猜测
 - **对比解码（Contrastive Decoding）**：针对**输出生成**——对比"有图"和"无图"条件下的输出分布，抑制不依赖图像的语言先验
@@ -4082,6 +4237,7 @@ Qwen2.5-VL 放弃 CLIP 从零训练，是因为其任务需求（OCR、文档理
 **Q9：视频理解与图像理解的核心挑战差异在哪里？**
 
 答：图像理解是空间感知（"什么在哪里"），视频理解还需要**时序推理**（"先发生了什么，后发生了什么，因果关系是什么"）。核心挑战有三层：
+
 1. **Token 数量爆炸**——1 分钟视频 @1fps × 256 token/帧 = 15360 个视觉 token，远超多数 LLM 的 context 上限
 2. **关键信息的时间稀疏性**——一段 10 分钟的视频中，与问题相关的信息可能只出现在某几秒，其余帧都是冗余
 3. **时序关系的抽象性**——"因为 A 所以 B"比"A 在 B 左边"更难建模，需要跨帧推理
@@ -4094,13 +4250,14 @@ Qwen2.5-VL 放弃 CLIP 从零训练，是因为其任务需求（OCR、文档理
 
 答：
 
-| 维度 | LLaVA | Qwen-VL 系列 | InternVL |
-|------|-------|-------------|----------|
-| **融合方式** | 线性/MLP 投影 | Cross-Attention → MLP 投影（演进） | 类 LLaVA 投影 |
-| **视觉编码器** | CLIP ViT (frozen) | CLIP → DFN → 从零训练（演进） | InternViT-6B（自研超大 ViT） |
-| **核心哲学** | 极简架构 + 好数据 | 系统性架构创新（位置编码、动态分辨率） | 视觉编码器 Scaling |
-| **创新重心** | 数据工程 + 训练范式 | 多模态位置编码 + 全模态统一 | 视觉基础模型 |
-| **代表贡献** | 证明简单方案有效 | M-RoPE、动态分辨率、Thinker-Talker | 证明视觉侧 Scaling 有效 |
+
+| 维度           | LLaVA               | Qwen-VL 系列                           | InternVL                     |
+| ---------------- | --------------------- | ---------------------------------------- | ------------------------------ |
+| **融合方式**   | 线性/MLP 投影       | Cross-Attention → MLP 投影（演进）    | 类 LLaVA 投影                |
+| **视觉编码器** | CLIP ViT (frozen)   | CLIP → DFN → 从零训练（演进）        | InternViT-6B（自研超大 ViT） |
+| **核心哲学**   | 极简架构 + 好数据   | 系统性架构创新（位置编码、动态分辨率） | 视觉编码器 Scaling           |
+| **创新重心**   | 数据工程 + 训练范式 | 多模态位置编码 + 全模态统一            | 视觉基础模型                 |
+| **代表贡献**   | 证明简单方案有效    | M-RoPE、动态分辨率、Thinker-Talker     | 证明视觉侧 Scaling 有效      |
 
 三条路线代表了三种不同的信念：LLaVA 相信**数据和 LLM 能力是关键**；Qwen-VL 相信**架构创新（尤其是位置编码）是关键**；InternVL 相信**视觉编码器的规模是关键**。事实上三者都有道理——最终最强的模型可能需要三者兼具。
 
@@ -4117,63 +4274,49 @@ Qwen2.5-VL 放弃 CLIP 从零训练，是因为其任务需求（OCR、文档理
 0. **Qwen-VL: A Versatile Vision-Language Model for Understanding, Localization, Text Reading, and Beyond**
    Bai, J., Bai, S., et al. (Qwen Team, Alibaba Group, 2023)
    arXiv: https://arxiv.org/abs/2308.12966
-
 1. **Qwen Technical Report**
    Bai, J., Bai, S., et al. (Qwen Team, Alibaba Group, 2023)
    arXiv: https://arxiv.org/abs/2309.16609
-
 2. **Qwen2 Technical Report**
    Yang, A., Yang, B., et al. (Qwen Team, Alibaba Group, 2024)
    arXiv: https://arxiv.org/abs/2407.10671
-
 3. **Qwen2.5 Technical Report**
    Qwen Team, Alibaba Group (2024)
    arXiv: https://arxiv.org/abs/2412.15115
-
 4. **Qwen3 Technical Report**
    Yang, A., Li, A., Yang, B., et al. (Qwen Team, Alibaba Group, 2025)
    arXiv: https://arxiv.org/abs/2505.09388
-
 5. **Qwen2-VL Technical Report**
    Wang, P., et al. (Qwen Team, Alibaba Group, 2024)
    arXiv: https://arxiv.org/abs/2409.12191
-
 6. **Qwen2.5-VL Technical Report**
    Bai, S., Chen, K., et al. (Qwen Team, Alibaba Group, 2025)
    arXiv: https://arxiv.org/abs/2502.13923
-
 7. **Qwen3-VL Technical Report**
    Bai, S., et al. (Qwen Team, Alibaba Group, 2025)
    arXiv: https://arxiv.org/abs/2511.21631
-
 8. **Qwen2.5-Omni Technical Report**
    Xu, J., Guo, Z., et al. (Qwen Team, Alibaba Group, 2025)
    arXiv: https://arxiv.org/abs/2503.20215
-
 9. **Qwen3-Omni Technical Report**
    Xu, J., Guo, Z., Hu, H., Chu, Y., et al. (Qwen Team, Alibaba Group, 2025)
-
 10. **RoFormer: Enhanced Transformer with Rotary Position Embedding**
     Su, J., Lu, Y., et al. (2021)
     arXiv: https://arxiv.org/abs/2104.09864
-
 11. **YaRN: Efficient Context Window Extension of Large Language Models**
     Peng, B., et al. (2023)
     arXiv: https://arxiv.org/abs/2309.00071
-
 12. **Mixture-of-Experts Meets Instruction Tuning (ST-MoE)**
     Zoph, B., et al. (Google, 2022)
     arXiv: https://arxiv.org/abs/2305.14705
-
 13. **DeepSeekMoE: Towards Ultimate Expert Specialization**
     Dai, D., et al. (DeepSeek, 2024)
     arXiv: https://arxiv.org/abs/2401.06066
-
 14. **GRPO: Group Relative Policy Optimization**
     Shao, Z., et al. (2024)
     arXiv: https://arxiv.org/abs/2402.03300
-
 15. **官方资源**
+
     - GitHub: https://github.com/QwenLM/
     - HuggingFace: https://huggingface.co/Qwen
     - 官方博客: https://qwenlm.github.io/
@@ -4183,4 +4326,3 @@ Qwen2.5-VL 放弃 CLIP 从零训练，是因为其任务需求（OCR、文档理
 **报告完成日期**：2026 年 4 月 12 日
 **覆盖范围**：Qwen 全系列 10 个模型（Qwen-1 → Qwen2 → Qwen2-VL → Qwen2.5 → Qwen2.5-VL → Qwen2.5-Omni → Qwen3 → Qwen3-VL → Qwen3-Omni + Qwen3-Next 预览）
 **总结构**：6 大 Part、16 章、每章含面试考点 + Part VI 多模态高频面试考点汇总
-
