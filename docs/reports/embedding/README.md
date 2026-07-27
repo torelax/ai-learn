@@ -10,6 +10,7 @@
 | [0.6B图搜图文搜图自训学习行动路线.md](0.6B图搜图文搜图自训学习行动路线.md) | ≤0.6B 图搜图/文搜图自训行动线 |
 | [BGE-M3三功能统一详解报告.md](BGE-M3三功能统一详解报告.md) | BGE-M3 |
 | [Embedding蒸馏技术详解.md](Embedding蒸馏技术详解.md) | Embedding 蒸馏专题 |
+| [Jasper-Token-Compression-600M详解.md](Jasper-Token-Compression-600M详解.md) | Jasper 600M：双教师蒸馏 + 弹性 Token 压缩（公式全） |
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例 |
 | [资料清单_论文与博客.md](资料清单_论文与博客.md) | 资料 |
 | [../distillation/知识蒸馏技术深度调研报告.md](../distillation/知识蒸馏技术深度调研报告.md) | 蒸馏总论（LLM/VLM/Embedding） |
