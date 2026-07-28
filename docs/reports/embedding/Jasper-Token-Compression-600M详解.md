@@ -1,7 +1,7 @@
 # Jasper-Token-Compression-600M 技术详解
 
-> 基于技术报告 [arXiv:2511.14405v2](https://arxiv.org/abs/2511.14405)（[HTML](https://arxiv.org/html/2511.14405v2)）与 Hugging Face 模型卡 [infgrad/Jasper-Token-Compression-600M](https://huggingface.co/infgrad/Jasper-Token-Compression-600M)。  
-> 训练代码：https://github.com/DunZhang/Jasper-Token-Compression-Training  
+> 基于技术报告 [arXiv:2511.14405v2](https://arxiv.org/abs/2511.14405)（[HTML](https://arxiv.org/html/2511.14405v2)）与 Hugging Face 模型卡 [infgrad/Jasper-Token-Compression-600M](https://huggingface.co/infgrad/Jasper-Token-Compression-600M)。
+> 训练代码：https://github.com/DunZhang/Jasper-Token-Compression-Training
 > 本文把架构、四阶段训练、全部公式与实验结论写全，便于对照实现与复现。
 
 ---
@@ -10,14 +10,15 @@
 
 **Jasper-Token-Compression-600M** 是 Prior Shape / infgrad 团队在 2025-11 开源的 **中英双语文本 Embedding** 模型：
 
-| 项 | 内容 |
-|----|------|
-| 规模 | ≈ **600M**（初始化自 **Qwen3-Embedding-0.6B**） |
-| 输出维 | **2048**（相对基座 1024 扩维） |
-| 教师 | **Qwen3-Embedding-8B** + **QZhou-Embedding（7B）** 双教师融合 |
-| 训练主线 | 无监督向量蒸馏 → Token 压缩蒸馏 → 动态压缩 + 相似度结构蒸馏 → 检索对比学习 |
-| 核心创新 | Embedding 层后接 **SwiGLU MLP + AdaptiveAvgPool1d** 的 **弹性 Token 压缩**，推理时可调压缩比 |
-| 宣称效果 | 英文 MTEB Mean(Task) **74.75**、中文 **73.51**；效率高于普通 0.6B，质量接近 8B 量级教师 |
+
+| 项       | 内容                                                                                        |
+| ---------- | --------------------------------------------------------------------------------------------- |
+| 规模     | ≈**600M**（初始化自 **Qwen3-Embedding-0.6B**）                                             |
+| 输出维   | **2048**（相对基座 1024 扩维）                                                              |
+| 教师     | **Qwen3-Embedding-8B** + **QZhou-Embedding（7B）** 双教师融合                               |
+| 训练主线 | 无监督向量蒸馏 → Token 压缩蒸馏 → 动态压缩 + 相似度结构蒸馏 → 检索对比学习               |
+| 核心创新 | Embedding 层后接**SwiGLU MLP + AdaptiveAvgPool1d** 的 **弹性 Token 压缩**，推理时可调压缩比 |
+| 宣称效果 | 英文 MTEB Mean(Task)**74.75**、中文 **73.51**；效率高于普通 0.6B，质量接近 8B 量级教师      |
 
 谱系上延续英文 **Stella / Jasper 蒸馏配方**（[arXiv:2412.19048](https://arxiv.org/abs/2412.19048)），本报告将其扩展到 **中英双语**，并加入 **对比学习** 与 **可调序列压缩**。
 
@@ -40,13 +41,14 @@
 
 报告 Figure 1 对比：
 
-| 模块 | Qwen3-Embedding-0.6B | Jasper-Token-Compression-600M |
-|------|----------------------|-------------------------------|
-| Backbone | Qwen3 0.6B | 同初始化 |
+
+| 模块       | Qwen3-Embedding-0.6B      | Jasper-Token-Compression-600M                                      |
+| ------------ | --------------------------- | -------------------------------------------------------------------- |
+| Backbone   | Qwen3 0.6B                | 同初始化                                                           |
 | Token 路径 | `word_emb → Transformer` | `word_emb → Qwen3MLP(SwiGLU) → AdaptiveAvgPool1d → Transformer` |
-| Pooling | last-token | **改为 mean pooling** |
-| 投影 | 无 / 原生 1024-d | **随机初始化 Linear：1024 → 2048**，再 L2 Norm |
-| 推理 | 固定全长 | **可配置** `length_threshold` + `compression_ratio` |
+| Pooling    | last-token                | **改为 mean pooling**                                              |
+| 投影       | 无 / 原生 1024-d          | **随机初始化 Linear：1024 → 2048**，再 L2 Norm                    |
+| 推理       | 固定全长                  | **可配置** `length_threshold` + `compression_ratio`                |
 
 ### 3.2 Token 压缩前向（核心）
 
@@ -54,6 +56,7 @@
 
 $$
 \mathbf{X} \in \mathbb{R}^{L_{\mathrm{in}} \times d},
+
 $$
 
 其中 $L_{\mathrm{in}}$ 为输入 token 数，$d$ 为隐层维度。
@@ -62,14 +65,15 @@ $$
 
 $$
 \mathbf{H} = \mathrm{Qwen3MLP}(\mathbf{X}) \in \mathbb{R}^{L_{\mathrm{in}} \times d}.
+
 $$
 
 2. **目标长度 $L_{\mathrm{tgt}}$**：由阈值 1 计算；若为 `NULL` 则不压缩，直接 $\mathbf{H}'=\mathbf{H}$。
-
 3. **1D 自适应平均池化（无参）**：
 
 $$
 \mathbf{H}' = \mathrm{AdaptiveAvgPool1d}(\mathbf{H};\; L_{\mathrm{tgt}}) \in \mathbb{R}^{L_{\mathrm{tgt}} \times d}.
+
 $$
 
 PyTorch 的 `AdaptiveAvgPool1d` 会按目标长度自动选 kernel/stride，把变长序列压到固定 $L_{\mathrm{tgt}}$。
@@ -92,6 +96,7 @@ L_{\mathrm{tgt}} =
 \texttt{NULL} & \text{if } L_{\mathrm{in}} \le L_{\mathrm{th}} \quad (\text{短文不压}) \\
 L_{\mathrm{th}} + (L_{\mathrm{in}} - L_{\mathrm{th}})\times \rho & \text{otherwise}
 \end{cases}
+
 $$
 
 伪代码等价：
@@ -107,6 +112,7 @@ else:
 
 $$
 L_{\mathrm{tgt}} = 80 + (1000-80)\times 0.33 = 80 + 303.6 \approx 384.
+
 $$
 
 相对原长约 $0.384\times$，而不是简单的 $0.33\times$ 全长——短句保护 + 长句平滑压缩。
@@ -123,6 +129,7 @@ Qwen3-8B 原生 **4096-d**，训练用了 **Matryoshka Representation Learning (
 
 $$
 \mathbf{E}_{\mathrm{qwen}} = \mathrm{Prefix}_{1024}\!\left(\mathbf{E}_{\text{Qwen3-8B}}\right) \in \mathbb{R}^{1024}.
+
 $$
 
 ### 4.2 QZhou-Embedding 分支（分段求和）
@@ -132,10 +139,12 @@ QZhou 原生 **3584-d**，**不支持 MRL**。取前 **3072** 维，切成 **3 �
 $$
 \mathbf{v}_1,\mathbf{v}_2,\mathbf{v}_3 \in \mathbb{R}^{1024},\quad
 \mathbf{E}_{\mathrm{QZhou}}^{[1:3072]} = [\mathbf{v}_1;\mathbf{v}_2;\mathbf{v}_3],
+
 $$
 
 $$
 \mathbf{E}_{\mathrm{qzhou}} = \mathbf{v}_1 + \mathbf{v}_2 + \mathbf{v}_3 \in \mathbb{R}^{1024}.
+
 $$
 
 （作者也试过 Qwen3-8B + Qwen3-4B 组合，提升有限，故最终选 QZhou。）
@@ -151,6 +160,7 @@ $$
   \mathrm{Norm}(\mathbf{E}_{\mathrm{qzhou}})
 \Big)
 \in \mathbb{R}^{2048},
+
 $$
 
 其中 $\Vert$ 表示特征维拼接，$\mathrm{Norm}$ 为 **L2 归一化**。
@@ -183,6 +193,7 @@ Stage 4  InfoNCE + Soft KL + Cosine（检索增强）
 
 $$
 \mathcal{L}_{\mathrm{cosine}} = 1 - \mathbf{E}_s \cdot \mathbf{E}_t.
+
 $$
 
 因两者均已 L2 Norm，点积即余弦相似度，故 $\mathcal{L}_{\mathrm{cosine}} \in [0,2]$，最小化即拉近角度。
@@ -191,18 +202,20 @@ $$
 
 $$
 \mathcal{L}_{\mathrm{s1}} = 10 \cdot \mathcal{L}_{\mathrm{cosine}}.
+
 $$
 
 #### Training Setup（Stage 1）
 
-| 项 | 设置 |
-|----|------|
-| 数据 | **1200 万** 中英无监督段落，中英约 **1:1** |
-| 最大长度 | **1030** tokens |
-| 优化器 | Adam，lr $1\times 10^{-4}$，warmup ratio **0.005**，cosine schedule |
-| Epoch | **2** |
-| 硬件 | 4× RTX 4090；per-GPU batch **4**，grad accum **16** → global batch **256** |
-| 其它 | FlashAttention-2 |
+
+| 项       | 设置                                                                        |
+| ---------- | ----------------------------------------------------------------------------- |
+| 数据     | **1200 万** 中英无监督段落，中英约 **1:1**                                  |
+| 最大长度 | **1030** tokens                                                             |
+| 优化器   | Adam，lr$1\times 10^{-4}$，warmup ratio **0.005**，cosine schedule          |
+| Epoch    | **2**                                                                       |
+| 硬件     | 4× RTX 4090；per-GPU batch**4**，grad accum **16** → global batch **256** |
+| 其它     | FlashAttention-2                                                            |
 
 ---
 
@@ -226,6 +239,7 @@ $$
 
 $$
 r \sim \mathrm{Uniform}(0,1),
+
 $$
 
 $$
@@ -236,14 +250,16 @@ $$
 \mathrm{Uniform}(0.33,\ 0.66) & 0.5 \le r < 0.8 \\
 \mathrm{Uniform}(0.66,\ 1.0) & r \ge 0.8
 \end{cases}
+
 $$
 
 概率解读：
 
-| 区间 | 概率 | 含义 |
-|------|------|------|
-| 固定 $\rho\approx 0.33$ | **40%** | 与 Stage 2 对齐，稳定主工况 |
-| 其它区间合计 | **60%** | 探索更强/更弱压缩，换推理弹性 |
+
+| 区间                   | 概率    | 含义                          |
+| ------------------------ | --------- | ------------------------------- |
+| 固定$\rho\approx 0.33$ | **40%** | 与 Stage 2 对齐，稳定主工况   |
+| 其它区间合计           | **60%** | 探索更强/更弱压缩，换推理弹性 |
 
 #### 5.3.2 Similarity Loss（式 2）
 
@@ -252,6 +268,7 @@ batch 内学生 / 教师 embedding 矩阵 $\mathbf{BE}_s,\mathbf{BE}_t \in \math
 $$
 \mathbf{S}_s = \mathbf{BE}_s\,\mathbf{BE}_s^{\mathsf{T}},\qquad
 \mathbf{S}_t = \mathbf{BE}_t\,\mathbf{BE}_t^{\mathsf{T}} \in \mathbb{R}^{B\times B}.
+
 $$
 
 $$
@@ -260,6 +277,7 @@ $$
 \mathrm{MSE}\!\left(\mathbf{S}_s,\ \mathbf{S}_t\right)
 =
 \frac{1}{B^2}\sum_{i,j}\left((\mathbf{S}_s)_{ij}-(\mathbf{S}_t)_{ij}\right)^2.
+
 $$
 
 **直觉**：不只对齐单点 $\mathbf{E}_s\approx\mathbf{E}_t$，还对齐 batch 内 **相对相似度结构**（谁和谁更像），对检索/聚类更关键。
@@ -272,19 +290,21 @@ $$
 10\cdot\mathcal{L}_{\mathrm{cosine}}
 +
 100\cdot\mathcal{L}_{\mathrm{similarity}}.
+
 $$
 
 权重上 **结构项远大于绝对余弦项**（100 vs 10）。
 
 #### Training Setup（Stage 3）
 
-| 项 | 设置 |
-|----|------|
-| 步数 | **800** steps（非完整 epoch） |
-| lr | $7\times 10^{-5}$ |
-| $L_{\mathrm{th}}$ | 80；$\rho$ 动态采样 |
-| grad accum | **32** → global batch **512** |
-| 其余 | 同 Stage 1 数据与硬件设定 |
+
+| 项                | 设置                           |
+| ------------------- | -------------------------------- |
+| 步数              | **800** steps（非完整 epoch）  |
+| lr                | $7\times 10^{-5}$              |
+| $L_{\mathrm{th}}$ | 80；$\rho$ 动态采样            |
+| grad accum        | **32** → global batch **512** |
+| 其余              | 同 Stage 1 数据与硬件设定      |
 
 ---
 
@@ -306,6 +326,7 @@ $$
 -\frac{1}{N}\sum_{i=1}^{N}
 \log
 \frac{\exp\!\big(s(q_i,d_i^{+})/\tau\big)}{Z_i},
+
 $$
 
 $$
@@ -320,6 +341,7 @@ Z_i
 &\quad+
 \sum_{j\neq i}\exp\!\big(s(q_i,d_j)/\tau\big).
 \end{aligned}
+
 $$
 
 第三项里 $d_j$ 覆盖 **其它 query 的正例及对应 hard negatives**，报告写明共产生 $(N-1)(1+K)$ 个 easy negatives。
@@ -330,6 +352,7 @@ $$
 
 $$
 \mathbf{S}^{(s)},\ \mathbf{S}^{(t)} \in \mathbb{R}^{N(1+K)},
+
 $$
 
 （HF 卡表述：query 对 **正例 + hard negatives + in-batch docs** 的打分向量。）
@@ -344,6 +367,7 @@ $$
   \;\Big\|\;
   \mathrm{sm}\!\big(\mathbf{S}^{(t)}/\alpha\big)
 \Big).
+
 $$
 
 **直觉**：不只学「谁是正例」（hard InfoNCE），还蒸馏教师的 **整张分数分布**（soft ranking）。
@@ -360,38 +384,42 @@ $$
 16\cdot\mathcal{L}_{\mathrm{soft}}
 +
 10\cdot\mathcal{L}_{\mathrm{cosine}}.
+
 $$
 
 #### Training Setup（Stage 4）
 
-| 项 | 设置 |
-|----|------|
-| 步数 | **5000** |
-| lr | $2\times 10^{-5}$（Adam） |
-| $N,\ K$ | **16, 3** |
-| $\tau,\ \alpha$ | **0.3, 0.1** |
-| 压缩 | $L_{\mathrm{th}}=80$ + **动态 $\rho$** |
-| 并行 | 4 GPU，grad accum **1**，启用 gradient checkpointing |
+
+| 项              | 设置                                                |
+| ----------------- | ----------------------------------------------------- |
+| 步数            | **5000**                                            |
+| lr              | $2\times 10^{-5}$（Adam）                           |
+| $N,\ K$         | **16, 3**                                           |
+| $\tau,\ \alpha$ | **0.3, 0.1**                                        |
+| 压缩            | $L_{\mathrm{th}}=80$ + **动态 $\rho$**              |
+| 并行            | 4 GPU，grad accum**1**，启用 gradient checkpointing |
 
 ---
 
 ## 6. 公式速查表
 
-| 编号 | 名称 | 公式 | 主要出现阶段 |
-|------|------|------|--------------|
-| (1) | Cosine | $\mathcal{L}_{\mathrm{cosine}}=1-\mathbf{E}_s\cdot\mathbf{E}_t$ | 1–4 |
-| (2) | Similarity MSE | $\mathcal{L}_{\mathrm{similarity}}=\mathrm{MSE}(\mathbf{BE}_s\mathbf{BE}_s^{\mathsf{T}},\mathbf{BE}_t\mathbf{BE}_t^{\mathsf{T}})$ | 3 |
-| (3) | Stage3 总损 | $\mathcal{L}_{\mathrm{s3}}=10\mathcal{L}_{\mathrm{cosine}}+100\mathcal{L}_{\mathrm{similarity}}$ | 3 |
-| (4)(5) | InfoNCE | 见 §5.4.1 | 4 |
-| (6) | Soft KL | $\mathcal{L}_{\mathrm{soft}}=\mathrm{D_{KL}}(\mathrm{sm}(\mathbf{S}^{(s)}/\alpha)\|\mathrm{sm}(\mathbf{S}^{(t)}/\alpha))$ | 4 |
-| (7) | Stage4 总损 | $\mathcal{L}_{\mathrm{s4}}=\mathcal{L}_{\mathrm{cl}}+16\mathcal{L}_{\mathrm{soft}}+10\mathcal{L}_{\mathrm{cosine}}$ | 4 |
-| Alg.1 | 目标长度 | $L_{\mathrm{tgt}}=L_{\mathrm{th}}+(L_{\mathrm{in}}-L_{\mathrm{th}})\rho$（短于阈值则不压） | 2–4 / 推理 |
-| Alg.2 | $\rho$ 采样 | 40% 钉在 0.33，60% 探索其它区间 | 3–4 |
+
+| 编号   | 名称           | 公式                                                                                                                              | 主要出现阶段 |
+| -------- | ---------------- | ----------------------------------------------------------------------------------------------------------------------------------- | -------------- |
+| (1)    | Cosine         | $\mathcal{L}_{\mathrm{cosine}}=1-\mathbf{E}_s\cdot\mathbf{E}_t$                                                                   | 1–4         |
+| (2)    | Similarity MSE | $\mathcal{L}_{\mathrm{similarity}}=\mathrm{MSE}(\mathbf{BE}_s\mathbf{BE}_s^{\mathsf{T}},\mathbf{BE}_t\mathbf{BE}_t^{\mathsf{T}})$ | 3            |
+| (3)    | Stage3 总损    | $\mathcal{L}_{\mathrm{s3}}=10\mathcal{L}_{\mathrm{cosine}}+100\mathcal{L}_{\mathrm{similarity}}$                                  | 3            |
+| (4)(5) | InfoNCE        | 见 §5.4.1                                                                                                                        | 4            |
+| (6)    | Soft KL        | $\mathcal{L}_{\mathrm{soft}}=\mathrm{D_{KL}}(\mathrm{sm}(\mathbf{S}^{(s)}/\alpha)\|\mathrm{sm}(\mathbf{S}^{(t)}/\alpha))$         | 4            |
+| (7)    | Stage4 总损    | $\mathcal{L}_{\mathrm{s4}}=\mathcal{L}_{\mathrm{cl}}+16\mathcal{L}_{\mathrm{soft}}+10\mathcal{L}_{\mathrm{cosine}}$               | 4            |
+| Alg.1  | 目标长度       | $L_{\mathrm{tgt}}=L_{\mathrm{th}}+(L_{\mathrm{in}}-L_{\mathrm{th}})\rho$（短于阈值则不压）                                        | 2–4 / 推理  |
+| Alg.2  | $\rho$ 采样    | 40% 钉在 0.33，60% 探索其它区间                                                                                                   | 3–4         |
 
 教师构造：
 
 $$
 \mathbf{E}_t=\mathrm{Norm}\big(\mathrm{Norm}(\mathbf{E}_{\mathrm{qwen}})\ \|\ \mathrm{Norm}(\mathbf{E}_{\mathrm{qzhou}})\big).
+
 $$
 
 ---
@@ -402,39 +430,42 @@ $$
 
 ### 7.1 英文 MTEB（Table 1 摘要）
 
-| 模型 | Size | Dim | Mean(Task) | Mean(TaskType) |
-|------|------|-----|------------|----------------|
-| Qwen3-Embedding-0.6B（学生初始化） | 595M | 1024 | 70.70 | 64.88 |
-| **Jasper-Token-Compression-600M** | 600M | 2048 | **74.75** | **68.46** |
-| Qwen3-Embedding-4B | 4B | 2560 | 74.60 | 68.10 |
-| QZhou-Embedding（教师） | 7B | 3584 | 75.97 | 69.52 |
-| Qwen3-Embedding-8B（教师） | 8B | 4096 | 75.22 | 68.71 |
+
+| 模型                               | Size | Dim  | Mean(Task) | Mean(TaskType) |
+| ------------------------------------ | ------ | ------ | ------------ | ---------------- |
+| Qwen3-Embedding-0.6B（学生初始化） | 595M | 1024 | 70.70      | 64.88          |
+| **Jasper-Token-Compression-600M**  | 600M | 2048 | **74.75**  | **68.46**      |
+| Qwen3-Embedding-4B                 | 4B   | 2560 | 74.60      | 68.10          |
+| QZhou-Embedding（教师）            | 7B   | 3584 | 75.97      | 69.52          |
+| Qwen3-Embedding-8B（教师）         | 8B   | 4096 | 75.22      | 68.71          |
 
 相对基座：Mean(Task) **+4.05**，Mean(TaskType) **+3.58**；整体接近 4B–8B 开源模型，与 Seed1.5-Embedding（74.76）同档。
 
 ### 7.2 中文 MTEB（Table 2 摘要）
 
-| 模型 | Mean(Task) | Mean(TaskType) |
-|------|------------|----------------|
-| Qwen3-Embedding-0.6B | 66.33 | 67.45 |
-| **Jasper-TC-600M** | **73.51** | **75.00** |
-| Qwen3-Embedding-8B | 73.84 | 75.00 |
-| QZhou-Embedding | 76.99 | 78.58 |
+
+| 模型                 | Mean(Task) | Mean(TaskType) |
+| ---------------------- | ------------ | ---------------- |
+| Qwen3-Embedding-0.6B | 66.33      | 67.45          |
+| **Jasper-TC-600M**   | **73.51**  | **75.00**      |
+| Qwen3-Embedding-8B   | 73.84      | 75.00          |
+| QZhou-Embedding      | 76.99      | 78.58          |
 
 相对基座：**+7.18 / +7.55**；中文提升幅度大于英文，说明双语蒸馏有效。仍低于部分更大/专用中文模型（如 Youtu、QZhou-Zh）。
 
 ### 7.3 消融：对比学习（Table 3，英文 Task Type）
 
-| Task Type | Stage 3 | Stage 4 | Qwen3-8B |
-|-----------|---------|---------|----------|
-| Classification | 90.49 | 90.35 | 90.43 |
-| Clustering | 59.71 | 59.44 | 58.57 |
-| PairClassification | 90.08 | 90.15 | 87.52 |
-| Reranking | 50.84 | 50.60 | 51.56 |
-| **Retrieval** | **65.53** | **66.19** | **69.44** |
-| STS | 88.73 | 88.79 | 88.58 |
-| Summarization | 33.28 | 33.66 | 34.83 |
-| Mean(Task) | 74.65 | 74.75 | 75.22 |
+
+| Task Type          | Stage 3   | Stage 4   | Qwen3-8B  |
+| -------------------- | ----------- | ----------- | ----------- |
+| Classification     | 90.49     | 90.35     | 90.43     |
+| Clustering         | 59.71     | 59.44     | 58.57     |
+| PairClassification | 90.08     | 90.15     | 87.52     |
+| Reranking          | 50.84     | 50.60     | 51.56     |
+| **Retrieval**      | **65.53** | **66.19** | **69.44** |
+| STS                | 88.73     | 88.79     | 88.58     |
+| Summarization      | 33.28     | 33.66     | 34.83     |
+| Mean(Task)         | 74.65     | 74.75     | 75.22     |
 
 结论：
 
@@ -446,13 +477,14 @@ $$
 
 在 1600 条定长文本、batch=32 上测 **单样本平均编码 ms**：
 
-| 设置 | Mean(Task) | L=128 | 256 | 512 | 1024 | 2048 |
-|------|------------|-------|-----|-----|------|------|
-| Qwen3-Emb-0.6B（无压缩） | 70.70 | 3.22 | 6.47 | 12.20 | 24.24 | 49.99 |
-| Jasper $\rho=0.50$ | **74.75** | 2.62 | 3.96 | 7.39 | 13.11 | 25.07 |
-| Jasper $\rho=0.33$ | 74.70 | 2.52 | 3.52 | 5.41 | 9.38 | 17.52 |
-| Jasper $\rho=0.20$ | 74.58 | 2.38 | 2.91 | 4.00 | 6.56 | 11.48 |
-| Jasper $\rho=0.10$ | 74.21 | 2.09 | 2.56 | 3.18 | 4.48 | 6.95 |
+
+| 设置                     | Mean(Task) | L=128 | 256  | 512   | 1024  | 2048  |
+| -------------------------- | ------------ | ------- | ------ | ------- | ------- | ------- |
+| Qwen3-Emb-0.6B（无压缩） | 70.70      | 3.22  | 6.47 | 12.20 | 24.24 | 49.99 |
+| Jasper$\rho=0.50$        | **74.75**  | 2.62  | 3.96 | 7.39  | 13.11 | 25.07 |
+| Jasper$\rho=0.33$        | 74.70      | 2.52  | 3.52 | 5.41  | 9.38  | 17.52 |
+| Jasper$\rho=0.20$        | 74.58      | 2.38  | 2.91 | 4.00  | 6.56  | 11.48 |
+| Jasper$\rho=0.10$        | 74.21      | 2.09  | 2.56 | 3.18  | 4.48  | 6.95  |
 
 解读：
 
@@ -486,13 +518,14 @@ $$
 
 若你方路线是「大教师蒸馏小部署模型」（参见同目录《0.6B 行动路线》《Embedding蒸馏技术详解》），可直接借鉴：
 
-| 可抄 | 注意 |
-|------|------|
-| **双教师互补 + 维对齐拼接** | 需先验证教师相关/互补；乱拼可能负迁移 |
-| **Cosine 绝对对齐 + batch 相似度 MSE** | Stage3 的结构项对保持教师几何很关键 |
-| **检索阶段 InfoNCE + Soft KL** | Soft KL 把教师分数分布当 soft label，比单 hard CE 稳 |
-| **注意力前压缩 + 动态 $\rho$ 训练** | 部署侧用「质量–延迟旋钮」；阈值保护短 query |
-| mean-pool + 扩维投影 | 维数↑会抬存储；是否值得看召回收益 |
+
+| 可抄                                   | 注意                                                 |
+| ---------------------------------------- | ------------------------------------------------------ |
+| **双教师互补 + 维对齐拼接**            | 需先验证教师相关/互补；乱拼可能负迁移                |
+| **Cosine 绝对对齐 + batch 相似度 MSE** | Stage3 的结构项对保持教师几何很关键                  |
+| **检索阶段 InfoNCE + Soft KL**         | Soft KL 把教师分数分布当 soft label，比单 hard CE 稳 |
+| **注意力前压缩 + 动态 $\rho$ 训练**    | 部署侧用「质量–延迟旋钮」；阈值保护短 query         |
+| mean-pool + 扩维投影                   | 维数↑会抬存储；是否值得看召回收益                   |
 
 不太建议原样照搬的部分：
 
@@ -503,12 +536,13 @@ $$
 
 ## 10. 与系列工作关系
 
-| 工作 | 关系 |
-|------|------|
-| Stella / Jasper 蒸馏（2412.19048） | 英文 SOTA 蒸馏配方前身 |
-| Qwen3-Embedding | 学生初始化 + 一教师 |
-| QZhou-Embedding | 另一教师 + Stage4 数据/评测 prompt 对齐 |
-| DeepSeek-OCR | Token/上下文压缩思想来源（跨模态启发） |
+
+| 工作                                  | 关系                                                                                                   |
+| --------------------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Stella / Jasper 蒸馏（2412.19048）    | 英文 SOTA 蒸馏配方前身                                                                                 |
+| Qwen3-Embedding                       | 学生初始化 + 一教师                                                                                    |
+| QZhou-Embedding                       | 另一教师 + Stage4 数据/评测 prompt 对齐                                                                |
+| DeepSeek-OCR                          | Token/上下文压缩思想来源（跨模态启发）                                                                 |
 | OpenReview「Jasper-Flash / ETC+CAPD」 | 同思路的会议匿名稿叙事（Elastic Token Compression + Progressive Distillation），与本技术报告同一模型线 |
 
 ---
@@ -531,6 +565,7 @@ $$
 \underbrace{\mathcal{L}_{\mathrm{cl}}+\mathcal{L}_{\mathrm{soft}}}_{\text{检索排序}}
 \;+\;
 \underbrace{L_{\mathrm{tgt}}(L_{\mathrm{th}},\rho)}_{\text{推理可调长度}}.
+
 $$
 
 其主要未闭合问题仍是：**非对称检索与教师的差距**，以及 **更可学习的压缩器**——这也是自研蒸馏小模型时最该额外投入的方向。
@@ -539,7 +574,7 @@ $$
 
 ## 参考文献
 
-1. Zhang et al. *Jasper-Token-Compression-600M Technical Report*. arXiv:2511.14405v2, 2025.  
-2. Zhang et al. *Jasper and Stella: distillation of SOTA embedding models*. arXiv:2412.19048, 2024.  
-3. HF: https://huggingface.co/infgrad/Jasper-Token-Compression-600M  
-4. Training code: https://github.com/DunZhang/Jasper-Token-Compression-Training  
+1. Zhang et al. *Jasper-Token-Compression-600M Technical Report*. arXiv:2511.14405v2, 2025.
+2. Zhang et al. *Jasper and Stella: distillation of SOTA embedding models*. arXiv:2412.19048, 2024.
+3. HF: https://huggingface.co/infgrad/Jasper-Token-Compression-600M
+4. Training code: https://github.com/DunZhang/Jasper-Token-Compression-Training
