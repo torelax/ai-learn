@@ -27,9 +27,12 @@ cd ai-learn
 
 ```
 ai-learn/
-├── docs/reports/embedding/   # Embedding 调研报告
-├── embedding/                # 笔记与练习
-├── torch/                    # PyTorch 练习
+├── docs/reports/embedding/      # Embedding 调研报告
+├── docs/reports/lora/           # LoRA / PEFT 调研报告
+├── docs/reports/distillation/   # 知识蒸馏调研
+├── docs/reports/Qwen/           # Qwen 系列调研
+├── embedding/                   # 笔记与练习
+├── torch/                       # PyTorch 练习
 ├── ...
 ```
 
