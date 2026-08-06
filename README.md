@@ -27,14 +27,18 @@ cd ai-learn
 
 ```
 ai-learn/
-├── docs/reports/embedding/      # Embedding 调研报告
+├── AGENTS.md                    # Agent / 论文研究与 Notion 同步规范
+├── docs/reports/embedding/      # Embedding 调研报告（入库）
 ├── docs/reports/lora/           # LoRA / PEFT 调研报告
 ├── docs/reports/distillation/   # 知识蒸馏调研
 ├── docs/reports/Qwen/           # Qwen 系列调研
+├── docs/papers/<topic>/         # 论文 PDF 本地副本（不入库）
 ├── embedding/                   # 笔记与练习
 ├── torch/                       # PyTorch 练习
 ├── ...
 ```
+
+论文深读须保留 PDF 于 `docs/papers/`，报告 MD 为权威正文，并主动全文同步 Notion（Embedding 落点见 `AGENTS.md`；其他专题先问）。
 
 ## 贡献
 

@@ -1,0 +1,34 @@
+---
+description: ai-learn 论文研究：PDF 副本、报告正文、Notion 导入与禁删
+alwaysApply: true
+---
+
+# 论文研究与 Notion 同步
+
+## PDF（必做、不入库）
+
+- 路径：`docs/papers/<topic>/<短名>_<arxiv_id或venue>.pdf`（topic 与 `docs/reports/<topic>/` 对齐）
+- `docs/papers/` **整树 gitignore**，禁止加入版本库
+- 研究时主动下载/保存 PDF；目录不存在则创建
+- 报告元信息**不要**写 `local PDF`（存量不必清理）
+- 配图优先 **arXiv HTML / ar5iv 原图** → `docs/papers/<topic>/<短名>_<id>_figs/`；无则再 PDF 裁切
+
+## 报告 MD = 权威源
+
+- 深读写在 `docs/reports/<topic>/`
+- 算法类文首用精简元信息（对应 Notion callout）：paper URL、project/code、关键 refs、backbone、date、modality、languages（不含 local PDF）
+- Embedding 正文必含：训练数据、评测 benchmark、对比方法、关键数据集简介
+- **之后**新建/大改：章节标题**不加** `1.` / `6.` 等数字序号（语义标题即可）；存量带序号页不必为去序号而整页重排
+- **之后**新建/大改：正文须含关键**原图 + 中文解释**（方法图/主结果图等）；图可放 `docs/reports/<topic>/figures/<短名>/` 再嵌入（存量不必整页补图）
+
+## Notion（主动导入，全文一致）
+
+- 写完/大改深读后：**全文**导入 Notion（可做格式转换，禁止摘要替代）
+- **Embedding**：Paper 库 `collection://0391fb9a-5dfb-4b28-b7dc-84cb27713890`；模型/算法在 Embedding&Rerank ModelCard 对应 tab 加 mention
+- **非 Embedding**：落点**每次先问用户**，不得自选
+- **禁止删除** Notion 页面或既有内容；任何删除必须先征得用户明确同意
+- 只允许覆盖「本报告对应、自己导入的那一页」以保持与 MD 一致
+- 新页/大改同步时同样不加章节数字序号，便于局部插入而不牵动前后标题
+- 同步时**必须上传报告中的图**，Notion 不得只剩文字版
+
+细节见 [AGENTS.md](AGENTS.md)。

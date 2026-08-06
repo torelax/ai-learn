@@ -6,3 +6,6 @@
 **/.env
 
 tmp
+
+# 论文 PDF 本地副本（整树不入库；约定见 AGENTS.md）
+docs/papers/
