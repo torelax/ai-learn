@@ -1,7 +1,9 @@
 # Conan-embedding-v2 技术详解
 
 > 基于论文 [Conan-Embedding-v2: Training an LLM from Scratch for Text Embeddings](https://arxiv.org/abs/2509.12892)（Li et al., Tencent PCG；亦见 EMNLP 2025）。
-> v1 动态难负例谱系：[Conan-embedding](https://arxiv.org/abs/2408.15710)（arXiv:2408.15710）。
+> local PDF: `docs/papers/embedding/Conan-embedding-v2_2509.12892.pdf`
+> 中译: `docs/papers/embedding/Conan-embedding-v2_2509.12892_zh.md`
+> v1 深读：[Conan-embedding详解.md](Conan-embedding详解.md)（[arXiv:2408.15710](https://arxiv.org/abs/2408.15710)）。
 > 本文把 **从零训练 1.4B 嵌入向 LLM、soft-masking、跨语检索数据集 CLR、动态难负例 DHNM、InfoNCE/CoSENT 公式与 MTEB SOTA 宣称（2025-05）** 写全。
 
 ---
@@ -219,7 +221,7 @@ $$
 1. 教师模型的「难」≠ 学生当前的「难」；
 2. 训练中负例变易后仍占坑，梯度信号变弱。
 
-v1（[arXiv:2408.15710](https://arxiv.org/abs/2408.15710)）提出训中按难度替换；v2 **加重判定并改为逐步检查**。
+v1（见 [Conan-embedding详解.md](Conan-embedding详解.md)）提出训中按难度替换（每 100 step；$1.15 S_i<S_0$ 且 $|S|<0.8$）；v2 **加重判定并改为逐步检查**。
 
 ### 7.2 分数与替换规则
 

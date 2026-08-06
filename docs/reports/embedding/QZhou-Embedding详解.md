@@ -1,8 +1,14 @@
 # QZhou-Embedding 技术详解
 
-> 基于 [QZhou-Embedding Technical Report](https://arxiv.org/abs/2508.21632)（Kingsoft AI / 金山，2025-08；[PDF](https://arxiv.org/pdf/2508.21632)）。  
-> 权重：[Kingsoft-LLM/QZhou-Embedding](https://huggingface.co/Kingsoft-LLM/QZhou-Embedding)（Apache-2.0）；评测脚本：https://github.com/Kingsoft-LLM/QZhou-Embedding  
-> 本文写全 **统一多任务框架（数据变换 + 三类损失）、LLM 数据合成、Data Grouping、两阶段训练与 MTEB/CMTEB 结果**；并对照因果注意力相关工作（Echo / LLM2Vec / [Token Prepending](Token-Prepending详解.md)）。
+> **paper**: [arXiv:2508.21632](https://arxiv.org/abs/2508.21632) · [PDF](https://arxiv.org/pdf/2508.21632)  
+> **code / weights**: [GitHub](https://github.com/Kingsoft-LLM/QZhou-Embedding) · [HF Kingsoft-LLM/QZhou-Embedding](https://huggingface.co/Kingsoft-LLM/QZhou-Embedding)（Apache-2.0）  
+> **refs**: [LLM2Vec](https://arxiv.org/abs/2404.05961) · [Echo](https://arxiv.org/abs/2402.15449) · [gte / gte-Qwen2](https://arxiv.org/abs/2308.03281) · [Token Prepending](Token-Prepending详解.md)  
+> **backbone**: Qwen2.5-7B-Instruct → 双向注意力 + mean pooling + L2  
+> **date**: 2025-08（Kingsoft AI / 金山）  
+> **modality**: 文本  
+> **languages**: 中英为主（冲榜 MTEB eng + CMTEB cmn）  
+> **local PDF**: `docs/papers/embedding/QZhou-Embedding_2508.21632.pdf`  
+> 本文写全 **多任务框架、训练/评测数据集清单、LLM 合成、Data Grouping、两阶段训练与 MTEB/CMTEB 结果**。
 
 ---
 
@@ -21,7 +27,7 @@
 | 长度 | 训练 query/passage **256 / 1536**；RoPE 外推可用到 ~8K |
 | 开源 | Apache-2.0 |
 
-与 Jasper 蒸馏叙事的关系：Jasper-Token-Compression 把 **QZhou（7B）+ Qwen3-Embedding-8B** 当作互补教师；QZhou 在 STS/细粒度语义上极强（见 §7 注）。
+与 Jasper 蒸馏叙事的关系：Jasper-Token-Compression 把 **QZhou（7B）+ Qwen3-Embedding-8B** 当作互补教师；QZhou 在 STS/细粒度语义上极强（见 §8 注）。
 
 ---
 
@@ -180,9 +186,100 @@ $$
 
 ---
 
-## 6. 训练优化
+## 6. 实验用到的数据集
 
-### 6.1 Data Grouping（式 4）
+论文 §6「Training Data」给出训练语料拼盘与过滤流程；评测则是 **MTEB (eng, v2)** 与 **CMTEB (cmn, v1)**。下表按原文整理（名称以报告英文为准）。
+
+### 6.1 规模与流水线
+
+| 项 | 内容 |
+|----|------|
+| 最终训练 | 约 **11M** 四元组 `(query, pos, neg, instruction)` |
+| LLM 合成 | 约 **5M** 高质量样本并入（小集优先 Paraphrase / Augment） |
+| 去重与过滤 | 全量去重；**gte-Qwen2-7B-instruct** 滤低分 query–pos |
+| Hard neg | 缺负例时：约 **30%** API 合成；其余 **stella-large-zh-v3** 取 top-10～30 |
+| 污染控制 | 对 MTEB 相关训练集做 **contamination exclusion**（去掉与测试集高度相似样本） |
+| Instruction | 原集保留；MTEB 训练 split 对齐 **Qwen3-Embedding** 评测指令；Huatuo / Reddit / Law-GPT / GLUE 等外域自写指令（附录 A.2） |
+
+### 6.2 数据来源总览（集合级）
+
+| 来源集合 | 说明 |
+|----------|------|
+| **bge-en-icl / bge-m3-data / bge-multilingual-gemma2-data** | FlagEmbedding 开源拼盘（[FlagEmbedding/dataset](https://github.com/FlagOpen/FlagEmbedding/tree/master/dataset)） |
+| **E5 公开数据约 1.5M** | 与 E5-Mistral / Echo / LLM2Vec 同系公开检索监督集 |
+| **Stella `retrieval_data_llm`** | 高质量 `(query, pos, neg)` 三元组 |
+| **zpoint 相关** | 含 Huatuo 医疗 QA 等 |
+| **sentence-transformers / HF 其它** | reddit、hover、mr-tydi、law-gpt、s2orc 等 |
+| **杂项开源** | web_questions、BioASQ、cmrc、CSL、nli_for_simcse、MLDR、GLUE、Yelp、Weibo Sentiment 等 |
+| **MTEB 评测相关训练 split** | Imdb / MassiveIntent / MassiveScenario / STS12 / LCQMC / PAWSX / STSB 等（仅 train，已做污染剔除） |
+
+异构源经 §4 三类变换后入训；对 bge/e5 子集与小规模 CLS/STS 等做合成增强。
+
+### 6.3 主要具名数据集（训练）
+
+#### 检索 / QA / 事实核查（Retrieval 向）
+
+| 数据集 | 类型简介 |
+|--------|----------|
+| **MS MARCO**（passage + document） | 大规模网络搜索式 QA；passage/document 检索主粮 |
+| **Natural Questions (NQ)** | Google 真实查询 → Wikipedia 答案段落 |
+| **ELI5** | 长答案开放式 QA |
+| **HotpotQA** | 多跳推理 QA |
+| **MIRACL** | 多语种检索（18 语） |
+| **SQuAD** | 阅读理解式段落问答 |
+| **FEVER** | 声明–证据；Supports→pos，Refutes→neg（Claim–Evidence 变换） |
+| **HoVer** | 多跳事实抽取与声明验证 |
+| **Quora Question Pairs (QQP)** | 问句对是否同义 / 检索式用法 |
+| **DuReader** | 中文真实场景机器阅读理解 |
+| **Mr. TyDi** | 多语种稠密检索基准相关数据 |
+| **S2ORC** | Semantic Scholar 学术语料（标题–摘要等 Title–Body 源） |
+| **BioASQ** | 生物医学语义索引与 QA |
+| **CMRC** | 中文跨度抽取式阅读理解 |
+| **MLDR** | 多语长文档检索相关 |
+| **Stella retrieval_data_llm** | 已挖好难负例的三元组 |
+| **Huatuo / Law-GPT / Reddit** | 医疗 QA、法律、论坛语义检索；报告强调自写领域 instruction |
+
+另含新闻 / arXiv / Wikipedia 等 **Title–Body/Abstract** 与论坛 **Question–Answer** 类数据（§3.2.1），报告未逐条点名者经统一变换并入。
+
+#### NLI / STS / 分类（NLI & CLS 向）
+
+| 数据集 | 类型简介 |
+|--------|----------|
+| **nli_for_simcse**（含 SNLI/MNLI 等） | 蕴含类句对 → Cosent 分数（entail/neutral/contradiction → 2/1/0） |
+| **GLUE** | 多任务 NLU 拼盘；外域 instruction |
+| **STS12 / STSB** | 语义相似度连续分；可对称翻倍 |
+| **LCQMC** | 大规模中文问句匹配 |
+| **PAWS-X** | 跨语对抗释义识别 |
+| **Imdb-Classification** | 影评情感分类（example-based） |
+| **MassiveIntent / MassiveScenario** | Massive NLU 意图/场景分类 |
+| **Yelp Reviews** | 商户评论分类 |
+| **Weibo Sentiment** | 微博情感分类 |
+| **CSL** | 中文科学文献相关分类/检索用法 |
+
+### 6.4 关键训练集一句话介绍
+
+- **MS MARCO**：工业检索标配；短查询对长 passage，撑起 Stage1「纯检索」。  
+- **NQ / HotpotQA / FEVER / HoVer**：真实查询、多跳与事实验证，补难负例与推理型检索。  
+- **DuReader / CMRC / Huatuo**：中文与垂直域，服务 CMTEB 与领域 instruction。  
+- **MIRACL / Mr.TyDi / MLDR / PAWS-X**：多语与长文档覆盖，虽主榜为 eng/cmn，语料更广。  
+- **SNLI·MNLI / STS·LCQMC**：Stage2 Cosent 主战场；对称翻倍放大 STS。  
+- **Imdb / Massive* / Yelp / Weibo**：example-based 分类，配合同类 MASK InfoNCE。  
+- **E5 1.5M + BGE 系列拼盘**：社区已整理好的检索监督底座；报告称主要只更新了更难的负例。
+
+### 6.5 评测基准（实验对比用）
+
+| 基准 | 口径 | 任务类型 | 对比对象（报告口径） |
+|------|------|----------|----------------------|
+| **MTEB (eng, v2)** | 2025-08-27 榜 | Class. / Clust. / PairCLS / Rerank / STS / Retr. / Summ. | 榜前模型：Qwen3-Emb、Seed1.5/1.6、gemini-embedding、Jasper、Linq/SFR-Mistral、NV-Embed-v2、LGAI-Embedding 等 |
+| **CMTEB (cmn, v1)** | 同上 | Class. / Clust. / PairCLS / Rerank / STS / Retr. | Seed、Conan v1/v2、Qwen3-Emb、xiaobu、piccolo、zpoint、ritrieve_zh 等 |
+
+官方排名协议下双榜第一（报告宣称）。子任务分数见 §8。
+
+---
+
+## 7. 训练优化
+
+### 7.1 Data Grouping（式 4）
 
 比「按任务同质 batch」更细：按 **数据集文件** 分组，**每个 batch 只来自同一数据集**（同域 in-batch neg 更难）。采样权重：
 
@@ -194,7 +291,7 @@ $$
 
 $l_i$ 为数据集大小，$\alpha$ 同 gte/mgte 设定。
 
-### 6.2 两阶段训练
+### 7.2 两阶段训练
 
 | | Stage 1 | Stage 2 |
 |--|---------|---------|
@@ -223,7 +320,7 @@ $$
 
 （$M_i$ 为检索集指示；与论文记号一致处按 RET 集合定义。）
 
-### 6.3 其它超参
+### 7.3 其它超参
 
 - Hard neg：**4** / 样本；bf16；Adam wd **0.01**；  
 - InfoNCE batch **256**，Cosent **768**；  
@@ -231,9 +328,9 @@ $$
 
 ---
 
-## 7. 实验结果（2025-08-27 口径）
+## 8. 实验结果（2025-08-27 口径）
 
-### 7.1 MTEB English (eng, v2) — Table 2
+### 8.1 MTEB English (eng, v2) — Table 2
 
 | Model | Class. | Clust. | PairCls | Rerank | STS | Retr. | Summ. | Mean(Task) | Mean(Type) |
 |-------|--------|--------|---------|--------|-----|-------|-------|------------|------------|
@@ -241,7 +338,7 @@ $$
 | Seed1.5-Embedding | 89.88 | 60.83 | 87.39 | 50.67 | 67.45 | 87.23 | 36.44 | 74.76 | 68.56 |
 | **QZhou-Embedding** | 88.97 | **61.65** | **92.43** | **51.77** | 67.12 | **91.65** | 33.05 | **75.97** | **69.52** |
 
-### 7.2 CMTEB Chinese (cmn, v1) — Table 3
+### 8.2 CMTEB Chinese (cmn, v1) — Table 3
 
 | Model | Class. | Clust. | PairCls | Rerank | STS | Retr. | Mean(Task) | Mean(Type) |
 |-------|--------|--------|---------|--------|-----|-------|------------|------------|
@@ -253,7 +350,7 @@ $$
 
 ---
 
-## 8. 可迁移实践（对自研 Embedding）
+## 9. 可迁移实践（对自研 Embedding）
 
 1. **先检索、后全能**：Stage1 打底检索，Stage2 用 $\eta_{\mathrm{RET}}$ 保护检索不被 STS/CLS 淹没。  
 2. **三类损失不要混成一个 InfoNCE**：NLI 用 Cosent；CLS 必须 **同类 MASK**。  
@@ -264,7 +361,7 @@ $$
 
 ---
 
-## 9. 局限与后续
+## 10. 局限与后续
 
 - 报告自评：数据质量/多样性是主因；将做多模态、多语与 Agent 记忆场景。  
 - 训练成本：7B 全参 + 11M 对 + API 合成，复现门槛高。  
@@ -273,7 +370,7 @@ $$
 
 ---
 
-## 10. 公式速查
+## 11. 公式速查
 
 | 编号 | 名称 | 要点 |
 |------|------|------|
@@ -285,7 +382,7 @@ $$
 
 ---
 
-## 11. 结论
+## 12. 结论
 
 QZhou-Embedding 的配方可以压成一句话：
 

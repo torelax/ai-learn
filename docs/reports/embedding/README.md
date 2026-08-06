@@ -2,6 +2,8 @@
 
 学习/调研文档（自 vlm_train / modelforge 迁入）。**Markdown 为源文件**；仅保留《图文 Embedding 模型技术综述》的 HTML 供审阅对照。
 
+论文 PDF 本地副本：`docs/papers/embedding/`（不入库）。Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范见根目录 [AGENTS.md](../../../AGENTS.md)。
+
 ## 总览与规划
 
 | 文档 | 说明 |
@@ -18,8 +20,14 @@
 |------|------|
 | [BGE-M3三功能统一详解报告.md](BGE-M3三功能统一详解报告.md) | BGE-M3 |
 | [Embedding蒸馏技术详解.md](Embedding蒸馏技术详解.md) | Embedding 蒸馏专题 |
-| [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例 |
+| [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例工业闭环 |
+| [ANCE详解.md](ANCE详解.md) | 全局 ANN 难负例 + 异步刷新 |
+| [RocketQA详解.md](RocketQA详解.md) | CE 去噪 hard + 伪标；v2 动态 listwise |
+| [NV-Retriever详解.md](NV-Retriever详解.md) | Positive-aware 挖负（MarginPos / PercPos） |
+| [LLM-DA文本行人检索数据增强详解.md](LLM-DA文本行人检索数据增强详解.md) | LLM 改写 + TFF + BSS |
+| [DeVE-QA稠密视频事件问答详解.md](DeVE-QA稠密视频事件问答详解.md) | 稠密视频事件 QA 数据与 DeVi |
 | [Jasper-Token-Compression-600M详解.md](Jasper-Token-Compression-600M详解.md) | Jasper 600M：双教师蒸馏 + 弹性 Token 压缩 |
+
 ## Late Interaction 族（文本 → 视觉文档）
 
 | 文档 | 论文 / 来源 |
@@ -37,7 +45,8 @@
 | [gte-Qwen2详解.md](gte-Qwen2详解.md) | 方法 [arXiv:2308.03281](https://arxiv.org/abs/2308.03281) + [HF gte-Qwen2-7B](https://huggingface.co/Alibaba-NLP/gte-Qwen2-7B-instruct) |
 | [Nomic-Embed详解.md](Nomic-Embed详解.md) | [arXiv:2402.01613](https://arxiv.org/abs/2402.01613) |
 | [LLM2Vec详解.md](LLM2Vec详解.md) | [arXiv:2404.05961](https://arxiv.org/abs/2404.05961) |
-| [Conan-embedding-v2详解.md](Conan-embedding-v2详解.md) | [arXiv:2509.12892](https://arxiv.org/abs/2509.12892)（EMNLP 2025；v1 见 [2408.15710](https://arxiv.org/abs/2408.15710)） |
+| [Conan-embedding详解.md](Conan-embedding详解.md) | [arXiv:2408.15710](https://arxiv.org/abs/2408.15710)（v1：DHNM + Cross-GPU CBB；CMTEB） |
+| [Conan-embedding-v2详解.md](Conan-embedding-v2详解.md) | [arXiv:2509.12892](https://arxiv.org/abs/2509.12892)（EMNLP 2025；从零 1.4B LLM） |
 | [QZhou-Embedding详解.md](QZhou-Embedding详解.md) | [arXiv:2508.21632](https://arxiv.org/abs/2508.21632)（双向 Qwen2.5-7B + 多任务/合成/两阶段） |
 | [Token-Prepending详解.md](Token-Prepending详解.md) | [ACL 2025](https://aclanthology.org/2025.acl-long.159/)（免训练层间回灌；因果注意力补丁） |
 
