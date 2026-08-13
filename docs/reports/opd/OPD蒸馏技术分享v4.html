@@ -1,0 +1,1573 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPD 蒸馏技术分享</title>
+<style>
+/* ============================================================
+   排版规范（1280×720 坐标系，投屏后按比例放大）
+   最小字号 14px —— 1080p 下约 21px，后排可读
+   每页 .body 直接子块 ≤ 3（个别 4），可见字数 ≤ 550
+   ============================================================ */
+:root{
+  --bg:#0e1117; --panel:#161c28; --panel2:#1d2534; --line:#2a3444;
+  /* dim2 = 5.0:1（原 #6b7a8d 只有 4.31:1，投屏后排偏灰） */
+  --tx:#e6edf3; --dim:#9aa7b8; --dim2:#758597;
+  --teacher:#4dd0c4; --student:#ffab5e; --danger:#ff6b6b; --ok:#5ed99b;
+  --accent:#7aa2f7; --warn:#ffd866; --purple:#c792ea;
+  --mono:"SF Mono",Menlo,Consolas,"DejaVu Sans Mono","Noto Sans Mono CJK SC",monospace;
+  --sans:-apple-system,"PingFang SC","Microsoft YaHei","Noto Sans CJK SC",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{width:100%;height:100%;overflow:hidden;background:#07090d;font-family:var(--sans)}
+#stage{position:absolute;top:50%;left:50%;width:1280px;height:720px;transform-origin:center center;
+  background:var(--bg);color:var(--tx);overflow:hidden}
+.slide{position:absolute;inset:0;padding:44px 62px 58px;display:none;flex-direction:column}
+.slide.active{display:flex}
+.slide.apx{background:linear-gradient(180deg,#121a2a 0%,var(--bg) 45%)}
+
+.act{font-size:15px;letter-spacing:.14em;color:var(--dim2);margin-bottom:8px}
+.act .ax{color:var(--purple)}
+h1{font-size:33px;font-weight:650;line-height:1.26;margin-bottom:8px}
+h1 .lt{color:var(--dim);font-weight:400}
+.sub{font-size:19.5px;color:var(--dim);margin-bottom:18px;line-height:1.55}
+.body{flex:1;min-height:0;display:flex;flex-direction:column;gap:22px}
+.body>*{flex-shrink:0}
+.row{display:flex;gap:18px;align-items:stretch}
+.row.top{align-items:flex-start}
+.col{flex:1;min-width:0}
+p{font-size:21px;line-height:1.62}
+small{font-size:17.5px;color:var(--dim);line-height:1.6;display:block}
+b,strong{color:#fff;font-weight:650}
+em{font-style:normal;color:var(--warn)}
+.tt{font-family:var(--mono);font-size:.95em;background:var(--panel2);padding:1px 6px;border-radius:4px;color:#cdd9e5}
+ul{list-style:none}
+li{font-size:20px;line-height:1.62;padding-left:23px;position:relative;margin-bottom:10px}
+li::before{content:"";position:absolute;left:2px;top:.68em;width:6px;height:6px;border-radius:50%;background:var(--dim2)}
+ol{counter-reset:n;list-style:none}
+ol li{padding-left:31px}
+ol li::before{counter-increment:n;content:counter(n);background:none;width:auto;height:auto;left:0;top:-1px;
+  font-family:var(--mono);font-size:17px;color:var(--accent);font-weight:700}
+
+.card{background:var(--panel);border:1px solid var(--line);border-radius:11px;padding:20px 24px}
+.card h3{font-size:19px;font-weight:650;margin-bottom:11px;color:#fff;display:flex;align-items:center;gap:9px}
+.card p,.card li{font-size:19px;line-height:1.6}
+.card small{font-size:17.5px}
+.card.t{border-color:rgba(77,208,196,.5)}
+.card.s{border-color:rgba(255,171,94,.5)}
+.card.d{border-color:rgba(255,107,107,.5)}
+.card.g{border-color:rgba(94,217,155,.5)}
+.card.a{border-color:rgba(122,162,247,.5)}
+.card.w{border-color:rgba(255,216,102,.5)}
+.card.p{border-color:rgba(199,146,234,.5)}
+.tag{font-family:var(--mono);font-size:15px;padding:2px 9px;border-radius:20px;border:1px solid currentColor;
+  font-weight:600;flex-shrink:0}
+.tag.t{color:var(--teacher)} .tag.s{color:var(--student)} .tag.d{color:var(--danger)}
+.tag.g{color:var(--ok)} .tag.a{color:var(--accent)} .tag.w{color:var(--warn)} .tag.p{color:var(--purple)}
+
+.hero{background:linear-gradient(90deg,rgba(122,162,247,.15),rgba(122,162,247,.02));
+  border-left:4px solid var(--accent);padding:18px 25px;border-radius:0 9px 9px 0}
+.hero.d{background:linear-gradient(90deg,rgba(255,107,107,.15),rgba(255,107,107,.02));border-left-color:var(--danger)}
+.hero.g{background:linear-gradient(90deg,rgba(94,217,155,.15),rgba(94,217,155,.02));border-left-color:var(--ok)}
+.hero.w{background:linear-gradient(90deg,rgba(255,216,102,.15),rgba(255,216,102,.02));border-left-color:var(--warn)}
+.hero.p{background:linear-gradient(90deg,rgba(199,146,234,.15),rgba(199,146,234,.02));border-left-color:var(--purple)}
+.hero p{font-size:21.5px;line-height:1.58}
+.hero .k{font-size:15.5px;letter-spacing:.08em;color:var(--dim);margin-bottom:6px}
+
+table{width:100%;border-collapse:collapse;font-size:18px}
+th{text-align:left;font-weight:600;color:var(--dim);font-size:16px;padding:10px 12px;
+  border-bottom:1px solid var(--line);white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid rgba(42,52,68,.5);vertical-align:top;line-height:1.5}
+tr:last-child td{border-bottom:none}
+td.n,th.n{text-align:right;font-family:var(--mono)}
+td.c,th.c{text-align:center}
+tr.hi td{background:rgba(255,216,102,.10)}
+tr.bad td{background:rgba(255,107,107,.10)}
+tr.good td{background:rgba(94,217,155,.10)}
+table.sm{font-size:17px} table.sm th{font-size:15.5px} table.sm th,table.sm td{padding:8px 10px}
+
+.log{background:#0a0d13;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+.log .lh{background:var(--panel2);padding:11px 16px;font-family:var(--mono);font-size:15.5px;color:var(--dim);
+  border-bottom:1px solid var(--line);display:flex;gap:18px;flex-wrap:wrap}
+.log .lh b{color:var(--tx);font-weight:600}
+.log table{font-family:var(--mono);font-size:16px}
+.log th{padding:7px 11px;font-family:var(--mono);font-size:15px;border-bottom:1px solid var(--line)}
+.log td{padding:5.5px 11px;border-bottom:1px solid rgba(42,52,68,.35);white-space:nowrap}
+.log .sep{border-left:1px solid var(--line)}
+.log .tk{color:var(--teacher)} .log .sk{color:var(--student)}
+.log .pos{color:var(--dim);text-align:right}
+.log .ro{color:#fff;font-weight:650}
+.log .kl{text-align:right;color:var(--warn)}
+.log .pb{color:#a3b1c2;font-size:15px}
+.log tr.hi td{background:rgba(255,216,102,.13)}
+.log tr.hi2 td{background:rgba(122,162,247,.13)}
+.log .yes{color:var(--ok)} .log .no{color:var(--danger);font-weight:700}
+
+pre{background:#0a0d13;border:1px solid var(--line);border-radius:9px;padding:15px 18px;
+  font-family:var(--mono);font-size:17px;line-height:1.72;color:#cdd9e5;overflow:hidden}
+pre.big{font-size:21px;line-height:1.85}
+pre .c{color:var(--dim2)} pre .k{color:var(--purple)} pre .st{color:var(--ok)} pre .hl{color:var(--warn);font-weight:600}
+pre .r{color:var(--danger)} pre .tc{color:var(--teacher)} pre .sc{color:var(--student)}
+
+/* token 链条 */
+.chain{display:flex;align-items:center;gap:6px;flex-wrap:nowrap}
+.tok{background:var(--panel2);border:1px solid var(--line);border-radius:7px;padding:9px 14px;
+  font-size:19px;white-space:nowrap}
+.tok.ok{border-color:rgba(94,217,155,.55);color:var(--ok)}
+.tok.bad{border-color:rgba(255,107,107,.7);color:var(--danger);background:rgba(255,107,107,.14);font-weight:650}
+.tok.un{border-color:rgba(255,107,107,.32);border-style:dashed;color:var(--dim);background:rgba(255,107,107,.05)}
+.chain .cs{color:var(--dim2);font-size:16px;flex-shrink:0}
+
+/* 系统架构图 */
+.sysbox{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 19px;text-align:center}
+.sysbox .st{font-size:19px;font-weight:650;color:#fff;line-height:1.3}
+.sysbox .sd{font-size:15.5px;color:var(--dim);margin-top:5px;font-family:var(--mono)}
+.sysbox.t{border-color:rgba(77,208,196,.55);background:rgba(77,208,196,.07)}
+.sysbox.s{border-color:rgba(255,171,94,.55);background:rgba(255,171,94,.07)}
+.sysbox.g{border-color:rgba(94,217,155,.55);background:rgba(94,217,155,.07)}
+.sysbox.dim{border-style:dashed;opacity:.75}
+.conn{font-family:var(--mono);font-size:15.5px;color:var(--dim);text-align:center;padding:5px 0;line-height:1.4}
+.conn b{color:var(--accent);font-weight:600}
+
+.flow{display:flex;align-items:center;justify-content:center}
+.fb{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:16px 19px;text-align:center;min-width:128px}
+.fb .num{font-family:var(--mono);font-size:15px;color:var(--accent);font-weight:700;margin-bottom:5px}
+.fb .nm{font-size:18px;font-weight:650;color:#fff;line-height:1.32}
+.fb .eg{font-size:15px;color:var(--dim);margin-top:6px;font-family:var(--mono)}
+.fb.t{border-color:rgba(77,208,196,.55)} .fb.t .num{color:var(--teacher)}
+.fb.s{border-color:rgba(255,171,94,.55)} .fb.s .num{color:var(--student)}
+.fb.g{border-color:rgba(94,217,155,.55)} .fb.g .num{color:var(--ok)}
+.ar{color:var(--dim2);font-size:21px;padding:0 9px;flex-shrink:0}
+.ar .lb{display:block;font-size:15px;font-family:var(--mono);color:var(--dim);text-align:center;margin-top:-3px}
+
+.vs{display:flex;align-items:stretch}
+.vs>div{flex:1;padding:19px 22px;background:var(--panel);border:1px solid var(--line)}
+.vs>div:first-child{border-radius:10px 0 0 10px;border-right:none}
+.vs>div:last-child{border-radius:0 10px 10px 0}
+.vs .vh{font-size:18px;font-weight:650;margin-bottom:11px}
+.vs .bad .vh{color:var(--danger)} .vs .good .vh{color:var(--ok)}
+.vs p,.vs li{font-size:18.5px;line-height:1.55}
+.vsx{align-self:center;font-family:var(--mono);color:var(--dim);font-size:14.5px;padding:0 13px;
+  flex-shrink:0;text-align:center;line-height:1.4}
+
+.big{font-family:var(--mono);font-size:46px;font-weight:700;line-height:1.12}
+.big.g{color:var(--ok)} .big.d{color:var(--danger)} .big.w{color:var(--warn)} .big.a{color:var(--accent)}
+.bigl{font-size:16px;color:var(--dim);margin-top:8px;line-height:1.45}
+.stats{display:flex;gap:16px}
+.stats>div{flex:1;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:19px 22px}
+
+.dist{display:flex;align-items:flex-end;gap:8px;height:158px;padding:0 2px}
+.dist .b{flex:1;display:flex;flex-direction:column;justify-content:flex-end;align-items:center;height:100%}
+.dist .bar{width:100%;border-radius:4px 4px 0 0;min-height:3px}
+.dlb{display:flex;gap:8px;padding:0 2px;margin-top:7px}
+.dlb span{flex:1;text-align:center;font-family:var(--mono);font-size:15px;color:var(--dim)}
+.dttl{font-size:17.5px;font-weight:650;margin-bottom:9px}
+.dttl .v{font-family:var(--mono);font-size:15px;font-weight:400;color:var(--dim);display:block;margin-top:3px}
+
+.foot{font-size:17px;color:var(--dim);border-top:1px solid var(--line);padding-top:12px;line-height:1.55}
+.gl{font-size:16.5px;color:var(--dim);line-height:1.58;border-top:1px dashed var(--line);padding-top:11px}
+.gl b{color:var(--tx);font-weight:600}
+
+.jump{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--purple);font-size:17px;
+  border:1px solid rgba(199,146,234,.5);border-radius:17px;padding:3px 13px;
+  background:rgba(199,146,234,.1);white-space:nowrap;transition:background .15s}
+.jump:hover{background:rgba(199,146,234,.24)}
+.back{display:inline-flex;align-items:center;gap:6px;cursor:pointer;color:var(--dim);font-size:16.5px;
+  border:1px solid var(--line);border-radius:17px;padding:3px 13px;white-space:nowrap}
+.back:hover{color:var(--tx);background:var(--panel2)}
+
+.cover{justify-content:center;align-items:flex-start;padding:62px 84px}
+.cover .ttl{font-size:54px;font-weight:700;line-height:1.16;letter-spacing:-.01em}
+.cover .ttl span{color:var(--accent)}
+.cover .stl{font-size:21px;color:var(--dim);margin-top:22px;line-height:1.62}
+.cover .meta{margin-top:40px;font-family:var(--mono);font-size:15.5px;color:var(--dim);line-height:1.95}
+.cover .rule{width:68px;height:3px;background:var(--accent);margin:26px 0}
+
+#bar{position:fixed;top:0;left:0;height:2px;background:var(--accent);z-index:50;transition:width .18s}
+#num{position:fixed;bottom:14px;right:22px;font-family:var(--mono);font-size:13px;color:var(--dim2);z-index:50}
+#hint{position:fixed;bottom:14px;left:22px;font-family:var(--mono);font-size:12.5px;color:#43505f;z-index:50}
+.zone{position:fixed;top:0;bottom:0;width:4%;z-index:40;cursor:pointer}
+.zone#zL{left:0} .zone#zR{right:0}
+.zone::after{content:"";position:absolute;top:50%;width:0;height:0;opacity:0;transition:opacity .15s;
+  border-top:10px solid transparent;border-bottom:10px solid transparent}
+.zone:hover::after{opacity:.5}
+#zL::after{left:11px;border-right:12px solid var(--dim)}
+#zR::after{right:11px;border-left:12px solid var(--dim)}
+#idx{position:fixed;inset:0;background:rgba(7,9,13,.975);z-index:100;display:none;overflow-y:auto;padding:30px 42px}
+#idx.on{display:block}
+#idx h2{color:var(--tx);font-size:20px;margin-bottom:16px}
+#idx .cols{column-count:3;column-gap:30px}
+#idx .grp{margin-bottom:14px;break-inside:avoid}
+#idx .gt{font-size:13px;letter-spacing:.1em;color:var(--purple);margin-bottom:6px}
+#idx .it{display:flex;gap:10px;padding:2px 8px;border-radius:5px;cursor:pointer;color:var(--dim);
+  font-size:14.5px;align-items:baseline}
+#idx .it:hover{background:var(--panel2);color:var(--tx)}
+#idx .it.cur{background:rgba(122,162,247,.18);color:var(--accent)}
+#idx .it .n{font-family:var(--mono);font-size:13px;color:var(--dim2);width:24px;text-align:right;flex-shrink:0}
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<div id="num"></div>
+<div id="hint">← → 翻页 · Esc 目录 · F 全屏</div>
+<div id="zL" class="zone" title="上一页"></div>
+<div id="zR" class="zone" title="下一页"></div>
+<div id="idx"></div>
+
+<div id="stage">
+<!-- ============ 开场 ============ -->
+<section class="slide cover" data-act="开场" data-t="封面">
+  <div class="act">ON-POLICY DISTILLATION · 组内技术分享</div>
+  <div class="ttl">让学生先自己说，<br>再让教师<span>逐字纠正</span></div>
+  <div class="rule"></div>
+  <div class="stl">它和普通蒸馏差在哪、为什么这个差别很关键，<br>以及怎么读懂训练时产出的诊断数据。</div>
+  <div class="meta">四个问题 · 正文 46 页 + 附录 12 页 · 主干 60 分钟<br>关键数字都可以现场手算复现</div>
+</section>
+
+<section class="slide" data-act="开场" data-t="先看一张表">
+  <div class="act">开场</div>
+  <h1>先看一张表 <span class="lt">—— 训练时真实产出的诊断日志</span></h1>
+  <div class="body">
+    <div class="log">
+      <div class="lh"><span>学生生成的一句话，逐 token 展开</span><span>长度 = <b>11</b></span></div>
+      <table>
+        <tr><th class="pos">位置</th><th>学生实际说出</th><th class="kl">loss</th>
+            <th class="sep tk">教师认为该说 ①</th><th class="tk">②</th>
+            <th class="sep sk">学生本来想说 ①</th><th class="sk">②</th>
+            <th class="sep c">SA90</th></tr>
+        <tr><td class="pos">0</td><td class="ro">一名</td><td class="kl">1.079</td><td class="sep tk">一位 <span class="pb">.771</span></td><td class="tk">一名 <span class="pb">.118</span></td><td class="sep sk">一位 <span class="pb">.328</span></td><td class="sk">画面 <span class="pb">.289</span></td><td class="sep c yes">✓</td></tr>
+        <tr><td class="pos">1</td><td class="ro">穿</td><td class="kl">0.570</td><td class="sep tk">身穿 <span class="pb">.522</span></td><td class="tk">穿着 <span class="pb">.132</span></td><td class="sep sk">穿 <span class="pb">.459</span></td><td class="sk">身穿 <span class="pb">.314</span></td><td class="sep c yes">✓</td></tr>
+        <tr class="hi"><td class="pos">2</td><td class="ro">绿色</td><td class="kl">1.046</td><td class="sep tk">深色 <span class="pb">.909</span></td><td class="tk">黑色 <span class="pb">.066</span></td><td class="sep sk">黑色 <span class="pb">.416</span></td><td class="sk">深色 <span class="pb">.367</span></td><td class="sep c no">✗</td></tr>
+        <tr><td class="pos">3</td><td class="ro">裙</td><td class="kl">0.094</td><td class="sep tk">连衣裙 <span class="pb">.578</span></td><td class="tk">长裙 <span class="pb">.309</span></td><td class="sep sk">连衣裙 <span class="pb">.680</span></td><td class="sk">长裙 <span class="pb">.250</span></td><td class="sep c yes">✓</td></tr>
+        <tr><td class="pos">4</td><td class="ro">子的</td><td class="kl">0.026</td><td class="sep tk">子的 <span class="pb">.969</span></td><td class="tk">装 <span class="pb">.026</span></td><td class="sep sk">子的 <span class="pb">.980</span></td><td class="sk">装的 <span class="pb">.007</span></td><td class="sep c yes">✓</td></tr>
+        <tr><td class="pos">5</td><td class="ro">女士</td><td class="kl">0.561</td><td class="sep tk">女士 <span class="pb">.562</span></td><td class="tk">女子 <span class="pb">.386</span></td><td class="sep sk">女子 <span class="pb">.416</span></td><td class="sk">女士 <span class="pb">.252</span></td><td class="sep c yes">✓</td></tr>
+        <tr><td class="pos">6</td><td class="ro">在</td><td class="kl">0.881</td><td class="sep tk">走进 <span class="pb">.434</span></td><td class="tk">站在 <span class="pb">.205</span></td><td class="sep sk">站在 <span class="pb">.250</span></td><td class="sk">在 <span class="pb">.195</span></td><td class="sep c yes">✓</td></tr>
+        <tr class="hi2"><td class="pos">7</td><td class="ro">室内</td><td class="kl">0.875</td><td class="sep tk">房间里 <span class="pb">.250</span></td><td class="tk">室内 <span class="pb">.172</span></td><td class="sep sk">客厅 <span class="pb">.586</span></td><td class="sk">室内 <span class="pb">.189</span></td><td class="sep c yes">✓</td></tr>
+        <tr><td class="pos">8</td><td class="ro">走动</td><td class="kl">0.322</td><td class="sep tk">走动 <span class="pb">.449</span></td><td class="tk">活动 <span class="pb">.240</span></td><td class="sep sk">走动 <span class="pb">.479</span></td><td class="sk">活动 <span class="pb">.198</span></td><td class="sep c yes">✓</td></tr>
+        <tr><td class="pos">9</td><td class="ro">。</td><td class="kl">0.044</td><td class="sep tk">， <span class="pb">.991</span></td><td class="tk">。 <span class="pb">.007</span></td><td class="sep sk">， <span class="pb">.957</span></td><td class="sk">。 <span class="pb">.042</span></td><td class="sep c yes">✓</td></tr>
+        <tr><td class="pos">10</td><td class="ro">&lt;结束&gt;</td><td class="kl">0.850</td><td class="sep tk">她 <span class="pb">.883</span></td><td class="tk">&lt;结束&gt; <span class="pb">.030</span></td><td class="sep sk">她 <span class="pb">.482</span></td><td class="sk">&lt;结束&gt; <span class="pb">.375</span></td><td class="sep c yes">✓</td></tr>
+      </table>
+    </div>
+    <div class="foot">表里只显示前 2 个候选，实际每个位置取教师的 <b>top-64</b>。这张表会在全场反复回来用。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="开场" data-t="这张表在说什么">
+  <div class="act">开场</div>
+  <h1>这张表在说什么</h1>
+  <div class="body">
+    <div class="card"><h3>学生自己说了一句话，教师<b>在每一个位置上</b>给出了它认为该说什么</h3>
+      <pre>学生说出的完整句子：<span class="sc">一名 穿 绿色 裙 子的 女士 在 室内 走动 。</span>
+
+位置 2 学生说了「绿色」，而教师认为这里该说「深色」（<span class="tc">.909</span>）</pre></div>
+    <div class="hero">
+      <div class="k">今天的目标</div>
+      <p>我不打算先讲一小时理论再回来看它 —— 我们<b>从这张表开始</b>，缺什么概念补什么概念。<br>
+      分享结束时，你应该能读懂这张表的每一列，<b>包括它不能说明什么</b>。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="开场" data-t="今天回答四个问题">
+  <div class="act">开场</div>
+  <h1>今天回答四个问题</h1>
+  <div class="sub">每一幕对应一个。讲完一个，回来划掉一个。</div>
+  <div class="body">
+    <div class="card a"><h3><span class="tag a">一</span>为什么要让学生自己先说一遍？</h3>
+      <small>这件事叫 on-policy。它不是效率优化，是在解决一个<b>结构性缺陷</b>。</small></div>
+    <div class="card a"><h3><span class="tag a">二</span>一个训练 step 里到底发生了什么？</h3>
+      <small>它已经<b>不是一个训练脚本</b>，而是一套系统。以及两边怎么保证说的是同一串 token。</small></div>
+    <div class="card w"><h3><span class="tag w">三</span>采样参数怎么塑造学生的轨迹？</h3>
+      <small><span class="tt">temperature</span> 和 <span class="tt">top_p</span> 做的<b>不是同一件事</b>，而且会互相影响。</small></div>
+    <div class="card g"><h3><span class="tag g">四</span>loss 怎么设计，诊断数据怎么读？</h3>
+      <small>两种 KL 会得出<b>相反</b>的结论 —— 这一段会现场算给你看。</small></div>
+  </div>
+</section>
+
+<!-- ============ 第一幕 ============ -->
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="SFT 的监督信号">
+  <div class="act">第一幕 · 为什么要 on-policy</div>
+  <h1>先看 SFT 的监督信号<span class="lt">：一个 one-hot</span></h1>
+  <div class="body">
+    <div class="card"><h3>给定标准答案，最大化答案里每个词的概率</h3>
+      <pre>这个位置该填「深色」，于是监督信号是：
+
+   深色  →  <span class="hl">1.0</span>
+   黑色  →  0
+   长裙  →  0
+   ...   →  0        <span class="c">其余 248317 个词全都是 0</span></pre></div>
+    <div class="hero">
+      <p>它只告诉了模型一件事：<b>哪个词是对的。</b><br>
+      其他所有词一律记为「错」—— 但它们其实<b>错得不一样</b>。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="换成教师给的分布">
+  <div class="act">第一幕 · 为什么要 on-policy</div>
+  <h1>换成一个教师<span class="lt">，让它在同一个位置前向一次</span></h1>
+  <div class="body">
+    <div class="card t"><h3>得到的不是一个词，而是<b>一个分布</b></h3>
+      <pre><span class="tc">深色     0.909</span>
+<span class="tc">黑色     0.066</span>
+<span class="tc">长裙     0.006</span>
+<span class="tc">深       0.005</span>
+<span class="tc">连衣裙   0.004</span></pre></div>
+    <div class="hero w">
+      <div class="k">这几个数多说了三件事</div>
+      <p>这个位置<b>该是个颜色词</b> · <b>深色系是主流</b> · <b>「长裙」也说得通但不是重点</b><br>
+      one-hot 把这三层全丢了。被丢掉的这部分信息，行业里叫 <em>暗知识（dark knowledge）</em>。</p>
+    </div>
+    <div class="foot">注意：到这一层为止，<b>已经不需要标准答案了，需要的是一个在线的教师</b>。<br>
+    但这一层还没碰到真正的问题。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="训练时：前缀永远正确">
+  <div class="act">第一幕 · 真正的问题</div>
+  <h1>训练时：<span class="lt">每一步的输入都是正确的前缀</span></h1>
+  <div class="body">
+    <div class="card g"><h3>这个做法叫 <b>teacher forcing</b></h3>
+      <div style="height:12px"></div>
+      <div class="chain">
+        <div class="tok ok">一名</div><span class="cs">→</span><div class="tok ok">穿</div><span class="cs">→</span>
+        <div class="tok ok">深色</div><span class="cs">→</span><div class="tok ok">连衣裙</div><span class="cs">→</span>
+        <div class="tok ok">的</div><span class="cs">→</span><div class="tok ok">女子</div>
+      </div>
+      <div style="height:12px"></div>
+      <small>整条链全部来自数据集，<b>永远正确</b>。</small></div>
+    <div class="hero d">
+      <div class="k">于是有一件事它从没练过</div>
+      <p>哪怕模型刚才把第 3 个词预测错了，喂给它的<b>下一个前缀依然是正确答案</b>。<br>
+      所以它<b>从来没有练过「从一个错误的前缀里往下走」</b>。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="推理时：一偏就没监督">
+  <div class="act">第一幕 · 真正的问题</div>
+  <h1>推理时：<span class="lt">模型吃自己的输出，一偏就回不去了</span></h1>
+  <div class="body">
+    <div class="card d"><h3>学生实际生成的链条</h3>
+      <div style="height:12px"></div>
+      <div class="chain">
+        <div class="tok ok">一名</div><span class="cs">→</span><div class="tok ok">穿</div><span class="cs">→</span>
+        <div class="tok bad">绿色</div><span class="cs">→</span>
+        <div class="tok un">裙</div><span class="cs">→</span><div class="tok un">子的</div><span class="cs">→</span>
+        <div class="tok un">女士</div><span class="cs">→</span><div class="tok un">…</div>
+      </div>
+      <div style="height:12px"></div>
+      <small><span style="color:var(--danger)">■</span> 第 3 个词就偏了。&nbsp;&nbsp;<span style="color:var(--dim)">▢</span> 虚线框里的每一个前缀，训练时<b>从未出现过</b> —— 那里<b>没有任何监督信号</b>。</small></div>
+    <div class="hero d">
+      <div class="k">exposure bias（暴露偏差）</div>
+      <p>训练时它只见过正确前缀；而推理时它<b>几乎总是</b>在自己制造的、没被监督过的前缀上工作。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="误差会自我放大">
+  <div class="act">第一幕 · 真正的问题</div>
+  <h1>而且误差会<span class="lt"> 自我放大</span></h1>
+  <div class="body">
+    <div class="card d"><h3>这是正反馈，不是线性累加</h3>
+      <pre>偏一点 → 前缀更陌生 → 下一步更容易错 → 前缀<span class="r">更</span>陌生 → …</pre>
+      <small style="margin-top:11px">所以<b>序列越长，差距越大</b>。这也解释了为什么长文本生成、多轮对话、推理链对这件事更敏感。</small></div>
+    <div class="hero g">
+      <div class="k">换个说法</div>
+      <p>教一个人开车：<b>只让他看你开</b>，他上路一偏就不知道怎么办；<br>
+      <b>让他自己开、你在旁边随时纠正</b>，他练的正好是他真会遇到的情况。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="这个词是从哪借来的">
+  <div class="act">第一幕 · 这个词是从哪借来的</div>
+  <h1>「on-policy」<span class="lt">借自强化学习，但更像模仿学习</span></h1>
+  <div class="body">
+    <div class="card"><h3>在强化学习里，它说的是：<b>你用来学习的数据，是谁产生的</b></h3>
+      <table class="sm">
+        <tr><th style="width:180px"></th><th style="width:400px">学习用的数据来自哪</th><th>类比到我们这里</th></tr>
+        <tr class="good"><td><b>on-policy</b></td><td><b>正在训练的这个模型</b>刚刚自己产生的</td><td>学生自己生成的句子</td></tr>
+        <tr><td><b>off-policy</b></td><td>别人产生的，或者<b>它自己很久以前</b>产生的</td><td>数据集里的标准答案</td></tr>
+      </table></div>
+    <div class="hero p">
+      <div class="k">和它最像的，是模仿学习里的一个做法</div>
+      <p>让学习者<b>自己动手</b>，在它<b>实际走到的每一个位置上</b>问老师「这里该怎么做」，用这些答案去训练。<br>
+      on-policy 蒸馏就是这个结构：<b>学生自己生成</b>（学习者动手），<b>教师逐位置给分布</b>（老师现场指点）。</p>
+    </div>
+    <div class="gl"><b>模仿学习</b>（imitation learning）：让模型模仿一个「专家」的行为来学习，而不是靠奖励试错。
+    上面那个做法在文献里叫 <b>DAgger</b>（2011）。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="但它没继承 RL 的难题">
+  <div class="act">第一幕 · 这个词是从哪借来的</div>
+  <h1>但它<span class="lt"> 没有继承强化学习最难的那部分</span></h1>
+  <div class="body">
+    <div class="vs">
+      <div class="bad"><div class="vh">强化学习：只能拿到一个总分</div>
+        <p>整句话说完，给你一个分数。<br><b>哪一步做对了、哪一步坏了事，得自己推断。</b></p>
+        <div style="height:9px"></div>
+        <small>这个推断很难也很不稳定。</small></div>
+      <div class="vsx">对比</div>
+      <div class="good"><div class="vh">on-policy 蒸馏：每步都有答案</div>
+        <p>教师给的是<b>每个位置一个完整分布</b>。<br><b>等于每一步都直接告诉你答案。</b></p>
+        <div style="height:9px"></div>
+        <small>不需要推断任何东西。</small></div>
+    </div>
+    <div class="hero g">
+      <p>所以它<b>比强化学习稳定得多、也好调得多</b>。<br>
+      代价是：<b>你需要一个比学生强的教师</b> —— 而强化学习不需要。</p>
+    </div>
+    <div class="foot">这个区别背后有一串概念（标量奖励、信用分配、策略梯度…），我放到附录了。
+      &nbsp;<span class="jump" data-goto-t="A1 几个词先说清楚">附录 A1 展开 →</span></div>
+  </div>
+</section>
+
+<section class="slide" data-act="第一幕 · 为什么要 on-policy" data-t="解法与命名">
+  <div class="act">第一幕 · 解法</div>
+  <h1>解法：<span class="lt">学生先走，教师跟着标</span></h1>
+  <div class="body">
+    <div class="flow" style="margin:2px 0">
+      <div class="fb s"><div class="num">1</div><div class="nm">学生自己生成</div><div class="eg">走到它真会去的地方</div></div>
+      <div class="ar">→</div>
+      <div class="fb t"><div class="num">2</div><div class="nm">教师在<b>这条轨迹</b><br>逐位置给分布</div><div class="eg">包括「偏了之后」的位置</div></div>
+      <div class="ar">→</div>
+      <div class="fb g"><div class="num">3</div><div class="nm">学生朝教师<br>的分布靠拢</div><div class="eg">KL</div></div>
+    </div>
+    <div class="row">
+      <div class="col card"><h3><span class="tag s">开关</span><span class="tt">--lmbda</span></h3>
+        <small><b>1.0</b> = 全部用学生自己的轨迹（我们的配置）<br>
+        <b>0.0</b> = 全部用数据集答案<br>代价：每步先生成一遍，30 个词 = <b>30 次前向</b></small></div>
+      <div class="col card"><h3>名字对照</h3>
+        <small><b>OPD</b> / on-policy KD / <b>GKD</b> —— 都是今天讲的东西<br>
+        <span style="color:var(--danger)">数据蒸馏 / sequence-level KD</span> —— <b>不是</b>，那是拿教师生成的答案做 SFT，轨迹是<b>教师的</b></small></div>
+    </div>
+    <div class="foot">这里改的是<b>两件互不相干的事</b>：<b>监督内容</b>（标准答案 → 教师的完整分布）和<b>监督位置</b>（教师写的句子 → 学生自己写的句子）。
+    两件可以分开做，只做前一件就是普通蒸馏 —— <b>OPD 是两件都做</b>。</div>
+  </div>
+</section>
+
+<!-- ============ 第二幕 · 系统 ============ -->
+<section class="slide" data-act="第二幕 · 它已经是一套系统" data-t="SFT 是一个进程">
+  <div class="act">第二幕 · 它已经不是一个训练脚本</div>
+  <h1>SFT 长什么样：<span class="lt">一个进程，改几个超参就能跑</span></h1>
+  <div class="body">
+    <div style="display:flex;justify-content:center;padding:16px 0">
+      <div class="sysbox g" style="width:420px;padding:26px">
+        <div class="st">训练进程</div>
+        <div class="sd" style="margin-top:12px;line-height:1.9">读数据<br>前向 → 算 loss → 反向<br>存 checkpoint</div>
+      </div>
+    </div>
+    <div class="hero g">
+      <div class="k">你要操心的东西</div>
+      <p>学习率、batch size、训练轮数、数据路径。<br>
+      <b>一条命令，一个进程，跑起来就不用管了。</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 它已经是一套系统" data-t="OPD 是一套系统">
+  <div class="act">第二幕 · 它已经不是一个训练脚本</div>
+  <h1>OPD 长什么样：<span class="lt">三个引擎 + 一条同步通道</span></h1>
+  <div class="body">
+    <div class="row" style="gap:14px;align-items:center">
+      <div style="flex:0 0 255px">
+        <div class="sysbox t"><div class="st">教师服务 A</div><div class="sd">推理引擎 · VLM 27B<br>独占 2 卡 · 端口 8000</div></div>
+        <div style="height:12px"></div>
+        <div class="sysbox t"><div class="st">教师服务 B</div><div class="sd">推理引擎 · LLM<br>独占 1 卡 · 端口 8100</div></div>
+      </div>
+      <div style="flex:0 0 155px" class="conn">
+        ── HTTP ──▶<br><b>整句话</b><br><br>◀── HTTP ──<br><b>每位置 top-64</b>
+      </div>
+      <div style="flex:1">
+        <div class="sysbox g" style="padding:22px"><div class="st">训练进程（4 卡）</div>
+          <div class="sd" style="margin-top:8px">编码 → 算 loss → 反向</div></div>
+        <div class="conn" style="padding:9px 0">▲ 权重同步 &nbsp;│&nbsp; 生成请求 ▼</div>
+        <div class="sysbox s"><div class="st">学生推理引擎</div>
+          <div class="sd">和训练<b>共享同一批卡</b> · 交替唤醒</div></div>
+      </div>
+    </div>
+    <div class="hero d">
+      <p><b>四个进程、两个端口、一条权重同步通道、一批共享显存的卡。</b><br>
+      「调不动」的原因通常<b>不在超参</b>，而在这几个组件之间的契约：分词一致吗、位置对齐吗、权重同步了吗。<br>
+      <b>而这些都不会报错</b> —— 训练照样跑完，只是学出来的东西是错的。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 它已经是一套系统" data-t="一个 step 的四次调用">
+  <div class="act">第二幕 · 一个 step 里发生了什么</div>
+  <h1>两个模型，一个 step <span class="lt">四次调用</span></h1>
+  <div class="body">
+    <div class="flow" style="margin:4px 0">
+      <div class="fb s"><div class="num">① 学生</div><div class="nm">生成</div><div class="eg">推理引擎</div></div>
+      <div class="ar">→<span class="lb">token ID</span></div>
+      <div class="fb t"><div class="num">② 教师</div><div class="nm">打分</div><div class="eg">推理引擎</div></div>
+      <div class="ar">→<span class="lb">top-64</span></div>
+      <div class="fb s"><div class="num">③ 学生</div><div class="nm">再前向</div><div class="eg">训练框架</div></div>
+      <div class="ar">→<span class="lb">logits</span></div>
+      <div class="fb g"><div class="num">④</div><div class="nm">算 loss</div><div class="eg">训练框架</div></div>
+    </div>
+    <div class="card"><h3>各自要跑几次前向，<b>以及在哪个进程里跑</b></h3>
+      <table class="sm">
+        <tr><th style="width:70px">调用</th><th class="n" style="width:130px">前向次数</th><th style="width:250px">在哪跑</th><th>为什么</th></tr>
+        <tr class="hi"><td>①</td><td class="n"><b>N 次</b></td><td>学生推理引擎</td><td>自回归，必须先有第 1 个词才能算第 2 个</td></tr>
+        <tr><td>②</td><td class="n">1 次</td><td><b>走 HTTP 出去</b></td><td>整句话 token 已知，可以并行过一遍</td></tr>
+        <tr><td>③ ④</td><td class="n">1 次</td><td>训练进程</td><td>需要计算图，推理引擎给不了</td></tr>
+      </table></div>
+    <div class="foot">两个反直觉的地方，接下来各讲一页：<b>教师其实一个字都不生成</b>；
+      <b>同一个学生被调用两次，用的是两个不同的引擎</b>。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 它已经是一套系统" data-t="教师一个字都不生成">
+  <div class="act">第二幕 · 教师在做什么</div>
+  <h1><span class="tag t" style="font-size:17px;padding:4px 13px">②</span> &nbsp;教师<span class="lt"> 一个字都不生成</span></h1>
+  <div class="body">
+    <div class="card t"><h3>把「问题 + 学生刚说完的整句话」当成<b>一个完整的输入</b>，前向一次</h3>
+      <pre>输入 = [问题] + [<span class="sc">一名 穿 绿色 裙 子的 女士 在 室内 走动 。</span>]
+                    ↑ 这整段是学生生成的，但对教师来说只是「输入」
+
+一次前向，返回<span class="hl">每一个位置</span>的 top-64：
+   位置 0 → 一位 .771 / 一名 .118 / …
+   位置 2 → <span class="tc">深色 .909</span> / 黑色 .066 / …    <span class="c">（以下略）</span></pre></div>
+    <div class="hero g">
+      <p>教师<b>不需要自己想</b>该说什么，只需要评价「在这个前缀下，下一个词的分布是什么」。<br>
+      <b>这个能力所有语言模型天生就有。</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 它已经是一套系统" data-t="教师的分布不受温度影响">
+  <div class="act">第二幕 · 教师在做什么</div>
+  <h1><span class="lt">一个容易搞错的细节：</span>教师返回的分布不受温度影响</h1>
+  <div class="body">
+    <div class="card d"><h3>请求里确实写了 <span class="tt">temperature=0</span>，但它管的不是我们要的东西</h3>
+      <pre>请求：prompt_logprobs=64,  max_tokens=1,  <span class="hl">temperature=0</span>
+                                          ↑
+              只作用于教师<b>会生成的那 1 个 token</b> —— 而那个 token <span class="r">我们直接丢掉</span></pre></div>
+    <div class="card g"><h3>我们真正要的分布走的是另一条路</h3>
+      <pre>推理引擎内部：<span class="k">logits.log_softmax(dim=-1)</span>
+              ↑ 直接对<b>原始分数</b>取对数概率，<span class="hl">中间不除任何温度</span></pre></div>
+    <div class="hero">
+      <p>所以教师返回的是它<b>最原始、未经任何缩放的判断</b>。<br>
+      真正的温度缩放是后面在<b>训练代码里</b>做的 —— 第三幕会专门讲温度出现在哪几处。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 它已经是一套系统" data-t="为什么只取 top-64">
+  <div class="act">第二幕 · 教师在做什么</div>
+  <h1>为什么只取 top-64，<span class="lt">不把整个分布都传回来</span></h1>
+  <div class="body">
+    <div class="stats">
+      <div><div class="big" style="color:var(--dim)">248,320</div><div class="bigl">词表大小</div></div>
+      <div><div class="big d">745 万</div><div class="bigl">一条 30 词回答的<br>完整分布浮点数个数</div></div>
+      <div><div class="big g">64</div><div class="bigl">实际返回<br>轻了约 <b>970 倍</b></div></div>
+    </div>
+    <div class="hero">
+      <p>再乘上 batch 和梯度累积，完整分布的传输和显存都不现实。<br>
+      而 <b>64 已经够了</b> —— 第五幕有个指标专门量化这件事。</p>
+    </div>
+    <div class="foot">还有一条更轻的路线：教师只返回<b>被采样到的那一个词</b>的概率，比 top-64 再轻 128 倍，但监督也稀疏得多。
+      &nbsp;<span class="jump" data-goto-t="A3 教师能返回什么">附录 A3 对比两条路线 →</span></div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 它已经是一套系统" data-t="学生为什么跑两遍">
+  <div class="act">第二幕 · 学生跑两遍</div>
+  <h1><span class="tag s" style="font-size:17px;padding:4px 13px">①③</span> &nbsp;同一个学生<span class="lt"> 为什么要跑两遍</span></h1>
+  <div class="body">
+    <div class="vs">
+      <div><div class="vh" style="color:var(--student)">① 用推理引擎生成</div>
+        <ul style="margin-top:5px">
+          <li>专为推理优化，采样<b>快</b></li>
+          <li>不建计算图，<b>拿不到梯度</b></li>
+        </ul></div>
+      <div class="vsx">同一份<br>权重</div>
+      <div><div class="vh" style="color:var(--ok)">③ 用训练框架再前向</div>
+        <ul style="margin-top:5px">
+          <li>慢</li>
+          <li>建计算图，<b>能反向传播</b></li>
+        </ul></div>
+    </div>
+    <div class="hero">
+      <p>推理引擎<b>只会算结果，不会记住「结果是怎么算出来的」</b>；而反向传播恰好需要后者。</p>
+    </div>
+    <div class="card d"><h3><span class="tag d">代价</span>两个副本的权重必须时刻同步</h3>
+      <p>每次参数更新后都要把新权重推给推理引擎。如果没做对：<br>
+      生成用<b>旧</b>权重、算 loss 用<b>新</b>权重 —— 训练照样跑、loss 照样降，但<b>它已经不是 on-policy 了</b>，而且<b>不报错</b>。</p></div>
+  </div>
+</section>
+
+<!-- ============ 第二幕 · 分词 ============ -->
+<section class="slide" data-act="第二幕 · 分词这一关" data-t="token 和分词是什么">
+  <div class="act">第二幕 · 分词这一关</div>
+  <h1>先说清 <span class="lt">token 和分词是怎么回事</span></h1>
+  <div class="body">
+    <div class="card"><h3>模型不认识文字，只认识<b>编号</b></h3>
+      <small>分词器负责把一段文字切成若干片段、每个片段给一个编号。<br>
+      主流用的是 <b>BPE</b>：<b>从字节开始，把高频相邻组合反复合并成更大的片段</b>。</small>
+      <div style="height:16px"></div>
+      <div class="chain">
+        <span style="font-size:17px;color:var(--dim);width:100px">切分结果</span>
+        <div class="tok">一名</div><div class="tok">穿</div><div class="tok">绿色</div><div class="tok">裙</div><div class="tok">子的</div><div class="tok">女士</div>
+      </div></div>
+    <div class="hero">
+      <p>所以一个片段可以是一个字，也可以是好几个字。<br>
+      上面的「<b>子的</b>」是<b>一个</b> token，不是两个字 —— 这一点马上会变得很关键。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 分词这一关" data-t="同一段文字，切法不唯一">
+  <div class="act">第二幕 · 分词这一关</div>
+  <h1>关键：<span class="lt">同一段文字，BPE 的切法不唯一</span></h1>
+  <div class="body">
+    <div class="card d"><h3>一个实测例子</h3>
+      <pre>学生采样时逐词生成，得到一个 3 字 token：
+        <span class="sc">[ 了一位 ]</span>                    <span class="c">→ 1 个 token</span>
+
+把它解码成文字「了一位」，再让分词器重新切：
+        <span class="r">[ 了 ][ 一位 ]</span>                <span class="c">→ 2 个 token</span></pre></div>
+    <div class="hero w">
+      <div class="k">为什么会不一样</div>
+      <p><b>采样是一个一个往外蹦的</b>，可能产出一条「合法但不是分词器首选」的切法；<br>
+      而重新分词会给出分词器<b>自己偏好的那一种</b>。文字一模一样，token 数从 1 变成 2。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第二幕 · 分词这一关" data-t="所以必须传原始 token ID">
+  <div class="act">第二幕 · 分词这一关</div>
+  <h1>后果：<span class="lt">位置全错，而且不报错</span></h1>
+  <div class="body">
+    <div class="card d"><h3>教师返回的是<b>逐位置</b>的分布</h3>
+      <pre>token 数一变  →  教师的第 <span class="hl">k</span> 行不再对应学生的第 <span class="hl">k</span> 个位置  →  后面<span class="r">全部错位</span></pre>
+      <small style="margin-top:11px">而这种错位<b>不会抛任何异常</b>，loss 还能正常下降，只是学的东西整体偏了一格。</small></div>
+    <div class="hero g">
+      <div class="k">所以做法是</div>
+      <p>把学生生成的<b>原始编号序列</b>直接交给教师，<b>全程不经过文字</b>。<br>
+      这个做法叫 <em>token-in-token-out</em>。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 第三幕 · 采样 ============ -->
+<section class="slide" data-act="第三幕 · 采样怎么塑造轨迹" data-t="temperature 改变形状">
+  <div class="act">第三幕 · 采样怎么塑造学生的轨迹</div>
+  <h1><span class="tt" style="font-size:.86em">temperature</span> <span class="lt">做的是：改变分布的形状</span></h1>
+  <div class="body">
+    <div class="card"><h3>把分数转成概率之前，先除以一个数</h3>
+      <pre>概率 = softmax( 模型原始分数 <span class="hl">/ T</span> )      <span class="c">T&lt;1 更尖 · T&gt;1 更平 · T→0 变成贪心</span></pre></div>
+    <div class="row">
+      <div class="col card"><div class="dttl" style="color:var(--ok)">T = 0.7 更尖<span class="v">最高 0.948 · 熵 0.27</span></div>
+        <div class="dist" style="height:104px">
+          <div class="b"><div class="bar" style="height:100%;background:var(--ok)"></div></div>
+          <div class="b"><div class="bar" style="height:3%;background:#3a4552"></div></div>
+          <div class="b"><div class="bar" style="height:1.5%;background:#3a4552"></div></div>
+          <div class="b"><div class="bar" style="height:1%;background:#3a4552"></div></div>
+          <div class="b"><div class="bar" style="height:1%;background:#3a4552"></div></div>
+        </div></div>
+      <div class="col card"><div class="dttl" style="color:var(--accent)">T = 1.0 原始<span class="v">最高 0.833 · 熵 0.71</span></div>
+        <div class="dist" style="height:104px">
+          <div class="b"><div class="bar" style="height:88%;background:var(--accent)"></div></div>
+          <div class="b"><div class="bar" style="height:8%;background:#3a4552"></div></div>
+          <div class="b"><div class="bar" style="height:5%;background:#3a4552"></div></div>
+          <div class="b"><div class="bar" style="height:3%;background:#3a4552"></div></div>
+          <div class="b"><div class="bar" style="height:2%;background:#3a4552"></div></div>
+        </div></div>
+      <div class="col card"><div class="dttl" style="color:var(--warn)">T = 1.5 更平<span class="v">最高 0.627 · 熵 1.31</span></div>
+        <div class="dist" style="height:104px">
+          <div class="b"><div class="bar" style="height:66%;background:var(--warn)"></div></div>
+          <div class="b"><div class="bar" style="height:15%;background:#4a5568"></div></div>
+          <div class="b"><div class="bar" style="height:11%;background:#4a5568"></div></div>
+          <div class="b"><div class="bar" style="height:8%;background:#4a5568"></div></div>
+          <div class="b"><div class="bar" style="height:6%;background:#4a5568"></div></div>
+        </div></div>
+    </div>
+    <div class="hero">
+      <p><b>最关键的一点：温度不排除任何词。</b>再小概率的词，只要原来非零，改温度之后<b>依然非零</b>。</p>
+    </div>
+    <div class="gl"><b>熵</b>：衡量分布「有多不确定」。<b>熵小 = 集中在少数词上，熵大 = 平均分散</b>。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第三幕 · 采样怎么塑造轨迹" data-t="截断：删候选">
+  <div class="act">第三幕 · 采样怎么塑造学生的轨迹</div>
+  <h1><span class="tt" style="font-size:.86em">top_k</span> / <span class="tt" style="font-size:.86em">top_p</span> <span class="lt">做的是完全不同的事：删候选</span></h1>
+  <div class="body">
+    <div class="card">
+      <table>
+        <tr><th style="width:150px">参数</th><th style="width:380px">规则</th><th>特点</th></tr>
+        <tr><td class="tt">top_k = k</td><td>只留概率最高的 <b>k</b> 个词</td><td>候选数<b>固定</b></td></tr>
+        <tr><td class="tt">top_p = p</td><td>按概率从大到小累加，累到 <b>p</b> 就停</td><td>候选数<b>自适应</b></td></tr>
+      </table></div>
+    <div class="hero w">
+      <div class="k">和温度的本质区别</div>
+      <p>它们把一部分词的概率<b>直接置零</b>，然后在剩下的里重新归一化。<br>
+      <b>被保留的词之间，相对比例完全不变</b> —— 所以它们改的是<b>候选集合</b>，不是分布形状。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第三幕 · 采样怎么塑造轨迹" data-t="剩下的候选按概率抽签">
+  <div class="act">第三幕 · 采样怎么塑造学生的轨迹</div>
+  <h1>剩下的候选，<span class="lt">是按概率抽签，不是选最大的</span></h1>
+  <div class="body">
+    <div class="card g"><h3>截断之后重新归一化，然后掷一次骰子</h3>
+      <pre>剩 3 个候选：   <span class="tc">深色 0.62</span>      黑色 0.29      长裙 0.09
+                    ↓             ↓             ↓
+               62% 的机会      29% 的机会    <span class="hl">9% 的机会</span></pre></div>
+    <div class="hero">
+      <p>所以<b>每一步都是随机的</b>。同一个问题跑两遍，会得到不同的句子。<br>
+      「永远选最大的」是另一种做法（贪心解码），相当于把温度降到 0。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第三幕 · 采样怎么塑造轨迹" data-t="温度与 top_p 会互相影响">
+  <div class="act">第三幕 · 采样怎么塑造学生的轨迹</div>
+  <h1>两者<span class="lt"> 不独立 </span>—— 降温会自动让 top_p 少留候选</h1>
+  <div class="body">
+    <div class="card">
+      <table>
+        <tr><th style="width:150px">温度</th><th class="n" style="width:170px">最高概率</th><th class="n" style="width:130px">熵</th><th class="n" style="width:220px">top_p=0.9 实际留下</th><th></th></tr>
+        <tr><td>T = 0.7</td><td class="n">0.948</td><td class="n">0.27</td><td class="n"><b>1 个词</b></td><td><small style="display:inline">截断等于没起作用</small></td></tr>
+        <tr><td>T = 1.0</td><td class="n">0.833</td><td class="n">0.71</td><td class="n">2 个</td><td></td></tr>
+        <tr><td>T = 1.5</td><td class="n">0.627</td><td class="n">1.31</td><td class="n"><b>5 个</b></td><td><small style="display:inline">同一个 0.9，效果完全不同</small></td></tr>
+      </table></div>
+    <div class="hero d">
+      <p>同一组分数、同一个 <span class="tt">top_p=0.9</span>，因为温度不同，候选数从 <b>1 个</b>变成 <b>5 个</b>。<br>
+      <b>所以「我把 top_p 设成 0.9」这句话本身不构成一个确定的采样行为，必须连温度一起说。</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第三幕 · 采样怎么塑造轨迹" data-t="我们的实际配置">
+  <div class="act">第三幕 · 采样怎么塑造学生的轨迹</div>
+  <h1>我们实际用的配置<span class="lt">（从训练日志里解析出来的真实值）</span></h1>
+  <div class="body">
+    <div class="card"><h3>三个参数</h3>
+      <pre>temperature = <span class="hl">0.9</span>      <span class="c">略微锐化</span>
+top_p       = <span class="hl">1.0</span>      <span class="c">累加到 100% 才停，等于谁都不删</span>
+top_k       = <span class="hl">-1</span>       <span class="c">不限制个数</span></pre></div>
+    <div class="hero w">
+      <div class="k">合起来的意思</div>
+      <p><b>候选集就是整个词表，248320 个词一个都没被排除。</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第三幕 · 采样怎么塑造轨迹" data-t="「不截断」意味着什么">
+  <div class="act">第三幕 · 采样怎么塑造学生的轨迹</div>
+  <h1>「不截断」<span class="lt">到底意味着什么</span></h1>
+  <div class="body">
+    <div class="card"><h3>不能按「很难被抽到所以可以忽略」来理解</h3>
+      <pre>一条 30 词的回答  =  <span class="hl">30 次</span>抽签
+一次训练          =  成千上万条回答
+                     ↓
+        <span class="r">小概率事件在这个规模下一定会发生</span></pre>
+      <small style="margin-top:11px"><b>每一个概率非零的词，都真的有机会被抽到</b>，哪怕概率只有 0.001。</small></div>
+    <div class="card"><h3>这个选择的两面</h3>
+      <table class="sm">
+        <tr class="good"><td style="width:130px"><b>好的一面</b></td><td>学生会走到它<b>真实会犯错</b>的地方，教师就能在那些位置纠正 —— 这正是 on-policy 唯一能提供、off-policy 拿不到的东西</td></tr>
+        <tr class="bad"><td><b>坏的一面</b></td><td>会产出低质量甚至退化的句子（第六幕有真实例子），这些轨迹<b>信息密度低</b></td></tr>
+        <tr><td><b>还有一点</b></td><td>线上推理一般<b>是</b>要截断的。训练和推理的采样分布不一致，<b>评估结果的可比性要打个问号</b></td></tr>
+      </table></div>
+  </div>
+</section>
+
+<section class="slide" data-act="第三幕 · 采样怎么塑造轨迹" data-t="温度在源码里的三处">
+  <div class="act">第三幕 · 温度到底在哪起作用</div>
+  <h1>「温度」在这套流程里<span class="lt"> 一共出现三次</span></h1>
+  <div class="body">
+    <div class="card">
+      <table class="sm">
+        <tr><th style="width:80px">位置</th><th style="width:230px">出现在哪</th><th>作用</th></tr>
+        <tr class="hi"><td>①</td><td><b>学生采样时</b></td><td>决定学生生成时分布多尖 &nbsp;→&nbsp; <b>真的有影响</b></td></tr>
+        <tr class="bad"><td>②</td><td><b>教师打分的请求里</b></td><td>只作用于那 1 个<b>被丢弃</b>的生成 token &nbsp;→&nbsp; <b>毫无影响</b></td></tr>
+        <tr class="hi"><td>③</td><td><b>算 loss 时</b></td><td>对师生<b>两侧同时</b>缩放 &nbsp;→&nbsp; <b>真的有影响</b></td></tr>
+      </table>
+      <small style="margin-top:10px">①和③是<b>同一个参数</b>，所以<b>没法只调其中一个</b>。</small></div>
+    <div class="card g"><h3>做「采样截断策略」对照实验时，该动哪个</h3>
+      <table class="sm">
+        <tr><th style="width:250px">参数</th><th style="width:250px">影响范围</th><th>能不能用</th></tr>
+        <tr class="bad"><td class="tt">--temperature</td><td>采样 <b>+</b> loss（连梯度尺度一起变）</td><td><b>不行</b>，一次改了两个变量</td></tr>
+        <tr class="good"><td class="tt">--top_p / --top_k</td><td><b>只影响采样</b>，不进 loss</td><td><b>可以</b></td></tr>
+      </table>
+      <small style="margin-top:10px">彻底的解法：加一个 <span class="tt">--loss_temperature</span>，默认回落到 <span class="tt">temperature</span> —— 几行改动，两个旋钮就独立了。</small></div>
+  </div>
+</section>
+
+<!-- ============ 第四幕 · 两种 KL ============ -->
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="单个词上的分歧">
+  <div class="act">第四幕 · loss 怎么设计</div>
+  <h1>要让学生「靠拢」教师，<span class="lt">先得有把尺子</span></h1>
+  <div class="body">
+    <div class="card"><h3>第一步：<b>单个词</b>上的分歧怎么衡量</h3>
+      <pre>同一个词，两边概率之比取对数：   <span class="hl">log( 学生概率 / 教师概率 )</span></pre>
+      <div style="height:12px"></div>
+      <table class="sm">
+        <tr><th style="width:280px">情况</th><th class="n" style="width:220px">算出来</th><th>含义</th></tr>
+        <tr><td>学生 .40 &nbsp;/&nbsp; 教师 .40</td><td class="n">log(1) = 0</td><td>两边一致，没有分歧</td></tr>
+        <tr><td>学生 .40 &nbsp;/&nbsp; 教师 .04</td><td class="n" style="color:var(--warn)">log(10) = +2.30</td><td>学生说得比教师多得多</td></tr>
+        <tr><td>学生 .04 &nbsp;/&nbsp; 教师 .40</td><td class="n" style="color:var(--danger)">log(0.1) = −2.30</td><td>学生说得比教师少得多</td></tr>
+      </table></div>
+    <div class="hero w">
+      <p>注意这是<b>逐词</b>算的。教师和学生在这个位置上各自都是<b>一个 24 万维的分布</b>，<br>
+      所以你手里会有 <b>24 万个分歧值</b> —— 而不是一个数。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="24 万个数怎么变成一个数">
+  <div class="act">第四幕 · loss 怎么设计</div>
+  <h1>第二步：<span class="lt">24 万个分歧值，得汇总成一个数</span></h1>
+  <div class="body">
+    <div class="card"><h3>为什么必须汇总：<b>loss 必须是一个标量</b>才能反向传播</h3>
+      <pre>教师分布 = [ 24 万个概率 ]   学生分布 = [ 24 万个概率 ]
+逐词分歧 = [ <span class="hl">24 万个数</span> ]  ——→  ?  ——→  <span class="st">1 个 loss</span></pre></div>
+    <div class="card d"><h3>直接取平均行不通</h3>
+      <small>24 万个词里<b>绝大多数两边都接近 0</b>（既不该说、学生也没想说），这些分歧值是噪声 ——
+      等权重平均会<b>把真正重要的那几个词淹没</b>。</small></div>
+    <div class="hero p">
+      <div class="k">所以要加权求和 —— KL 的定义就是这么来的</div>
+      <p style="font-family:var(--mono);font-size:21px;margin:6px 0 10px">
+      KL(<span style="color:var(--warn)">P</span>‖Q) = Σ <span style="color:var(--warn)">P(词)</span> × log( <span style="color:var(--warn)">P(词)</span> / Q(词) )</p>
+      <p><b>用第一个参数 P 自己的概率当权重。</b>P 大的词认真算，P 接近 0 的词几乎不看。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="于是有了一个选择">
+  <div class="act">第四幕 · loss 怎么设计</div>
+  <h1>于是就有了<span class="lt"> 一个必须做的选择：用谁当权重</span></h1>
+  <div class="body">
+    <div class="card">
+      <table>
+        <tr><th style="width:290px">写法</th><th style="width:240px">权重用谁的</th><th>于是它在检查什么</th></tr>
+        <tr><td><b>forward KL</b><br><span class="tt">KL(教师‖学生)</span></td><td><b style="color:var(--teacher)">教师</b></td>
+            <td>在<b>教师认为重要</b>的位置上，学生够不够</td></tr>
+        <tr><td><b>reverse KL</b><br><span class="tt">KL(学生‖教师)</span></td><td><b style="color:var(--student)">学生</b></td>
+            <td>在<b>学生想说</b>的位置上，教师认不认</td></tr>
+      </table></div>
+    <div class="hero w">
+      <p>这就是 <b>KL(P‖Q) ≠ KL(Q‖P)</b> 的来源 —— 不是数学瑕疵，<b>是一个设计决定</b>。<br>
+      两种都叫 KL，但它们在<b>检查完全不同的东西</b>。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="两种错误 × 两种权重">
+  <div class="act">第四幕 · 两种 KL 的机制</div>
+  <h1>理解这件事只需要<span class="lt"> 一句话</span></h1>
+  <div class="body">
+    <div class="hero d">
+      <p style="font-size:23px"><b>权重为 0 的地方，再大的分歧也会被乘成 0。</b></p>
+    </div>
+    <div class="card"><h3>于是同一种错误，换个权重，罚得完全不同</h3>
+      <table class="sm">
+        <tr><th style="width:290px">哪种错误</th>
+            <th style="width:290px">用<span style="color:var(--teacher)">教师</span>当权重（forward）</th>
+            <th>用<span style="color:var(--student)">学生</span>当权重（reverse）</th></tr>
+        <tr><td><b>教师说该有，学生却没有</b><br><small style="margin-top:3px">教师 .45，学生 ≈ 0</small></td>
+            <td class="bad"><b>罚得极重</b><br><small>权重 .45 很大，分歧趋于无穷</small></td>
+            <td class="good"><b>几乎不罚</b><br><small>权重是学生的 ≈ 0，整项被乘没了</small></td></tr>
+        <tr><td><b>学生说得起劲，教师却不认</b><br><small style="margin-top:3px">学生 .40，教师 .02</small></td>
+            <td class="good"><b>几乎不罚</b><br><small>权重是教师的 .02，很小</small></td>
+            <td class="bad"><b>罚得重</b><br><small>权重 .40 很大，分歧 +3.0</small></td></tr>
+      </table></div>
+    <div class="foot"><b>两条对角线上的结论完全相反</b> —— 这就是两种 KL 会得出相反结论的全部原因。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="两侧的行为与副作用">
+  <div class="act">第四幕 · 两种 KL 的机制</div>
+  <h1>于是两种 KL <span class="lt">把学生逼向相反的方向</span></h1>
+  <div class="body">
+    <div class="row">
+      <div class="col card w"><h3><span class="tag w">beta=0</span>forward KL</h3>
+        <p>逼着学生<b>把教师提到的每一种说法都覆盖到</b>。</p>
+        <div style="height:10px"></div>
+        <small>→ 概率被<b>摊开</b>（mass-covering）<br><br>
+        <b>副作用</b>：学生在教师没提的词上乱放概率，<b>不受惩罚</b></small></div>
+      <div class="col card g"><h3><span class="tag g">beta=1</span>reverse KL</h3>
+        <p>逼着学生<b>只说教师认可的话</b>。</p>
+        <div style="height:10px"></div>
+        <small>→ 概率被<b>收窄</b>（mode-seeking）<br><br>
+        <b>副作用</b>：学生完全忽略教师的某些说法，<b>不受惩罚</b></small></div>
+    </div>
+    <div class="hero">
+      <p>记忆句：<b>forward 怕漏，reverse 怕错。</b><br>
+      但别停在口诀上 —— <b>接下来三页算给你看。</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="算给你看：相反的赢家">
+  <div class="act">第四幕 · 算给你看</div>
+  <h1>一个教师，两个候选学生，<span class="lt">两个 loss 选出相反的赢家</span></h1>
+  <div class="body">
+    <div class="row">
+      <div class="col card t"><div class="dttl" style="color:var(--teacher)">教师<span class="v">两种说法都对，中间那块不对</span></div>
+        <div class="dist" style="height:104px">
+          <div class="b"><div class="bar" style="height:56%;background:var(--teacher)"></div></div>
+          <div class="b"><div class="bar" style="height:2.5%;background:#2a5a56"></div></div>
+          <div class="b"><div class="bar" style="height:7.5%;background:#2a5a56"></div></div>
+          <div class="b"><div class="bar" style="height:2.5%;background:#2a5a56"></div></div>
+          <div class="b"><div class="bar" style="height:56%;background:var(--teacher)"></div></div>
+        </div>
+        <div class="dlb"><span>.45</span><span>.02</span><span>.06</span><span>.02</span><span>.45</span></div></div>
+      <div class="col card w"><div class="dttl" style="color:var(--warn)">学生 A<span class="v">摊开，两边都想覆盖</span></div>
+        <div class="dist" style="height:104px">
+          <div class="b"><div class="bar" style="height:12.5%;background:var(--warn)"></div></div>
+          <div class="b"><div class="bar" style="height:25%;background:var(--warn)"></div></div>
+          <div class="b"><div class="bar" style="height:50%;background:var(--warn)"></div></div>
+          <div class="b"><div class="bar" style="height:25%;background:var(--warn)"></div></div>
+          <div class="b"><div class="bar" style="height:12.5%;background:var(--warn)"></div></div>
+        </div>
+        <div class="dlb"><span>.10</span><span>.20</span><span>.40</span><span>.20</span><span>.10</span></div></div>
+      <div class="col card g"><div class="dttl" style="color:var(--ok)">学生 B<span class="v">只挑左边那一种</span></div>
+        <div class="dist" style="height:104px">
+          <div class="b"><div class="bar" style="height:100%;background:var(--ok)"></div></div>
+          <div class="b"><div class="bar" style="height:18.75%;background:#2d6b4a"></div></div>
+          <div class="b"><div class="bar" style="height:3.75%;background:#2d6b4a"></div></div>
+          <div class="b"><div class="bar" style="height:1.25%;background:#2d6b4a"></div></div>
+          <div class="b"><div class="bar" style="height:1.25%;background:#2d6b4a"></div></div>
+        </div>
+        <div class="dlb"><span>.80</span><span>.15</span><span>.03</span><span>.01</span><span>.01</span></div></div>
+    </div>
+    <div class="card"><h3>两个 loss 分别算出来（数越小越好）</h3>
+      <table class="sm">
+        <tr><th style="width:340px">候选学生</th><th class="n" style="width:290px">forward KL（教师当权重）</th><th class="n">reverse KL（学生当权重）</th></tr>
+        <tr><td><b>A</b> &nbsp;摊开，覆盖两种说法</td><td class="n" style="color:var(--ok);font-weight:700">1.148 ← 更优</td><td class="n">1.379</td></tr>
+        <tr><td><b>B</b> &nbsp;只挑一种说法</td><td class="n">1.469</td><td class="n" style="color:var(--ok);font-weight:700">0.697 ← 更优</td></tr>
+      </table></div>
+    <div class="foot"><b>完全相同的教师、完全相同的两个候选，forward 选 A，reverse 选 B</b> —— 是相反的结论，不是「侧重不同」。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="forward 的账单">
+  <div class="act">第四幕 · 算给你看</div>
+  <h1><span class="tag w" style="font-size:16px;padding:4px 12px">forward KL</span> &nbsp;学生 B 的账单 = 1.469</h1>
+  <div class="body">
+    <div class="card"><h3>算法：每位置算一项 = <span class="hl">权重</span> × log( <span class="hl">权重方</span> / 对方 )，再把五项加起来</h3>
+      <pre>位置 5（教师 <span class="tc">.45</span> 当权重，学生 <span class="sc">.01</span>）： 0.45 × log(0.45/0.01) = <span class="r">+1.713</span></pre></div>
+    <div class="card w">
+      <table class="sm">
+        <tr><th style="width:150px">位置</th><th class="n" style="width:230px">教师（权重）</th><th class="n" style="width:230px">学生 B</th><th class="n">这一项</th></tr>
+        <tr><td>1</td><td class="n">.45</td><td class="n">.80</td><td class="n">−0.259</td></tr>
+        <tr><td>2</td><td class="n">.02</td><td class="n">.15</td><td class="n">−0.040</td></tr>
+        <tr><td>3</td><td class="n">.06</td><td class="n">.03</td><td class="n">+0.042</td></tr>
+        <tr><td>4</td><td class="n">.02</td><td class="n">.01</td><td class="n">+0.014</td></tr>
+        <tr class="bad"><td><b>5</b></td><td class="n"><b>.45</b></td><td class="n"><b>.01</b></td><td class="n" style="color:var(--danger)"><b>+1.713</b></td></tr>
+      </table></div>
+    <div class="foot">总额里<b>位置 5 一项就贡献 1.713</b> —— 那正是教师的<b>另一种说法</b>。<b>「把教师在意的一整种说法丢了」= 怕漏。</b></div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="reverse 的账单">
+  <div class="act">第四幕 · 算给你看</div>
+  <h1><span class="tag g" style="font-size:16px;padding:4px 12px">reverse KL</span> &nbsp;学生 A 的账单 = 1.379</h1>
+  <div class="body">
+    <div class="card g">
+      <table>
+        <tr><th style="width:150px">位置</th><th class="n" style="width:230px">学生 A（权重）</th><th class="n" style="width:230px">教师</th><th class="n">这一项</th></tr>
+        <tr><td>1</td><td class="n">.10</td><td class="n">.45</td><td class="n">−0.150</td></tr>
+        <tr class="bad"><td><b>2</b></td><td class="n"><b>.20</b></td><td class="n"><b>.02</b></td><td class="n" style="color:var(--danger)"><b>+0.461</b></td></tr>
+        <tr class="bad"><td><b>3</b></td><td class="n"><b>.40</b></td><td class="n"><b>.06</b></td><td class="n" style="color:var(--danger)"><b>+0.759</b></td></tr>
+        <tr class="bad"><td><b>4</b></td><td class="n"><b>.20</b></td><td class="n"><b>.02</b></td><td class="n" style="color:var(--danger)"><b>+0.461</b></td></tr>
+        <tr><td>5</td><td class="n">.10</td><td class="n">.45</td><td class="n">−0.150</td></tr>
+      </table></div>
+    <div class="hero d">
+      <p>总额几乎全部来自<b>位置 2、3、4 —— 教师认为不该说的中间那块</b>（合计 +1.68）。<br>
+      学生把 0.8 的概率压在了那里。<b>「你说了教师不认可的话」= 怕错。</b></p>
+    </div>
+    <div class="foot"><b>每个 loss 的总额，都被它自己要罚的那种错误支配。</b>
+      所以「forward 怕漏，reverse 怕错」不是口号，<b>是这两张账单的直接读数</b>。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="真实数据里的「中间那块」">
+  <div class="act">第四幕 · 落到语言模型上</div>
+  <h1>刚才那个「中间那块」<span class="lt">在真实数据里是什么</span></h1>
+  <div class="body">
+    <div class="card"><h3>回到开场那张表的位置 7</h3>
+      <pre>教师：<span class="tc">房间里 .250</span>   <span class="tc">室内 .172</span>   <span class="tc">客厅 .151</span>   房间 .118   房间内 .081</pre>
+      <small style="margin-top:12px">好几种说法都对。<b>语言天然如此</b>：说到这里，你可以起「房间里…」也可以起「客厅…」——
+      都对，但<b>你必须选一个</b>。所以那两个「峰」就是<b>多种都合理、但互不兼容的续写方式</b>。</small></div>
+    <div class="vs">
+      <div class="bad"><div class="vh">forward KL 摊开 → 说含糊话</div>
+        <ul style="margin-top:5px">
+          <li>为了覆盖所有说法，概率被摊平</li>
+          <li>采样时落到<b>几种说法的夹缝里</b> —— 单看每个词都沾点道理，<b>连起来不像人话</b></li>
+        </ul></div>
+      <div class="vsx">→</div>
+      <div class="good"><div class="vh">reverse KL 收窄 → 说确定话</div>
+        <ul style="margin-top:5px">
+          <li>挑一种教师认可的说法，把概率压上去</li>
+          <li>稳定落在<b>一种连贯的说法</b>里；代价是<b>多样性下降</b></li>
+        </ul></div>
+    </div>
+    <div class="foot">我们选 reverse KL（<span class="tt">beta=1</span>），因为要的是<b>确定、不啰嗦</b>的输出。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第四幕 · 两种 KL" data-t="经典蒸馏用的是 forward KL">
+  <div class="act">第四幕 · 落到语言模型上</div>
+  <h1>一个有用的锚点：<span class="lt">经典蒸馏用的就是 forward KL</span></h1>
+  <div class="body">
+    <div class="card a"><h3>教科书里那个「用教师的软标签做交叉熵」</h3>
+      <p>它和 <span class="tt">KL(教师‖学生)</span> 只差一个常数（教师自己的熵），<b>优化起来完全等价</b>。<br>
+      所以 <b>beta=0 就是经典 KD</b>。</p></div>
+    <div class="hero g">
+      <div class="k">为什么 on-policy 反而普遍偏向 reverse KL</div>
+      <p>因为两者<b>目标不同</b>：<br>
+      经典 KD 想让学生<b>逼近教师这个分布</b>；on-policy 想让学生<b>产出好句子</b>。<br>
+      而「学生产出的句子好不好」，恰好就是<b>用学生自己的概率当权重</b>在衡量的东西。</p>
+    </div>
+    <div class="foot">实现上还有一个前提会削弱 reverse KL 的极端行为，也是下一幕某个指标存在的理由。
+      &nbsp;<span class="jump" data-goto-t="A2 loss 实际是怎么算的">附录 A2 展开 →</span></div>
+  </div>
+</section>
+
+<!-- ============ 第五幕 · 三个诊断指标 ============ -->
+<section class="slide" data-act="第五幕 · 三个诊断指标" data-t="top1_agree">
+  <div class="act">第五幕 · 三个诊断指标</div>
+  <h1><span class="tt" style="font-size:.86em">top1_agree</span> <span class="lt">—— 最容易被误读的一个</span></h1>
+  <div class="sub">训练时可以额外输出一批指标。它们<b>不参与训练</b>，只用来观察。</div>
+  <div class="body">
+    <div class="hero d">
+      <div class="k">定义，以及最常见的误读</div>
+      <p>教师的第一选择与学生的第一选择<b>是不是同一个词</b>。<br>
+      它<b>不是</b>「学生预测得对不对」，也<b>不是</b>「命中学生实际说出的那个词」——<b>只比较两边各自的第一名</b>。</p>
+    </div>
+    <div class="card"><h3>实测 54.5%（开场样本）/ 中位 <b>67.2%</b> —— 只有一半，是不是没学好？</h3>
+      <pre>位置 7  教师：<span class="tc">房间里 .250</span>  室内 .172  客厅 .151  房间 .118   <span class="c">四五个词平分秋色</span>
+        学生：<span class="sc">客厅 .586</span>   室内 .189  房间内 .062            <span class="c">选了客厅，在教师那排第 3</span></pre>
+      <small style="margin-top:11px">不是。这一位记为「不一致」，但学生的选择<b>完全合理</b> —— 同一位的 SA90 是 ✓。
+      而且训练目标是<b>让整个分布靠拢</b>，从来不是「第一名必须一致」。</small></div>
+  </div>
+</section>
+
+<section class="slide" data-act="第五幕 · 三个诊断指标" data-t="SA90">
+  <div class="act">第五幕 · 三个诊断指标</div>
+  <h1><span class="tt" style="font-size:.86em">SA90</span> <span class="lt">—— 学生的选择，教师认不认</span></h1>
+  <div class="body">
+    <div class="card"><h3>两步</h3>
+      <small>① 把教师的概率<b>从大到小累加</b>，累到 0.9 就停 —— 纳入的那些词构成「教师认可集」<br>
+      ② 看学生的第一选择<b>有没有落在这个集合里</b></small></div>
+    <div class="row">
+      <div class="col card g"><h3>位置 7：教师不确定 → 认可集大</h3>
+        <pre>累加 .250 → .422 → … → <span class="hl">0.9</span>
+认可集 ≈ 前 8 个词
+学生选「客厅」排第 3   <span class="st">→ ✓</span></pre></div>
+      <div class="col card d"><h3>位置 2：教师很确定 → 认可集极小</h3>
+        <pre>教师 <span class="tc">深色 .909</span>，<span class="hl">一个词就超 0.9</span>
+认可集 = 【深色】一个
+学生选的是「黑色」     <span class="r">→ ✗</span></pre></div>
+    </div>
+    <div class="hero g">
+      <div class="k">它比 top1_agree 高明的地方：自适应</div>
+      <p>教师<b>越确定</b>认可集越小、越难通过；教师<b>本来就模糊</b>时自动放宽，不冤枉学生。<br>
+      <b>top1_agree 问「你们想的一样吗」，SA90 问「你想的教师能接受吗」。</b>实测中位数 <b>97.1%</b>。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide" data-act="第五幕 · 三个诊断指标" data-t="hallu">
+  <div class="act">第五幕 · 三个诊断指标</div>
+  <h1><span class="tt" style="font-size:.86em">hallu</span> <span class="lt">—— 学生有没有跑出教师的视野</span></h1>
+  <div class="body">
+    <div class="card d"><h3>定义：学生的第一选择<b>不在</b>教师 top-64 里的比例</h3>
+      <p>也就是：学生最想说的那个词，<b>教师连前 64 名都没提到</b>。</p></div>
+    <div class="hero w">
+      <div class="k">为什么单独需要这个指标</div>
+      <p>因为教师只返回 top-64，<b>loss 也只在这 64 个词上计算</b>。<br>
+      学生跑到这 64 个词之外去，<b>loss 不但看不见，还会给出一个虚假的好成绩</b>。<br>
+      所以必须有一个指标<b>在公式之外</b>盯着它。</p>
+    </div>
+    <div class="row">
+      <div class="col stats"><div><div class="big g">0.07%</div><div class="bigl">120 个样本块的均值</div></div>
+        <div><div class="big g">0%</div><div class="bigl">p25 / 中位 / p75</div></div></div>
+      <div class="col card g"><h3>它顺带回答了「top-64 够不够」</h3>
+        <small>0.07% 说明 <b>64 已经覆盖了学生几乎所有的选择</b>，加大 k 收益极小。<br>
+        涨到 1~2% 就是<b>该加 k 的信号</b>。<b>这是能用数据回答的问题。</b></small></div>
+    </div>
+    <div class="foot">「虚假的好成绩」是什么意思，附录里有具体数值。
+      &nbsp;<span class="jump" data-goto-t="A2b 一个 loss 看不见的错误">附录 A2 →</span></div>
+  </div>
+</section>
+
+<section class="slide" data-act="第五幕 · 三个诊断指标" data-t="健康的训练长什么样">
+  <div class="act">第五幕 · 健康的训练长什么样</div>
+  <h1>120 个样本块的<span class="lt"> 分位数分布</span></h1>
+  <div class="body">
+    <div class="card">
+      <table class="sm">
+        <tr><th>指标</th><th class="n">min</th><th class="n">p25</th><th class="n">中位</th><th class="n">p75</th><th class="n">max</th></tr>
+        <tr><td>回答长度</td><td class="n">6</td><td class="n">24</td><td class="n"><b>28</b></td><td class="n">33</td><td class="n">91</td></tr>
+        <tr><td>loss</td><td class="n">0.214</td><td class="n">0.398</td><td class="n"><b>0.483</b></td><td class="n">0.605</td><td class="n">1.377</td></tr>
+        <tr class="good"><td class="tt">SA90</td><td class="n">63.6%</td><td class="n">95.5%</td><td class="n"><b>97.1%</b></td><td class="n">100%</td><td class="n">100%</td></tr>
+        <tr><td class="tt">top1_agree</td><td class="n">27.3%</td><td class="n">59.3%</td><td class="n"><b>67.2%</b></td><td class="n">74.1%</td><td class="n">100%</td></tr>
+        <tr class="good"><td class="tt">hallu</td><td class="n">0%</td><td class="n">0%</td><td class="n"><b>0%</b></td><td class="n">0%</td><td class="n">4.0%</td></tr>
+      </table></div>
+    <div class="card a"><h3><span class="tag a">关键</span>光看数没有意义，要能说出<b>为什么这算健康</b></h3>
+      <small>· loss <b>稳定</b>在 0.2~1.4 —— 既没发散，也<b>没塌到 0</b>（塌到 0 通常意味着监督信号退化了）<br>
+      · 长度中位 28 而上限 156 <b>从未被触及</b> → 短回答是模型<b>自己选择结束</b>的，不是被截断<br>
+      · <span class="tt">hallu</span> 中位 0% → 学生的选择<b>始终在教师视野内</b></small></div>
+    <div class="foot">局限：这些都是<b>内部一致性</b>判断，目前<b>没有跨项目的绝对基线</b>。</div>
+  </div>
+</section>
+
+<!-- ============ 第六幕 · 反例 ============ -->
+<section class="slide" data-act="第六幕 · 一个真实的反例" data-t="一条退化的轨迹">
+  <div class="act">第六幕 · 一个真实的反例</div>
+  <h1>学生说出来的是 <span style="color:var(--danger)">「客厅里客厅里。」</span></h1>
+  <div class="body">
+    <div class="log">
+      <div class="lh"><span>长度 = <b>6</b></span><span>SA90 = <b>100%</b></span><span>top1_agree = <b>100%</b></span><span>hallu = <b>0%</b></span></div>
+      <table>
+        <tr><th class="pos">位置</th><th>学生说出</th><th class="kl">loss</th>
+            <th class="sep tk">教师 ①</th><th class="tk">②</th>
+            <th class="sep sk">学生 ①</th><th class="sk">②</th></tr>
+        <tr><td class="pos">0</td><td class="ro">客厅</td><td class="kl">0.128</td><td class="sep tk">客厅 <span class="pb">.816</span></td><td class="tk">在 <span class="pb">.041</span></td><td class="sep sk">客厅 <span class="pb">.906</span></td><td class="sk">（空）<span class="pb">.035</span></td></tr>
+        <tr><td class="pos">1</td><td class="ro">里</td><td class="kl">0.158</td><td class="sep tk">里 <span class="pb">.429</span></td><td class="tk">内 <span class="pb">.334</span></td><td class="sep sk">里 <span class="pb">.477</span></td><td class="sk">内 <span class="pb">.371</span></td></tr>
+        <tr class="hi"><td class="pos">2</td><td class="ro" style="color:var(--danger)">客厅</td><td class="kl">0.379</td><td class="sep tk">， <span class="pb">.791</span></td><td class="tk">光线 <span class="pb">.083</span></td><td class="sep sk">， <span class="pb">.439</span></td><td class="sk">光线 <span class="pb">.268</span></td></tr>
+        <tr><td class="pos">3</td><td class="ro">里</td><td class="kl">0.362</td><td class="sep tk">里 <span class="pb">.460</span></td><td class="tk">光线 <span class="pb">.062</span></td><td class="sep sk">里 <span class="pb">.832</span></td><td class="sk">内 <span class="pb">.030</span></td></tr>
+        <tr><td class="pos">4</td><td class="ro">。</td><td class="kl">0.326</td><td class="sep tk">， <span class="pb">.667</span></td><td class="tk">摆放 <span class="pb">.055</span></td><td class="sep sk">， <span class="pb">.586</span></td><td class="sk">客厅 <span class="pb">.123</span></td></tr>
+        <tr class="hi2"><td class="pos">5</td><td class="ro">&lt;结束&gt;</td><td class="kl">0.774</td><td class="sep tk">&lt;结束&gt; <span class="pb">.551</span></td><td class="tk">客厅 <span class="pb">.084</span></td><td class="sep sk">&lt;结束&gt; <span class="pb">.383</span></td><td class="sk">一位 <span class="pb">.159</span></td></tr>
+      </table>
+    </div>
+    <div class="foot">这条轨迹能读出三件事，接下来两页。</div>
+  </div>
+</section>
+
+<section class="slide" data-act="第六幕 · 一个真实的反例" data-t="为什么会发生 & 指标不矛盾">
+  <div class="act">第六幕 · 一个真实的反例</div>
+  <h1>前两件事</h1>
+  <div class="body">
+    <div class="card"><h3>① 它为什么会发生</h3>
+      <p>位置 2 教师和学生的第一选择<b>都是「，」</b>（该收句了）。<br>
+      但因为<b>完全不截断</b>，「客厅」——概率比学生第 5 名还低——被抽中了。</p>
+      <small style="margin-top:9px"><b>这是第三幕讲的「不截断」的正常行为，不是 bug。</b></small></div>
+    <div class="card"><h3>② 为什么 <span class="tt">top1_agree = 100%</span> 和句子退化不矛盾</h3>
+      <p>它比的是<b>教师和学生各自的第一名</b>，六个位置全都一致 → 100%。<br>
+      <b>学生实际说出了什么，不在这个指标的定义里。</b></p>
+      <small style="margin-top:9px">这就是第五幕那个误读点，在真实数据里的样子。</small></div>
+  </div>
+</section>
+
+<section class="slide" data-act="第六幕 · 一个真实的反例" data-t="坏前缀上的教师最有价值">
+  <div class="act">第六幕 · 一个真实的反例</div>
+  <h1>③ 这条<span class="lt">已经废了</span>的轨迹上，教师的打分<span class="lt">反而最有价值</span></h1>
+  <div class="body">
+    <div class="row">
+      <div class="col card t"><h3><span class="tag t">教师</span>它说什么</h3>
+        <pre><span class="tc">&lt;结束&gt;  0.551</span>
+客厅    0.084
+一个    0.040</pre>
+        <small style="margin-top:10px">翻译过来：<b>「这句已经废了，别再往下说，收。」</b></small></div>
+      <div class="col card s"><h3><span class="tag s">学生</span>它想说什么</h3>
+        <pre>&lt;结束&gt;  <span class="hl">0.383</span>
+一位    0.159   <span class="c">还想接着描述</span>
+一名    0.159</pre>
+        <small style="margin-top:10px">还有约 <b>43%</b> 的概率想继续往下说。</small></div>
+    </div>
+    <div class="hero g">
+      <div class="k">这正是第一幕那个结构性差异，在真实数据里的样子</div>
+      <p><b>教师在教学生「怎么从一个坏状态里收场」。</b><br>
+      而这件事 off-policy <b>永远教不了</b> —— 数据集的标准答案里，根本不会出现这样的前缀。</p>
+    </div>
+    <div class="hero w">
+      <p>于是「该不该截断」更微妙了：这类退化样本占 <b>1.7%</b>，截断能减少它们，
+      但会<b>顺手削掉学生真实的失败模式</b> —— 而那恰好是 on-policy 唯一能提供的东西。</p>
+    </div>
+  </div>
+</section>
+
+<!-- ============ 附录 A1 ============ -->
+<section class="slide apx" data-act="附录 A1 · RL 的难题" data-t="A1 几个词先说清楚">
+  <div class="act"><span class="ax">附录 A1</span> · 从第一幕跳转而来</div>
+  <h1>先把几个词说清楚</h1>
+  <div class="body">
+    <div class="card">
+      <table class="sm">
+        <tr><th style="width:230px">术语</th><th>意思</th></tr>
+        <tr><td><b>标量奖励</b></td><td>一次只给<b>一个数</b>当反馈，比如「这句话得 7 分」。不告诉你哪个词好、哪个词坏</td></tr>
+        <tr><td><b>奖励在序列末尾</b></td><td>整句话说完了才给分。中间每一步做得对不对，<b>当时没有任何反馈</b></td></tr>
+        <tr class="bad"><td><b>信用分配</b></td><td>那个总分是 30 个词共同造成的，得反推<b>哪几步立了功、哪几步坏了事</b>。<b>这是 RL 最难的地方</b></td></tr>
+        <tr><td><b>策略梯度</b></td><td>RL 里解上面这个反推问题的一类方法：靠<b>多次采样取平均</b>来估计每一步的功过</td></tr>
+        <tr><td><b>方差大</b></td><td>「靠采样取平均」意味着估计值本身是<b>抖的</b>。样本不够多时，梯度方向可能只是噪声</td></tr>
+        <tr class="good"><td><b>监督式梯度下降</b></td><td>每一步都<b>直接知道正确答案</b>，不需要反推。就是普通的模型训练，稳定好调</td></tr>
+      </table></div>
+    <div class="foot">下一页把两种监督信号并排放在一起看。&nbsp;&nbsp;<span class="back" data-goto-t="但它没继承 RL 的难题">← 返回正文</span></div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A1 · RL 的难题" data-t="A1b 两种监督信号并排看">
+  <div class="act"><span class="ax">附录 A1（续）</span></div>
+  <h1>两种监督信号<span class="lt"> 并排看</span></h1>
+  <div class="body">
+    <div class="vs">
+      <div class="bad"><div class="vh">强化学习：只有一个总分</div>
+        <pre>说完整句 → 打分 = <span class="hl">7 分</span>
+
+第 1 个词好不好？ <span class="r">不知道</span>
+第 2 个词好不好？ <span class="r">不知道</span>
+只能靠反复采样、统计平均来<span class="r">猜</span></pre>
+        <small style="margin-top:12px">→ 需要策略梯度、优势估计一整套机器<br>→ <b>方差大、容易训崩</b></small></div>
+      <div class="vsx">对比</div>
+      <div class="good"><div class="vh">on-policy 蒸馏：每步都有答案</div>
+        <pre>每个位置都拿到教师的<span class="st">完整分布</span>
+
+位置 1？ <span class="st">深色 .909 / 黑色 .066 / …</span>
+位置 2？ <span class="st">连衣裙 .578 / 长裙 .309 / …</span>
+<span class="st">不需要反推任何东西</span></pre>
+        <small style="margin-top:12px">→ 直接算 KL、直接反传<br>→ <b>稳定、便宜、好调</b></small></div>
+    </div>
+    <div class="hero p">
+      <div class="k">但代价是什么</div>
+      <p>它需要一个<b>比学生强的教师</b>；而 RL 不需要，它靠奖励信号理论上能超过任何单个示范者。<br>
+      所以两者<b>不是替代关系</b>：能拿到强教师就蒸馏，拿不到才需要 RL。</p>
+    </div>
+    <div class="foot"><span class="back" data-goto-t="但它没继承 RL 的难题">← 返回正文</span></div>
+  </div>
+</section>
+
+<!-- ============ 附录 A2 ============ -->
+<section class="slide apx" data-act="附录 A2 · loss 的盲区" data-t="A2 loss 实际是怎么算的">
+  <div class="act"><span class="ax">附录 A2</span> · 从第四幕 / 第五幕跳转而来</div>
+  <h1>loss 实际是怎么算的 <span class="lt">—— 三步</span></h1>
+  <div class="body">
+    <div class="card"><h3>源码里的三步（<span class="tt">gkd_loss.py</span>）</h3>
+      <pre><span class="c">① gather：用教师那 64 个词的编号，从学生的 24 万个分数里挑出 64 个</span>
+s_logits = <span class="k">gather</span>(student_logits, teacher_topk_indices)     <span class="hl">← 其余 248256 个全部丢弃</span>
+
+<span class="c">② 两侧同时除以温度</span>
+s_logits /= temperature ； t_logits /= temperature
+
+<span class="c">③ 各自在这 64 维上重新归一化，然后算 KL</span>
+s_log = <span class="k">log_softmax</span>(s_logits, dim=-1)     <span class="hl">← 64 个数重新加和成 1</span>
+t_log = <span class="k">log_softmax</span>(t_logits, dim=-1)</pre></div>
+    <div class="hero w">
+      <div class="k">第 ③ 步那个「重新归一化」是关键</div>
+      <p>教师原本返回的是<b>整个词表</b>上的概率，那 64 个数加起来<b>不到 1</b>。<br>
+      <span class="tt">log_softmax</span> 把它们<b>重新归一化成 1</b> —— 等于<b>假装词表只有这 64 个词</b>。下一页看它的后果。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A2 · loss 的盲区" data-t="A2b 一个 loss 看不见的错误">
+  <div class="act"><span class="ax">附录 A2（续）</span></div>
+  <h1>算一个极端例子：<span class="lt">学生 90% 的概率跑出了教师视野</span></h1>
+  <div class="body">
+    <div class="card"><h3>设定（简化成 5 个词看清机制）</h3>
+      <pre>学生真实分布： <span class="r">翠绿 0.90</span>  深色 0.05  黑色 0.03  长裙 0.01  其他 0.01
+教师 top-k ：              <span class="tc">深色 0.60</span>  <span class="tc">黑色 0.25</span>  <span class="tc">长裙 0.10</span>     <span class="c">← 里面没有「翠绿」</span></pre></div>
+    <div class="card d"><h3>按上一页那三步走一遍</h3>
+      <pre><span class="c">① gather 只取出学生在教师那几个词上的值</span>
+   0.05 / 0.03 / 0.01     合计只有 <span class="hl">0.09</span>
+   「翠绿」的 <span class="r">0.90 没有被取出，整个丢弃</span>
+
+<span class="c">② ③ 重新归一化</span>
+   学生 → 深色 <b>0.556</b>   黑色 <b>0.333</b>   长裙 <b>0.111</b>
+   教师 → 深色 <b>0.632</b>   黑色 <b>0.263</b>   长裙 <b>0.105</b>     <span class="c">← 看起来很接近！</span></pre></div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A2 · loss 的盲区" data-t="A2c 算出来的 loss 是多少">
+  <div class="act"><span class="ax">附录 A2（续）</span></div>
+  <h1>算出来的 loss 是多少</h1>
+  <div class="body">
+    <div class="card"><h3>③ reverse KL = Σ 学生概率 × log(学生概率 / 教师概率)</h3>
+      <pre>深色   0.556 × log(0.556/0.632) = <span class="st">−0.0713</span>
+黑色   0.333 × log(0.333/0.263) = <span class="r">+0.0788</span>
+长裙   0.111 × log(0.111/0.105) = <span class="r">+0.0060</span>
+                          loss = <span class="hl">0.0136</span></pre></div>
+    <div class="card">
+      <table>
+        <tr><th style="width:430px">情况</th><th class="n">reverse KL</th></tr>
+        <tr class="bad"><td>学生把 <b>90%</b> 概率给了教师视野外的词</td><td class="n" style="font-size:19px"><b>0.0136</b></td></tr>
+        <tr class="good"><td>学生和教师<b>完全一致</b></td><td class="n" style="font-size:19px"><b>0.0000</b></td></tr>
+      </table></div>
+    <div class="hero d">
+      <p>两者只差 <b>0.0136</b>。<b>loss 几乎分不出这两种情况。</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A2 · loss 的盲区" data-t="A2d 所以 hallu 才必须存在">
+  <div class="act"><span class="ax">附录 A2（续）</span></div>
+  <h1>所以问题<span class="lt"> 比「看不见」更严重</span></h1>
+  <div class="body">
+    <div class="hero d">
+      <div class="k">重归一化做了什么</div>
+      <p>它把学生<b>剩下的那 10%</b> 放大成了一个完整分布 —— 于是学生「看起来」和教师很像，<br>
+      <b>loss 反而给出了一个虚假的好成绩。</b></p>
+    </div>
+    <div class="card"><h3>顺带，「罚到无穷」的极端情况在这个实现下也不会出现</h3>
+      <small>重新归一化后，<b>这 64 个位置教师全都给了非零概率</b>，学生也一样 —— 两个分布的支撑集<b>完全相同</b>，
+      不存在「一方为 0」的位置。<br>
+      <b>推论</b>：教科书里 reverse KL「塌到单一模式」的极端行为，在这个实现下是<b>被削弱</b>的。</small></div>
+    <div class="hero g">
+      <div class="k">这就是 hallu 存在的全部理由</div>
+      <p>它在公式<b>之外</b>直接数「学生第一选择有没有落在教师 top-64 里」——<br>
+      <b>不经过归一化，所以骗不了它。</b></p>
+    </div>
+    <div class="foot"><span class="back" data-goto-t="hallu">← 返回正文（hallu 那页）</span></div>
+  </div>
+</section>
+
+<!-- ============ 附录 A3 ============ -->
+<section class="slide apx" data-act="附录 A3 · 两种蒸馏路线" data-t="A3 教师能返回什么">
+  <div class="act"><span class="ax">附录 A3</span> · 从第二幕跳转而来</div>
+  <h1>教师可以返回多少东西：<span class="lt">三个档位</span></h1>
+  <div class="body">
+    <div class="card">
+      <table>
+        <tr><th style="width:250px">档位</th><th style="width:330px">每个位置返回什么</th><th>可行性</th></tr>
+        <tr class="bad"><td><b>全词表</b></td><td>248320 个概率</td><td>传输和显存都<b>不现实</b></td></tr>
+        <tr class="good"><td><b>top-k</b>（我们用的）</td><td>概率最高的 k 个词 + 各自概率<br><span class="tt">k = 64</span></td><td>可行，目前主流</td></tr>
+        <tr><td><b>sampled-token</b></td><td><b>只有一个数</b>：学生实际说出那个词的概率</td><td>最轻，但监督稀疏</td></tr>
+      </table></div>
+    <div class="hero p">
+      <div class="k">框架原生支持两条路</div>
+      <p>参数 <span class="tt">gkd_logits_topk</span>：设成 <b>64</b> 走 top-k；设成 <b>0</b> 就走 sampled-token。<br>
+      所以这不是二选一的架构决定，<b>是一个可以切换的开关</b>。</p>
+    </div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A3 · 两种蒸馏路线" data-t="A3b 传输量差多少">
+  <div class="act"><span class="ax">附录 A3（续）</span></div>
+  <h1>传输量差多少 <span class="lt">—— 这是 top-k 存在的理由</span></h1>
+  <div class="body">
+    <div class="card"><h3>按一条 30 词的回答估算（理论载荷，不含 JSON 开销）</h3>
+      <table>
+        <tr><th style="width:250px">档位</th><th class="n" style="width:230px">每个位置</th><th class="n" style="width:200px">一条回答</th><th class="n">相对 top-64</th></tr>
+        <tr class="bad"><td>全词表（bf16）</td><td class="n">485 KB</td><td class="n">14.6 MB</td><td class="n"><b>970 倍</b></td></tr>
+        <tr class="good"><td><b>top-64</b></td><td class="n">512 B</td><td class="n">15 KB</td><td class="n">1 倍</td></tr>
+        <tr><td>sampled-token</td><td class="n">4 B</td><td class="n">120 B</td><td class="n"><b>1/128</b></td></tr>
+      </table>
+      <small style="margin-top:12px">top-64 每位置 = 64 × (词编号 4 B + 概率 4 B) = 512 B；
+      sampled-token 只要一个概率，<b>词编号学生自己就知道</b>。</small></div>
+    <div class="hero w">
+      <p>再乘上 batch 和梯度累积 —— 全词表方案的传输量会直接压垮网络。<br>
+      <b>top-k 把这件事从「不可能」变成「可行」，这是它存在的全部理由。</b></p>
+    </div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A3 · 两种蒸馏路线" data-t="A3c 取舍与 k 该取多少">
+  <div class="act"><span class="ax">附录 A3（续）</span></div>
+  <h1>那为什么不用最轻的那条路</h1>
+  <div class="body">
+    <div class="card">
+      <table class="sm">
+        <tr><th style="width:210px"></th><th style="width:330px">top-k（我们用的）</th><th>sampled-token</th></tr>
+        <tr><td><b>监督信息</b></td><td class="good">头部分布形状<b>完整保留</b>（暗知识）</td><td class="bad">只有<b>一个点</b>，形状信息全丢</td></tr>
+        <tr><td><b>loss 形式</b></td><td>真正的<b>分布之间</b>的 KL</td><td>只能匹配<b>单个概率值</b></td></tr>
+        <tr><td><b>传输量</b></td><td>512 B / 位置</td><td class="good">4 B / 位置</td></tr>
+        <tr><td><b>对教师接口的要求</b></td><td>必须能返回 top-k 分布</td><td class="good">只要能返回单词概率</td></tr>
+      </table>
+      <small style="margin-top:10px"><b>top-k 换的是「监督信息量」，sampled-token 换的是「极低成本」。</b>
+      我们要教<b>分布形状</b>，所以走 top-k。</small></div>
+    <div class="card g"><h3>那 k 该取多少 —— 用数据回答，不靠猜</h3>
+      <small>k 线性决定传输量：k=16 → 128 B / 位置；<b>k=64 → 512 B</b>；k=256 → 2 KB。<br>
+      而 <span class="tt">hallu</span> 实测<b>均值 0.07%</b>，说明 64 已覆盖学生几乎所有选择，<b>加大 k 是纯浪费</b>；涨到 1~2% 才是该加 k 的信号。</small></div>
+    <div class="foot"><span class="back" data-goto-t="为什么只取 top-64">← 返回正文</span></div>
+  </div>
+</section>
+
+<!-- ============ 附录 A4 ============ -->
+<section class="slide apx" data-act="附录 A4 · 速查" data-t="A4 术语速查">
+  <div class="act"><span class="ax">附录 A4</span> · 术语速查</div>
+  <h1>术语</h1>
+  <div class="body">
+    <div class="row top">
+      <div class="col card"><h3>流程相关</h3>
+        <table class="sm">
+          <tr><td style="width:150px"><b>rollout</b></td><td>让模型自己生成一段内容</td></tr>
+          <tr><td><b>token</b></td><td>模型处理的最小单位，一个编号</td></tr>
+          <tr><td><b>BPE</b></td><td>分词方法：从字节开始反复合并高频组合。<b>切法不唯一</b></td></tr>
+          <tr><td><b>logits</b></td><td>模型输出的原始分数，还没变成概率</td></tr>
+          <tr><td><b>teacher forcing</b></td><td>训练时始终用正确答案当前缀</td></tr>
+          <tr><td><b>exposure bias</b></td><td>训练只见过正确前缀，推理却在自己的前缀上工作</td></tr>
+          <tr><td><b>熵</b></td><td>分布「有多不确定」。小 = 集中，大 = 分散</td></tr>
+        </table></div>
+      <div class="col card"><h3>方法相关</h3>
+        <table class="sm">
+          <tr><td style="width:150px"><b>on-policy</b></td><td>用<b>模型自己刚产生</b>的数据来学</td></tr>
+          <tr><td><b>off-policy</b></td><td>用别人的、或自己很久以前的数据</td></tr>
+          <tr><td><b>模仿学习</b></td><td>模仿专家行为来学，而不是靠奖励试错</td></tr>
+          <tr><td><b>DAgger</b></td><td>让学习者自己走，在它走到的位置上问专家</td></tr>
+          <tr><td><b>KL 散度</b></td><td>衡量两个分布差多少。<b>不对称</b>，谁在前面很关键</td></tr>
+          <tr><td><b>mass-covering</b></td><td>forward KL 的倾向：摊开，覆盖所有说法</td></tr>
+          <tr><td><b>mode-seeking</b></td><td>reverse KL 的倾向：收窄，聚焦主要说法</td></tr>
+          <tr><td><b>暗知识</b></td><td>分布里除「哪个词对」之外的信息</td></tr>
+        </table></div>
+    </div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A4 · 速查" data-t="A4b 参数速查">
+  <div class="act"><span class="ax">附录 A4（续）</span></div>
+  <h1>参数速查</h1>
+  <div class="body">
+    <div class="card">
+      <table class="sm">
+        <tr><th style="width:290px">参数</th><th>含义</th></tr>
+        <tr><td class="tt">--lmbda 1</td><td>100% 用学生自己的轨迹（纯 on-policy）</td></tr>
+        <tr><td class="tt">--beta 1</td><td>reverse KL（怕错、收窄）；<b>0</b> = forward KL（怕漏、摊开）= 经典 KD</td></tr>
+        <tr><td class="tt">--gkd_logits_topk 64</td><td>教师每位置返回 top-64；<b>设成 0</b> 切到 sampled-token 路线</td></tr>
+        <tr class="bad"><td class="tt">--temperature 0.9</td><td><b>同时</b>管学生采样和 loss 缩放 —— 做对照实验时别动它</td></tr>
+        <tr class="good"><td class="tt">--top_p 1.0 / --top_k -1</td><td>不截断，从全词表采样。<b>只影响采样，不进 loss</b></td></tr>
+        <tr><td class="tt">max_completion_length</td><td>最大生成长度，直接影响训练速度</td></tr>
+      </table></div>
+  </div>
+</section>
+
+<section class="slide apx" data-act="附录 A4 · 速查" data-t="附录索引">
+  <div class="act"><span class="ax">附录</span></div>
+  <h1>附录索引 <span class="lt">—— Q&amp;A 时当菜单用</span></h1>
+  <div class="body">
+    <div class="card p"><h3><span class="tag p">A1</span>为什么它没继承强化学习最难的那部分
+        <span class="jump" data-goto-t="A1 几个词先说清楚" style="margin-left:auto">跳转 →</span></h3>
+      <small>标量奖励 / 信用分配 / 策略梯度 / 方差 逐个解释，两种监督信号并排对比。<b>2 页</b></small></div>
+    <div class="card p"><h3><span class="tag p">A2</span>loss 实际怎么算，以及它看不见的那类错误
+        <span class="jump" data-goto-t="A2 loss 实际是怎么算的" style="margin-left:auto">跳转 →</span></h3>
+      <small>源码三步 → 一个极端例子（学生 90% 跑出视野，loss 只有 0.0136）→ 所以 hallu 必须存在。<b>4 页</b></small></div>
+    <div class="card p"><h3><span class="tag p">A3</span>top-k vs sampled-token 两条路线
+        <span class="jump" data-goto-t="A3 教师能返回什么" style="margin-left:auto">跳转 →</span></h3>
+      <small>三个档位的传输量（970 倍 / 1 倍 / 1/128）、两条路线取舍、k 该取多少。<b>3 页</b></small></div>
+    <div class="foot">正文里没讲、但可以单开一场的话题：<b>packing 在新型混合注意力架构上前向结果是错的</b> ——
+      实测拼接前向 vs 单独前向，第一条样本 100% 一致，第二三条掉到 53% 和 42%。</div>
+  </div>
+</section>
+
+</div><!-- /#stage -->
+
+<script>
+(function(){
+  var slides = Array.prototype.slice.call(document.querySelectorAll('.slide'));
+  var N = slides.length;
+  var stage = document.getElementById('stage');
+  var bar = document.getElementById('bar');
+  var numEl = document.getElementById('num');
+  var idx = document.getElementById('idx');
+  var cur = 0;
+
+  function fit(){
+    var s = Math.min(window.innerWidth / 1280, window.innerHeight / 720);
+    stage.style.transform = 'translate(-50%,-50%) scale(' + s + ')';
+  }
+  window.addEventListener('resize', fit);
+  fit();
+
+  function show(i, push){
+    cur = Math.max(0, Math.min(N - 1, i));
+    slides.forEach(function(s, k){ s.classList.toggle('active', k === cur); });
+    bar.style.width = ((cur + 1) / N * 100) + '%';
+    numEl.textContent = (cur + 1) + ' / ' + N;
+    Array.prototype.forEach.call(idx.querySelectorAll('.it'), function(el){
+      el.classList.toggle('cur', +el.dataset.i === cur);
+    });
+    if (push !== false) {
+      try { history.replaceState(null, '', '?p=' + (cur + 1)); } catch(e){}
+    }
+  }
+
+  // 正文 <-> 附录 跳转（按标题寻址，增删页面不会失效）
+  function indexOfTitle(title){
+    for (var i = 0; i < N; i++) { if (slides[i].dataset.t === title) return i; }
+    return -1;
+  }
+  document.addEventListener('click', function(e){
+    var t = e.target.closest ? e.target.closest('[data-goto-t]') : null;
+    if (!t) return;
+    e.stopPropagation();
+    var i = indexOfTitle(t.dataset.gotoT);
+    if (i >= 0) show(i);
+  }, true);
+
+  (function buildIndex(){
+    var html = '<h2>目录 &nbsp;<span style="font-size:14px;color:var(--dim2);font-weight:400">点击跳转 · Esc 关闭</span></h2><div class="cols">';
+    var lastAct = null, open = false;
+    slides.forEach(function(s, i){
+      var act = s.dataset.act || '';
+      if (act !== lastAct) {
+        if (open) html += '</div>';
+        html += '<div class="grp"><div class="gt">' + act + '</div>';
+        lastAct = act; open = true;
+      }
+      html += '<div class="it" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><span>' + (s.dataset.t || '') + '</span></div>';
+    });
+    if (open) html += '</div>';
+    idx.innerHTML = html + '</div>';
+    idx.addEventListener('click', function(e){
+      e.stopPropagation();
+      var it = e.target.closest ? e.target.closest('.it') : null;
+      if (it) { show(+it.dataset.i); idx.classList.remove('on'); }
+      else if (e.target === idx) { idx.classList.remove('on'); }
+    });
+  })();
+
+  // 版式平衡：内容偏少的页，把富余空间按「上 38% / 下 62%」分配。
+  // 全部用布局 px（offsetHeight / clientHeight），不受 stage 的 scale 影响。
+  function balance(){
+    slides.forEach(function(s){
+      var body = s.querySelector('.body');
+      if (!body) return;
+      var wasActive = s.classList.contains('active');
+      body.style.paddingTop = '';
+      s.style.visibility = 'hidden';
+      s.classList.add('active');
+      if (body.children.length) {
+        body.style.flex = '0 0 auto';      // 先量内容的自然高度
+        var used = body.offsetHeight;
+        body.style.flex = '';              // 还原后量可用高度
+        var avail = body.clientHeight;
+        var rest = avail - used;
+        if (rest > 70) body.style.paddingTop = Math.round(rest * 0.30) + 'px';
+      }
+      if (!wasActive) s.classList.remove('active');
+      s.style.visibility = '';
+    });
+  }
+  balance();
+  if (document.fonts && document.fonts.ready) { document.fonts.ready.then(balance); }
+
+  document.addEventListener('keydown', function(e){
+    var open = idx.classList.contains('on');
+    switch (e.key) {
+      case 'ArrowRight': case 'ArrowDown': case ' ': case 'PageDown':
+        if (!open) { show(cur + 1); e.preventDefault(); } break;
+      case 'ArrowLeft': case 'ArrowUp': case 'PageUp':
+        if (!open) { show(cur - 1); e.preventDefault(); } break;
+      case 'Home': show(0); e.preventDefault(); break;
+      case 'End': show(N - 1); e.preventDefault(); break;
+      case 'Escape': idx.classList.toggle('on'); e.preventDefault(); break;
+      case 'f': case 'F':
+        if (document.fullscreenElement) document.exitFullscreen();
+        else document.documentElement.requestFullscreen();
+        break;
+    }
+  });
+
+  document.getElementById('zL').addEventListener('click', function(e){
+    if (!idx.classList.contains('on')) { show(cur - 1); e.stopPropagation(); }
+  });
+  document.getElementById('zR').addEventListener('click', function(e){
+    if (!idx.classList.contains('on')) { show(cur + 1); e.stopPropagation(); }
+  });
+
+  var p = parseInt((location.search.match(/[?&]p=(\d+)/) || [])[1], 10);
+  show(isFinite(p) ? p - 1 : 0, false);
+})();
+</script>
+</body>
+</html>
