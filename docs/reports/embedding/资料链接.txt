@@ -1,3 +1,4 @@
+# CLIP / SigLIP / SigLIP2
 https://arxiv.org/pdf/2103.00020
 https://openai.com/index/clip/
 https://arxiv.org/pdf/2212.07143
@@ -11,6 +12,8 @@ https://arxiv.org/pdf/2502.14786
 https://huggingface.co/blog/siglip2
 https://huggingface.co/collections/google/siglip2-67b5dcef38c175486e240107
 https://andlukyane.com/blog/paper-review-siglip2
+
+# ColBERT / ColPali / ColQwen / ViDoRe
 https://arxiv.org/pdf/2004.12832
 https://arxiv.org/pdf/2112.01488
 https://aclanthology.org/2022.naacl-main.272/
@@ -19,18 +22,63 @@ https://arxiv.org/pdf/2407.01449
 https://huggingface.co/vidore/colqwen2-v1.0
 https://huggingface.co/vidore/colqwen2.5-v0.1
 https://arxiv.org/pdf/2505.17166
+
+# GME / VLM2Vec / MegaPairs（MLLM 通用多模态嵌入）
 https://arxiv.org/pdf/2412.16855
 https://arxiv.org/html/2412.16855
 https://huggingface.co/Alibaba-NLP/gme-Qwen2-VL-2B-Instruct
 https://huggingface.co/Alibaba-NLP/gme-Qwen2-VL-7B-Instruct
+https://arxiv.org/pdf/2410.05160
+https://tiger-ai-lab.github.io/VLM2Vec/
+https://arxiv.org/pdf/2412.14475
+
+# BGE 全家桶
 https://arxiv.org/pdf/2309.07597
 https://huggingface.co/BAAI/bge-large-zh-v1.5
 https://huggingface.co/BAAI/bge-large-en-v1.5
 https://arxiv.org/pdf/2402.03216
-https://huggingface.co/BAAI/bge-multilingual-gemma2
+https://arxiv.org/pdf/2409.15700
 https://huggingface.co/BAAI/bge-en-icl
-https://arxiv.org/pdf/2412.14475
-https://arxiv.org/html/2510.11835v1
+https://huggingface.co/BAAI/bge-multilingual-gemma2
+https://huggingface.co/BAAI/bge-reranker-v2-m3
+https://huggingface.co/BAAI/bge-reranker-v2-gemma
+https://huggingface.co/BAAI/bge-reranker-v2-minicpm-layerwise
+https://huggingface.co/BAAI/bge-reranker-v2.5-gemma2-lightweight
+https://github.com/FlagOpen/FlagEmbedding
+
+# 基石 / 检索预训练
+https://arxiv.org/pdf/2104.08821
+https://arxiv.org/pdf/2112.09118
+https://arxiv.org/pdf/2104.08253
+https://arxiv.org/pdf/2108.05540
+https://arxiv.org/pdf/2205.12035
+https://arxiv.org/pdf/2211.08769
+https://arxiv.org/pdf/2212.09741
+https://instructor-embedding.github.io
+
+# LLM-Embedding 冲榜路线
+https://arxiv.org/pdf/2401.00368
+https://arxiv.org/pdf/2402.09906
+https://arxiv.org/pdf/2405.17428
+https://blog.salesforceairesearch.com/sfr-embedded-mistral/
+https://huggingface.co/Salesforce/SFR-Embedding-2_R
+https://arxiv.org/pdf/2405.05374
+https://arxiv.org/pdf/2412.04506
+https://huggingface.co/dunzhang/stella_en_1.5B_v5
+
+# 前沿方向
+https://arxiv.org/pdf/2409.04701
+https://arxiv.org/pdf/2505.12540
+https://arxiv.org/pdf/2412.13663
+https://huggingface.co/answerdotai/ModernBERT-base
+https://arxiv.org/pdf/2304.07193
+https://arxiv.org/pdf/2508.10104
+https://arxiv.org/pdf/2506.05176
+https://github.com/QwenLM/Qwen3-Embedding
+https://seed.bytedance.com/en/blog/introducing-seed1-5-embedding
+https://huggingface.co/spaces/vidore/vidore-leaderboard
+
+# 主文引用（基础/对照）
 https://arxiv.org/pdf/2304.07193
 https://arxiv.org/pdf/2004.04906
 https://arxiv.org/pdf/1908.10084

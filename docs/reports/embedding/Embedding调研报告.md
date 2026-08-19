@@ -1309,19 +1309,67 @@ Client → Gateway → [Embed query] → Vector DB (ANN ± BM25)
 
 ## 附录 B：资源链接
 
-### 本仓库专题报告
+### 本仓库专题报告（按主题）
 
-- [BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)（Dense / Sparse 入门 / Late Interaction / Self-KD / Hybrid）
+**BGE 全家桶**（RetroMAE → C-Pack → M3 → EN-ICL → gemma2 → Reranker）
+
+- [BGE-CPack详解](BGE-CPack详解.md)：C-Pack / BGE 全家桶起点，C-MTEB + C-MTP + 三阶段训练
+- [BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)：Dense + Sparse + Multi-vec 三头联合 + Self-KD
+- [BGE-EN-ICL详解](BGE-EN-ICL详解.md)：Mistral-7B + causal + ICL few-shot 训练；MTEB 71.24
+- [BGE-multilingual-gemma2详解](BGE-multilingual-gemma2详解.md)：Gemma-2-9B 骨干；MIRACL 74.1 SOTA
+- [BGE-Reranker详解](BGE-Reranker详解.md)：v2-m3 / v2-gemma / v2.5-gemma2-lightweight（深度+宽度双压缩）
+
+**基石短深读**
+
+- [无监督对比检索三部曲](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md)：SimCSE / Contriever / Condenser + coCondenser
+- [RetroMAE与DupMAE详解](RetroMAE与DupMAE详解.md)：非对称 MAE + BoW 头
+- [INSTRUCTOR详解](INSTRUCTOR详解.md)：指令化嵌入开山
+- [CLIP详解](CLIP详解.md)：图文双塔基石，对称 InfoNCE + WIT 4 亿对
+- [SigLIP与SigLIP2详解](SigLIP与SigLIP2详解.md)：sigmoid loss + LocCa + SILC/TIPS + NaFlex
+
+**训练与损失**
+
+- [对比学习与InfoNCE精讲](对比学习与InfoNCE精讲.md)：损失演化专题（Metric learning → InfoNCE → 各家变体）
+- [难负例挖掘工业实践](难负例挖掘工业实践.md)：假负例治理与刷新
+- [Embedding蒸馏技术详解](Embedding蒸馏技术详解.md)：CE→BE / vec / logit 三种蒸馏信号
+
+**LLM-Embedding & MLLM-Embedding**
+
+- [LLM-Embedding冲榜路线](LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md)：E5-Mistral / GritLM / NV-Embed-v2 / SFR-2R / Arctic v1&2 / Stella 六篇合写
+- [MLLM通用多模态嵌入](MLLM通用多模态嵌入_GME-VLM2Vec-BGEVL.md)：GME / VLM2Vec+MMEB / BGE-VL+MegaPairs 三篇合写
+
+**前沿方向**
+
+- [前沿短深读集合](前沿短深读_LateChunking-Vec2Vec-ModernBERT-DINOv2v3-Qwen3-Seed-ViDoRev2.md)：Late Chunking / Vec2Vec / ModernBERT / DINOv2+v3 / Qwen3-Embedding / Seed1.5 / ViDoRe v2
+
+**Late Interaction 族**
+
+- [ColBERT详解](ColBERT详解.md) · [ColBERTv2详解](ColBERTv2详解.md) · [ColPali详解](ColPali详解.md) · [ColQwen系列详解](ColQwen系列详解.md)
+
+**稠密文本 Embedding**
+
+- [E5详解](E5详解.md) · [GTE多阶段对比学习详解](GTE多阶段对比学习详解.md) · [gte-Qwen2详解](gte-Qwen2详解.md) · [Nomic-Embed详解](Nomic-Embed详解.md) · [LLM2Vec详解](LLM2Vec详解.md) · [Conan-embedding详解](Conan-embedding详解.md) · [Conan-embedding-v2详解](Conan-embedding-v2详解.md) · [QZhou-Embedding详解](QZhou-Embedding详解.md) · [Token-Prepending详解](Token-Prepending详解.md) · [Jasper-Token-Compression-600M详解](Jasper-Token-Compression-600M详解.md)
+
+**Jina 系列**
+
+- [Jina系列总览](Jina系列总览.md) · [v2](Jina-embeddings-v2详解.md) · [v3](Jina-embeddings-v3详解.md) · [jina-clip](jina-clip系列详解.md) · [v4](Jina-embeddings-v4详解.md) · [v5-text](Jina-embeddings-v5-text详解.md) · [v5-omni](Jina-embeddings-v5-omni详解.md)
+
+**难负例算法与数据**
+
+- [ANCE详解](ANCE详解.md) · [RocketQA详解](RocketQA详解.md) · [NV-Retriever详解](NV-Retriever详解.md) · [LLM-DA文本行人检索数据增强详解](LLM-DA文本行人检索数据增强详解.md) · [DeVE-QA稠密视频事件问答详解](DeVE-QA稠密视频事件问答详解.md) · [InternLM2数据处理与过滤详解](InternLM2数据处理与过滤详解.md)
 
 ### 外部资源
 
-- [MTEB Leaderboard](https://huggingface.co/spaces/mteb/leaderboard)
+- [MTEB Leaderboard](https://huggingface.co/spaces/mteb/leaderboard)（含 MTEB v2 / MMTEB）
 - [BEIR Leaderboard](https://github.com/beir-cellar/beir)
+- [ViDoRe v2 Leaderboard](https://huggingface.co/spaces/vidore/vidore-leaderboard)
+- [MMEB Leaderboard](https://tiger-ai-lab.github.io/VLM2Vec/)
 - [Sentence Transformers](https://www.sbert.net/)
 - [FlagEmbedding (BGE)](https://github.com/FlagOpen/FlagEmbedding)
 - [BGE-M3 官方文档](https://bge-model.com/bge/bge_m3.html)
 - [MTEB GitHub](https://github.com/embeddings-benchmark/mteb)
-- [ColPali](https://github.com/illuin-tech/colpali)
+- [ColPali / Vidore](https://github.com/illuin-tech/colpali)
+- [Qwen3-Embedding](https://github.com/QwenLM/Qwen3-Embedding)
 
 ---
 

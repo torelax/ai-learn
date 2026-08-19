@@ -19,14 +19,38 @@
 | 文档 | 说明 |
 |------|------|
 | [BGE-M3三功能统一详解报告.md](BGE-M3三功能统一详解报告.md) | BGE-M3 |
+| [BGE-CPack详解.md](BGE-CPack详解.md) | [arXiv:2309.07597](https://arxiv.org/abs/2309.07597)（C-Pack / BGE 全家桶起点：C-MTEB + C-MTP + BGE 模型 + 三阶段训练） |
+| [BGE-EN-ICL详解.md](BGE-EN-ICL详解.md) | [arXiv:2409.15700](https://arxiv.org/abs/2409.15700)（Mistral-7B + causal + [EOS] + few-shot ICL 训练；MTEB 71.24 / 71.67） |
+| [BGE-multilingual-gemma2详解.md](BGE-multilingual-gemma2详解.md) | Gemma-2-9B 骨干（附录 C of BGE-EN-ICL 论文）；MIRACL 74.1 SOTA / FR-MTEB / PL-MTEB SOTA |
+| [BGE-Reranker详解.md](BGE-Reranker详解.md) | v2-m3 / v2-gemma / v2-minicpm-layerwise / **v2.5-gemma2-lightweight**（附录 D of BGE-EN-ICL 论文；深度+宽度双压缩） |
 | [Embedding蒸馏技术详解.md](Embedding蒸馏技术详解.md) | Embedding 蒸馏专题 |
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例工业闭环 |
+| [对比学习与InfoNCE精讲.md](对比学习与InfoNCE精讲.md) | 损失演化专题：Metric learning → InfoNCE → SimCSE/DPR/CLIP/SigLIP/蒸馏/BGE-M3/GritLM |
+| [InternLM2数据处理与过滤详解.md](InternLM2数据处理与过滤详解.md) | [arXiv:2403.17297](https://arxiv.org/abs/2403.17297)：LLM 预训练数据清洗流水线（Conan-v1 预训练引用的数据过滤方法） |
 | [ANCE详解.md](ANCE详解.md) | 全局 ANN 难负例 + 异步刷新 |
 | [RocketQA详解.md](RocketQA详解.md) | CE 去噪 hard + 伪标；v2 动态 listwise |
 | [NV-Retriever详解.md](NV-Retriever详解.md) | Positive-aware 挖负（MarginPos / PercPos） |
 | [LLM-DA文本行人检索数据增强详解.md](LLM-DA文本行人检索数据增强详解.md) | LLM 改写 + TFF + BSS |
 | [DeVE-QA稠密视频事件问答详解.md](DeVE-QA稠密视频事件问答详解.md) | 稠密视频事件 QA 数据与 DeVi |
 | [Jasper-Token-Compression-600M详解.md](Jasper-Token-Compression-600M详解.md) | Jasper 600M：双教师蒸馏 + 弹性 Token 压缩 |
+
+## 基石短深读（2026 补齐）
+
+| 文档 | 论文 / 来源 |
+|------|-------------|
+| [无监督对比检索三部曲_SimCSE-Contriever-Condenser.md](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md) | SimCSE [2104.08821](https://arxiv.org/abs/2104.08821) + Contriever [2112.09118](https://arxiv.org/abs/2112.09118) + Condenser [2104.08253](https://arxiv.org/abs/2104.08253) + coCondenser [2108.05540](https://arxiv.org/abs/2108.05540) |
+| [RetroMAE与DupMAE详解.md](RetroMAE与DupMAE详解.md) | RetroMAE [2205.12035](https://arxiv.org/abs/2205.12035) + DupMAE / RetroMAE v2 [2211.08769](https://arxiv.org/abs/2211.08769) |
+| [INSTRUCTOR详解.md](INSTRUCTOR详解.md) | [arXiv:2212.09741](https://arxiv.org/abs/2212.09741)（指令化嵌入开山；GTR + 拼接指令 + MEDI 330 任务） |
+| [CLIP详解.md](CLIP详解.md) | [arXiv:2103.00020](https://arxiv.org/abs/2103.00020)（图文双塔基石；对称 InfoNCE + WIT 4 亿对 + zero-shot 分类） |
+| [SigLIP与SigLIP2详解.md](SigLIP与SigLIP2详解.md) | SigLIP [2303.15343](https://arxiv.org/abs/2303.15343) + SigLIP 2 [2502.14786](https://arxiv.org/abs/2502.14786)（sigmoid loss + 100 语 + LocCa + SILC/TIPS + NaFlex） |
+
+## 合写型专题（2026 补齐）
+
+| 文档 | 覆盖内容 |
+|------|---------|
+| [LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md](LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md) | E5-Mistral / GritLM / NV-Embed-v2 / SFR-Embedding-2R / Arctic-Embed v1&2 / Stella-Jasper 六篇合写；6 个可插拔积木 + 消融交集 |
+| [MLLM通用多模态嵌入_GME-VLM2Vec-BGEVL.md](MLLM通用多模态嵌入_GME-VLM2Vec-BGEVL.md) | GME [2412.16855](https://arxiv.org/abs/2412.16855) + VLM2Vec+MMEB [2410.05160](https://arxiv.org/abs/2410.05160) + BGE-VL/MegaPairs [2412.14475](https://arxiv.org/abs/2412.14475) 三篇合写 |
+| [前沿短深读_LateChunking-Vec2Vec-ModernBERT-DINOv2v3-Qwen3-Seed-ViDoRev2.md](前沿短深读_LateChunking-Vec2Vec-ModernBERT-DINOv2v3-Qwen3-Seed-ViDoRev2.md) | Late Chunking [2409.04701](https://arxiv.org/abs/2409.04701) / Vec2Vec [2505.12540](https://arxiv.org/abs/2505.12540) / ModernBERT [2412.13663](https://arxiv.org/abs/2412.13663) / DINOv2 [2304.07193](https://arxiv.org/abs/2304.07193)+DINOv3 [2508.10104](https://arxiv.org/abs/2508.10104) / Qwen3-Embedding [2506.05176](https://arxiv.org/abs/2506.05176) / Seed1.5-Embedding / ViDoRe v2 [2505.17166](https://arxiv.org/abs/2505.17166) 七个方向合写 |
 
 ## Late Interaction 族（文本 → 视觉文档）
 
@@ -42,6 +66,7 @@
 | 文档 | 论文 / 来源 |
 |------|-------------|
 | [E5详解.md](E5详解.md) | [arXiv:2212.03533](https://arxiv.org/abs/2212.03533) |
+| [GTE多阶段对比学习详解.md](GTE多阶段对比学习详解.md) | [arXiv:2308.03281](https://arxiv.org/abs/2308.03281)（GTE 原始 BERT 版；两阶段对比范式，被 Conan/BGE/gte-Qwen 沿用） |
 | [gte-Qwen2详解.md](gte-Qwen2详解.md) | 方法 [arXiv:2308.03281](https://arxiv.org/abs/2308.03281) + [HF gte-Qwen2-7B](https://huggingface.co/Alibaba-NLP/gte-Qwen2-7B-instruct) |
 | [Nomic-Embed详解.md](Nomic-Embed详解.md) | [arXiv:2402.01613](https://arxiv.org/abs/2402.01613) |
 | [LLM2Vec详解.md](LLM2Vec详解.md) | [arXiv:2404.05961](https://arxiv.org/abs/2404.05961) |
