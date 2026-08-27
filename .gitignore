@@ -8,8 +8,5 @@
 
 tmp
 
-# 论文 PDF 本地副本（整树不入库；约定见 AGENTS.md）
-docs/papers/
-
 # 还没整理好，暂时不传
 model_train

@@ -32,7 +32,7 @@ ai-learn/
 ├── docs/reports/lora/           # LoRA / PEFT 调研报告
 ├── docs/reports/distillation/   # 知识蒸馏调研
 ├── docs/reports/Qwen/           # Qwen 系列调研
-├── docs/papers/<topic>/         # 论文 PDF 本地副本（不入库）
+├── docs/papers/<topic>/         # 论文 PDF / 中译 / 配图
 ├── embedding/                   # 笔记与练习
 ├── torch/                       # PyTorch 练习
 ├── ...

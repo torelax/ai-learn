@@ -9,7 +9,7 @@
 | 路径 | 职责 |
 |------|------|
 | `docs/reports/<topic>/` | 研究报告 Markdown（**权威正文**，入库） |
-| `docs/papers/<topic>/` | 论文 PDF 本地副本（**整树不入库**） |
+| `docs/papers/<topic>/` | 论文 PDF / 中译 / 配图本地副本（入库） |
 | `embedding/`、`torch/`、`refs/` | 练习笔记 / 代码参考 |
 
 专题目录与报告对齐：`embedding`、`lora`、`distillation`、`Qwen` 等。
@@ -37,7 +37,6 @@ docs/papers/<topic>/<Series>/<Paper>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}
 规则：
 
 - 目录按报告专题分；不存在则创建
-- **整树 `docs/papers/` 已在 `.gitignore`，禁止 `git add` PDF**
 - 报告 MD **不要**写 `local PDF`、本地 PDF 路径、中译落盘路径；用 arXiv / ACL / 官方链接即可
 - 配图优先从 **arXiv HTML / ar5iv** 下载原图到对应 `figs/`；无 HTML 原图时再 PDF 裁切兜底（见 `docs/papers/embedding/_fetch_html_figures.py`）
 
@@ -145,4 +144,4 @@ docs/reports/<topic>/figures/<短名>/fig01.png
 | [docs/README.md](docs/README.md) | 文档索引 |
 | [docs/reports/embedding/README.md](docs/reports/embedding/README.md) | Embedding 报告索引 |
 | [.cursor/rules/paper-research.mdc](.cursor/rules/paper-research.mdc) | 论文研究强制规则 |
-| [.gitignore](.gitignore) | 含 `docs/papers/` |
+| [.gitignore](.gitignore) | 忽略缓存 / 未完成目录等 |

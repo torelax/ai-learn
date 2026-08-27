@@ -5,11 +5,10 @@ alwaysApply: true
 
 # 论文研究与 Notion 同步
 
-## PDF（必做、不入库）
+## PDF（必做）
 
 - 路径：`docs/papers/<topic>/<Name>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}`；系列则为 `docs/papers/<topic>/<Series>/<Paper>/`（topic 与 `docs/reports/<topic>/` 对齐）。文件夹用方法名或文章名，**不要带 arXiv 编号**
 - PDF **禁止** `paper.pdf`：文件名用论文英文全名，有 arXiv 则后缀 `_YYMM.NNNNN.pdf`
-- `docs/papers/` **整树 gitignore**，禁止加入版本库
 - 研究时主动下载/保存 PDF；目录不存在则创建
 - 报告元信息**不要**写 `local PDF`、本地 PDF 路径或中译落盘路径
 - 配图优先 **arXiv HTML / ar5iv 原图** → 该篇的 `figs/`；无则再 PDF 裁切
