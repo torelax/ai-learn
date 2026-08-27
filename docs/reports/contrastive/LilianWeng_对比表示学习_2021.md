@@ -5,9 +5,9 @@
 > 原文：[Contrastive Representation Learning (Lilian Weng, May 2021)](https://lilianweng.github.io/posts/2021-05-31-contrastive/)
 > 说明：中文为完整译文；英文原文紧随其后以引用块给出。公式与插图保持原文。
 
-对比表示学习的目标，是学习一个嵌入空间：其中相似的样本对在空间中彼此靠近，而不相似的样本对则彼此远离。对比学习既可用于监督设置，也可用于无监督设置。在处理无监督数据时，对比学习是自监督学习中最强大的方法之一。
+对比表示学习的目标，是学习一个嵌入空间：其中相似的样本对在空间中彼此靠近，而不相似的样本对则彼此远离。对比学习既可用于监督设置，也可用于无监督设置。在处理无监督数据时，对比学习是[自监督学习](https://lilianweng.github.io/posts/2019-11-10-self-supervised/)中最强大的方法之一。
 
-> The goal of contrastive representation learning is to learn such an embedding space in which similar sample pairs stay close to each other while dissimilar ones are far apart. Contrastive learning can be applied to both supervised and unsupervised settings. When working with unsupervised data, contrastive learning is one of the most powerful approaches in self-supervised learning.
+> The goal of contrastive representation learning is to learn such an embedding space in which similar sample pairs stay close to each other while dissimilar ones are far apart. Contrastive learning can be applied to both supervised and unsupervised settings. When working with unsupervised data, contrastive learning is one of the most powerful approaches in [self-supervised learning](https://lilianweng.github.io/posts/2019-11-10-self-supervised/).
 
 ## 对比训练目标
 > **EN** Contrastive Training Objectives
@@ -19,9 +19,9 @@
 ### 对比损失
 > **EN** Contrastive Loss
 
-对比损失（Contrastive loss；Chopra et al. 2005）是最早用于以对比方式做深度度量学习的训练目标之一。
+对比损失（Contrastive loss；[Chopra et al. 2005](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf)）是最早用于以对比方式做深度度量学习的训练目标之一。
 
-> Contrastive loss (Chopra et al. 2005) is one of the earliest training objectives used for deep metric learning in a contrastive fashion.
+> Contrastive loss ([Chopra et al. 2005](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf)) is one of the earliest training objectives used for deep metric learning in a contrastive fashion.
 
 给定输入样本列表 $\{ \mathbf{x}_i \}$，每个样本有对应标签 $y_i \in \{1, \dots, L\}$，共 $L$ 个类别。我们希望学习函数 $f_\theta(.): \mathcal{X}\to\mathbb{R}^d$，将 $x_i$ 编码为嵌入向量，使得同类样本的嵌入相似，而不同类样本的嵌入差异很大。因此，对比损失接收一对输入 $(x_i, x_j)$：当它们属于同一类时最小化嵌入距离，否则最大化距离。
 
@@ -36,15 +36,15 @@ $$ \mathcal{L}_\text{cont}(\mathbf{x}_i, \mathbf{x}_j, \theta) = \mathbb{1}[y_i=
 ### Triplet 损失
 > **EN** Triplet Loss
 
-Triplet 损失最早在 FaceNet（Schroff et al. 2015）论文中提出，用于学习同一个人在不同姿态与角度下的人脸识别。
+Triplet 损失最早在 FaceNet（[Schroff et al. 2015](https://arxiv.org/abs/1503.03832)）论文中提出，用于学习同一个人在不同姿态与角度下的人脸识别。
 
-> Triplet loss was originally proposed in the FaceNet (Schroff et al. 2015) paper and was used to learn face recognition of the same person at different poses and angles.
+> Triplet loss was originally proposed in the FaceNet ([Schroff et al. 2015](https://arxiv.org/abs/1503.03832)) paper and was used to learn face recognition of the same person at different poses and angles.
 
 ![triplet-loss](figures/LilianWeng_contrastive/triplet-loss.png)
 
-给定一个 anchor 与一个正样本时的 triplet loss 示意。（图片来源：Schroff et al. 2015）
+给定一个 anchor 与一个正样本时的 triplet loss 示意。（图片来源：[Schroff et al. 2015](https://arxiv.org/abs/1503.03832)）
 
-> Illustration of triplet loss given one positive and one negative per anchor. (Image source: Schroff et al. 2015)
+> Illustration of triplet loss given one positive and one negative per anchor. (Image source: [Schroff et al. 2015](https://arxiv.org/abs/1503.03832))
 
 给定一个 anchor 输入 $\mathbf{x}$，我们选取一个正样本 $\mathbf{x}^+$ 与一个负样本 $\mathbf{x}^-$，即 $\mathbf{x}^+$ 与 $\mathbf{x}$ 属于同一类，而 $\mathbf{x}^-$ 从另一类中采样。Triplet 损失同时学习：最小化 anchor $\mathbf{x}$ 与正样本 $\mathbf{x}^+$ 之间的距离，并最大化 anchor $\mathbf{x}$ 与负样本 $\mathbf{x}^-$ 之间的距离，其形式为：
 
@@ -63,15 +63,15 @@ $$ \mathcal{L}_\text{triplet}(\mathbf{x}, \mathbf{x}^+, \mathbf{x}^-) = \sum_{\m
 ### Lifted Structured 损失
 > **EN** Lifted Structured Loss
 
-Lifted Structured Loss（Song et al. 2015）在一个训练 batch 内利用所有样本对之间的边，以获得更好的计算效率。
+Lifted Structured Loss（[Song et al. 2015](https://arxiv.org/abs/1511.06452)）在一个训练 batch 内利用所有样本对之间的边，以获得更好的计算效率。
 
-> Lifted Structured Loss (Song et al. 2015) utilizes all the pairwise edges within one training batch for better computational efficiency.
+> Lifted Structured Loss ([Song et al. 2015](https://arxiv.org/abs/1511.06452)) utilizes all the pairwise edges within one training batch for better computational efficiency.
 
 ![lifted-structured-loss](figures/LilianWeng_contrastive/lifted-structured-loss.png)
 
-对比损失、triplet 损失与 lifted structured 损失的对比示意。红色与蓝色边分别连接相似与不相似的样本对。（图片来源：Song et al. 2015）
+对比损失、triplet 损失与 lifted structured 损失的对比示意。红色与蓝色边分别连接相似与不相似的样本对。（图片来源：[Song et al. 2015](https://arxiv.org/abs/1511.06452)）
 
-> Illustration compares contrastive loss, triplet loss and lifted structured loss. Red and blue edges connect similar and dissimilar sample pairs respectively. (Image source: Song et al. 2015)
+> Illustration compares contrastive loss, triplet loss and lifted structured loss. Red and blue edges connect similar and dissimilar sample pairs respectively. (Image source: [Song et al. 2015](https://arxiv.org/abs/1511.06452))
 
 令 $D_{ij} = | f(\mathbf{x}_i) - f(\mathbf{x}_j) |_2$，结构化损失函数定义为
 
@@ -96,9 +96,9 @@ $$ \mathcal{L}_\text{struct}^{(ij)} = D_{ij} + \log \Big( \sum_{(i,k)\in\mathcal
 ### N-pair 损失
 > **EN** N-pair Loss
 
-Multi-Class N-pair loss（Sohn 2016）将 triplet 损失推广为与多个负样本进行比较。
+Multi-Class N-pair loss（[Sohn 2016](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html)）将 triplet 损失推广为与多个负样本进行比较。
 
-> Multi-Class N-pair loss (Sohn 2016) generalizes triplet loss to include comparison with multiple negative samples.
+> Multi-Class N-pair loss ([Sohn 2016](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html)) generalizes triplet loss to include comparison with multiple negative samples.
 
 给定一个 $(N + 1)$-元组训练样本 $\{ \mathbf{x}, \mathbf{x}^+, \mathbf{x}^-_1, \dots, \mathbf{x}^-_{N-1} \}$，其中包含一个正样本与 $N-1$ 个负样本，N-pair 损失定义为：
 
@@ -113,9 +113,9 @@ $$ \begin{aligned} \mathcal{L}_\text{N-pair}(\mathbf{x}, \mathbf{x}^+, \{\mathbf
 ### NCE
 > **EN** NCE
 
-Noise Contrastive Estimation（NCE）是一种估计统计模型参数的方法，由 Gutmann & Hyvarinen 于 2010 年提出。其思路是通过逻辑回归区分目标数据与噪声。可进一步阅读 NCE 如何用于学习词嵌入。
+Noise Contrastive Estimation（NCE）是一种估计统计模型参数的方法，由 [Gutmann & Hyvarinen](http://proceedings.mlr.press/v9/gutmann10a.html) 于 2010 年提出。其思路是通过逻辑回归区分目标数据与噪声。[可进一步阅读 NCE 如何用于学习词嵌入](https://lilianweng.github.io/posts/2017-10-15-word-embedding/#noise-contrastive-estimation-nce)。
 
-> Noise Contrastive Estimation, short for NCE, is a method for estimating parameters of a statistical model, proposed by Gutmann & Hyvarinen in 2010. The idea is to run logistic regression to tell apart the target data from noise. Read more on how NCE is used for learning word embedding here.
+> Noise Contrastive Estimation, short for NCE, is a method for estimating parameters of a statistical model, proposed by [Gutmann & Hyvarinen](http://proceedings.mlr.press/v9/gutmann10a.html) in 2010. The idea is to run logistic regression to tell apart the target data from noise. Read more on [how NCE is used for learning word embedding here](https://lilianweng.github.io/posts/2017-10-15-word-embedding/#noise-contrastive-estimation-nce).
 
 令 $\mathbf{x}$ 为目标样本 $\sim P(\mathbf{x} \vert C=1; \theta) = p_\theta(\mathbf{x})$，$\tilde{\mathbf{x}}$ 为噪声样本 $\sim P(\tilde{\mathbf{x}} \vert C=0) = q(\tilde{\mathbf{x}})$。注意，逻辑回归建模的是 logit（即 log-odds）；此处我们希望建模来自目标数据分布而非噪声分布的样本 $u$ 的 logit：
 
@@ -136,9 +136,9 @@ $$ \begin{aligned} \mathcal{L}_\text{NCE} &= - \frac{1}{N} \sum_{i=1}^N \big[ \l
 ### InfoNCE
 > **EN** InfoNCE
 
-CPC（Contrastive Predictive Coding；van den Oord, et al. 2018）中的 InfoNCE 损失受 NCE 启发，使用 categorical 交叉熵损失，在一组无关噪声样本中识别正样本。
+CPC（[Contrastive Predictive Coding](https://lilianweng.github.io/posts/2019-11-10-self-supervised/#contrastive-predictive-coding)；[van den Oord, et al. 2018](https://arxiv.org/abs/1807.03748)）中的 InfoNCE 损失受 NCE 启发，使用 categorical 交叉熵损失，在一组无关噪声样本中识别正样本。
 
-> The InfoNCE loss in CPC (Contrastive Predictive Coding; van den Oord, et al. 2018), inspired by NCE, uses categorical cross-entropy loss to identify the positive sample amongst a set of unrelated noise samples.
+> The InfoNCE loss in CPC ([Contrastive Predictive Coding](https://lilianweng.github.io/posts/2019-11-10-self-supervised/#contrastive-predictive-coding); [van den Oord, et al. 2018](https://arxiv.org/abs/1807.03748)), inspired by NCE, uses categorical cross-entropy loss to identify the positive sample amongst a set of unrelated noise samples.
 
 给定上下文向量 $\mathbf{c}$，正样本应从条件分布 $p(\mathbf{x} \vert \mathbf{c})$ 中抽取，而 $N-1$ 个负样本从 proposal 分布 $p(\mathbf{x})$ 中抽取，且与上下文 $\mathbf{c}$ 独立。为简洁起见，将所有样本记为 $X=\{ \mathbf{x}_i \}^N_{i=1}$，其中仅有一个 $\mathbf{x}_\texttt{pos}$ 为正样本。正确识别正样本的概率为：
 
@@ -179,9 +179,9 @@ $$ f_k(\mathbf{x}_{t+k}, \mathbf{c}_t) = \exp(\mathbf{z}_{t+k}^\top \mathbf{W}_k
 ### Soft-Nearest Neighbors 损失
 > **EN** Soft-Nearest Neighbors Loss
 
-Soft-Nearest Neighbors Loss（Salakhutdinov & Hinton 2007, Frosst et al. 2019）将其扩展为包含多个正样本。
+Soft-Nearest Neighbors Loss（[Salakhutdinov & Hinton 2007](http://proceedings.mlr.press/v2/salakhutdinov07a.html), [Frosst et al. 2019](https://arxiv.org/abs/1902.01889)）将其扩展为包含多个正样本。
 
-> Soft-Nearest Neighbors Loss (Salakhutdinov & Hinton 2007, Frosst et al. 2019) extends it to include multiple positive samples.
+> Soft-Nearest Neighbors Loss ([Salakhutdinov & Hinton 2007](http://proceedings.mlr.press/v2/salakhutdinov07a.html), [Frosst et al. 2019](https://arxiv.org/abs/1902.01889)) extends it to include multiple positive samples.
 
 给定一个 batch 的样本 $\{\mathbf{x}_i, y_i)\}^B_{i=1}$，其中 $y_i$ 为 $\mathbf{x}_i$ 的类标签，以及衡量两个输入相似度的函数 $f(.,.)$，温度 $\tau$ 下的 soft nearest neighbor 损失定义为：
 
@@ -200,9 +200,9 @@ $$ \mathcal{L}_\text{snn} = -\frac{1}{B}\sum_{i=1}^B \log \frac{\sum_{i\neq j, y
 
 > We can loosen the definition of "classes" and "labels" in soft nearest-neighbor loss to create positive and negative sample pairs out of unsupervised data by, for example, applying data augmentation to create noise versions of original samples.
 
-大多数近期研究遵循如下对比学习目标的定义，以纳入多个正样本与负样本。根据（Wang & Isola 2020）中的设定，令 $p_\texttt{data}(.)$ 为 $\mathbb{R}^n$ 上的数据分布，$p_\texttt{pos}(., .)$ 为 $\mathbb{R}^{n \times n}$ 上的正样本对分布。这两个分布应满足：
+大多数近期研究遵循如下对比学习目标的定义，以纳入多个正样本与负样本。根据（[Wang & Isola 2020](https://arxiv.org/abs/2005.10242)）中的设定，令 $p_\texttt{data}(.)$ 为 $\mathbb{R}^n$ 上的数据分布，$p_\texttt{pos}(., .)$ 为 $\mathbb{R}^{n \times n}$ 上的正样本对分布。这两个分布应满足：
 
-> Most recent studies follow the following definition of contrastive learning objective to incorporate multiple positive and negative samples. According to the setup in (Wang & Isola 2020), let $p_\texttt{data}(.)$ be the data distribution over $\mathbb{R}^n$ and $p_\texttt{pos}(., .)$ be the distribution of positive pairs over $\mathbb{R}^{n \times n}$. These two distributions should satisfy:
+> Most recent studies follow the following definition of contrastive learning objective to incorporate multiple positive and negative samples. According to the setup in ([Wang & Isola 2020](https://arxiv.org/abs/2005.10242)), let $p_\texttt{data}(.)$ be the data distribution over $\mathbb{R}^n$ and $p_\texttt{pos}(., .)$ be the distribution of positive pairs over $\mathbb{R}^{n \times n}$. These two distributions should satisfy:
 
 - 对称性：$\forall \mathbf{x}, \mathbf{x}^+, p_\texttt{pos}(\mathbf{x}, \mathbf{x}^+) = p_\texttt{pos}(\mathbf{x}^+, \mathbf{x})$
 - 边缘匹配：$\forall \mathbf{x}, \int p_\texttt{pos}(\mathbf{x}, \mathbf{x}^+) d\mathbf{x}^+ = p_\texttt{data}(\mathbf{x})$
@@ -236,23 +236,23 @@ $$ \begin{aligned} \mathcal{L}_\text{contrastive} &= \mathbb{E}_{(\mathbf{x},\ma
 ### 难负例挖掘
 > **EN** Hard Negative Mining
 
-难负样本应与锚样本具有不同标签，但其嵌入特征与锚嵌入非常接近。在有监督数据集中可访问真实标签时，识别任务相关的难负例较为容易。例如，在学习句子嵌入时，可将 NLI 数据集中标注为「矛盾」的句子对视为难负例对（如 SimCSE），或将 BM25 返回的、关键词匹配最多但排序靠前的错误候选作为难负样本（DPR；Karpukhin et al., 2020）。
+难负样本应与锚样本具有不同标签，但其嵌入特征与锚嵌入非常接近。在有监督数据集中可访问真实标签时，识别任务相关的难负例较为容易。例如，在学习句子嵌入时，可将 NLI 数据集中标注为「矛盾」的句子对视为难负例对（如 SimCSE），或将 BM25 返回的、关键词匹配最多但排序靠前的错误候选作为难负样本（[DPR](https://lilianweng.github.io/posts/2020-10-29-odqa/#DPR)；[Karpukhin et al., 2020](https://arxiv.org/abs/2004.04906)）。
 
-> Hard negative samples should have different labels from the anchor sample, but have embedding features very close to the anchor embedding. With access to ground truth labels in supervised datasets, it is easy to identify task-specific hard negatives. For example when learning sentence embedding, we can treat sentence pairs labelled as "contradiction" in NLI datasets as hard negative pairs (e.g. SimCSE, or use top incorrect candidates returned by BM25 with most keywords matched as hard negative samples (DPR; Karpukhin et al., 2020).
+> Hard negative samples should have different labels from the anchor sample, but have embedding features very close to the anchor embedding. With access to ground truth labels in supervised datasets, it is easy to identify task-specific hard negatives. For example when learning sentence embedding, we can treat sentence pairs labelled as "contradiction" in NLI datasets as hard negative pairs (e.g. SimCSE, or use top incorrect candidates returned by BM25 with most keywords matched as hard negative samples ([DPR](https://lilianweng.github.io/posts/2020-10-29-odqa/#DPR); [Karpukhin et al., 2020](https://arxiv.org/abs/2004.04906)).
 
 然而，若希望保持无监督设定，难负例挖掘会变得棘手。增大训练批量或记忆库规模会隐式引入更多难负例，但也会带来大内存占用的副作用。
 
 > However, it becomes tricky to do hard negative mining when we want to remain unsupervised. Increasing training batch size or memory bank size implicitly introduces more hard negative samples, but it leads to a heavy burden of large memory usage as a side effect.
 
-Chuang 等人（2020）研究了对比学习中的采样偏差，并提出了去偏损失。在无监督设定下，由于不知道真实标签，我们可能意外采样到假负例。采样偏差可导致显著的性能下降。
+[Chuang 等人（2020）](https://arxiv.org/abs/2007.00224)研究了对比学习中的采样偏差，并提出了去偏损失。在无监督设定下，由于不知道真实标签，我们可能意外采样到假负例。采样偏差可导致显著的性能下降。
 
-> Chuang et al. (2020) studied the sampling bias in contrastive learning and proposed debiased loss. In the unsupervised setting, since we do not know the ground truth labels, we may accidentally sample false negative samples. Sampling bias can lead to significant performance drop.
+> [Chuang et al. (2020)](https://arxiv.org/abs/2007.00224) studied the sampling bias in contrastive learning and proposed debiased loss. In the unsupervised setting, since we do not know the ground truth labels, we may accidentally sample false negative samples. Sampling bias can lead to significant performance drop.
 
 ![contrastive-sampling-bias](figures/LilianWeng_contrastive/contrastive-sampling-bias.png)
 
-对比学习中的采样偏差指假负例，可导致显著性能下降。（图源：Chuang et al., 2020）
+对比学习中的采样偏差指假负例，可导致显著性能下降。（图源：[Chuang et al., 2020](https://arxiv.org/abs/2007.00224)）
 
-> Sampling bias which refers to false negative samples in contrastive learning can lead to a big performance drop. (Image source: Chuang et al., 2020)
+> Sampling bias which refers to false negative samples in contrastive learning can lead to a big performance drop. (Image source: [Chuang et al., 2020](https://arxiv.org/abs/2007.00224))
 
 假设锚类别 $c$ 的概率均匀为 $\rho(c)=\eta^+$，观察到不同类别的概率为 $\eta^- = 1-\eta^+$。
 
@@ -288,13 +288,13 @@ $$ \mathcal{L}^{N,M}_\text{debias}(f) = \mathbb{E}_{\mathbf{x},\{\mathbf{u}_i\}^
 
 ![contrastive-debias-t-SNE](figures/LilianWeng_contrastive/contrastive-debias-t-SNE.png)
 
-去偏对比学习所学表示的 t-SNE 可视化。（图源：Chuang et al., 2020）
+去偏对比学习所学表示的 t-SNE 可视化。（图源：[Chuang et al., 2020](https://arxiv.org/abs/2007.00224)）
 
-> t-SNE visualization of learned representation with debiased contrastive learning. (Image source: Chuang et al., 2020)
+> t-SNE visualization of learned representation with debiased contrastive learning. (Image source: [Chuang et al., 2020](https://arxiv.org/abs/2007.00224))
 
 在上述记号基础上，Robinson 等人（2021）修改采样概率，通过按与锚样本的相似度对 $p^-_x(x')$ 加权，以针对难负例。新的采样概率 $q_\beta(x^-)$ 为：
 
-> Following the above annotation, Robinson et al. (2021) modified the sampling probabilities to target at hard negatives by up-weighting the probability $p^-_x(x')$ to be proportional to its similarity to the anchor sample. The new sampling probability $q_\beta(x^-)$ is:
+> Following the above annotation, [Robinson et al. (2021)](https://arxiv.org/abs/2010.04592) modified the sampling probabilities to target at hard negatives by up-weighting the probability $p^-_x(x')$ to be proportional to its similarity to the anchor sample. The new sampling probability $q_\beta(x^-)$ is:
 
 $$ q_\beta(\mathbf{x}^-) \propto \exp(\beta f(\mathbf{x})^\top f(\mathbf{x}^-)) \cdot p(\mathbf{x}^-) $$
 
@@ -310,9 +310,9 @@ $$ \begin{aligned} \mathbb{E}_{\mathbf{u} \sim q_\beta} [\exp(f(\mathbf{x})^\top
 
 ![contrastive-hard-negatives-code](figures/LilianWeng_contrastive/contrastive-hard-negatives-code.png)
 
-在 $M=1$ 时计算 NCE 损失、去偏对比损失与难负样本目标的伪代码。（图源：Robinson et al., 2021）
+在 $M=1$ 时计算 NCE 损失、去偏对比损失与难负样本目标的伪代码。（图源：[Robinson et al., 2021](https://arxiv.org/abs/2010.04592)）
 
-> Pseudo code for computing NCE loss, debiased contrastive loss, and hard negative sample objective when setting $M=1$. (Image source: Robinson et al., 2021)
+> Pseudo code for computing NCE loss, debiased contrastive loss, and hard negative sample objective when setting $M=1$. (Image source: [Robinson et al., 2021](https://arxiv.org/abs/2010.04592))
 
 ## 视觉：图像嵌入
 > **EN** Vision: Image Embedding
@@ -356,15 +356,15 @@ $$ \begin{aligned} \mathbb{E}_{\mathbf{u} \sim q_\beta} [\exp(f(\mathbf{x})^\top
 
 > Many frameworks are designed for learning good data augmentation strategies (i.e. a composition of multiple transforms). Here are a few common ones.
 
-- AutoAugment（Cubuk, et al. 2018）：受 NAS 启发，AutoAugment 将学习图像分类最佳数据增强操作（如剪切、旋转、反色等）的问题建模为 RL 问题，并搜索在验证集上准确率最高的组合。
-- RandAugment（Cubuk et al., 2019）：RandAugment 用单一幅度参数控制不同变换操作的强度，大幅缩小 AutoAugment 的搜索空间。
-- PBA（Population based augmentation；Ho et al., 2019）：PBA 将 PBT（Jaderberg et al, 2017）与 AutoAugment 结合，用进化算法并行训练一群体子模型以演化最佳增强策略。
-- UDA（Unsupervised Data Augmentation；Xie et al., 2019）：在一组候选增强策略中，UDA 选择使无标签样本与其无标签增强版本上预测分布之间 KL 散度最小的策略。
+- [AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment)（[Cubuk, et al. 2018](https://arxiv.org/abs/1805.09501)）：受 [NAS](https://lilianweng.github.io/posts/2020-08-06-nas/) 启发，[AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment) 将学习图像分类最佳数据增强操作（如剪切、旋转、反色等）的问题建模为 RL 问题，并搜索在验证集上准确率最高的组合。
+- RandAugment（[Cubuk et al., 2019](https://arxiv.org/abs/1909.13719)）：RandAugment 用单一幅度参数控制不同变换操作的强度，大幅缩小 [AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment) 的搜索空间。
+- PBA（Population based augmentation；[Ho et al., 2019](https://arxiv.org/abs/1905.05393)）：PBA 将 PBT（[Jaderberg et al, 2017](https://arxiv.org/abs/1711.09846)）与 [AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment) 结合，用进化算法并行训练一群体子模型以演化最佳增强策略。
+- UDA（Unsupervised Data Augmentation；[Xie et al., 2019](https://arxiv.org/abs/1904.12848)）：在一组候选增强策略中，UDA 选择使无标签样本与其无标签增强版本上预测分布之间 KL 散度最小的策略。
 
-> - AutoAugment(Cubuk, et al. 2018): Inspired by NAS, AutoAugment frames the problem of learning best data augmentation operations (i.e. shearing, rotation, invert, etc.) for image classification as an RL problem and looks for the combination that leads to the highest accuracy on the evaluation set.
-> - RandAugment (Cubuk et al., 2019): RandAugment greatly reduces the search space of AutoAugment by controlling the magnitudes of different transformation operations with a single magnitude parameter.
-> - PBA (Population based augmentation; Ho et al., 2019): PBA combined PBT (Jaderberg et al, 2017) with AutoAugment, using the evolutionary algorithm to train a population of children models in parallel to evolve the best augmentation strategies.
-> - UDA (Unsupervised Data Augmentation; Xie et al., 2019): Among a set of possible augmentation strategies, UDA selects those to minimize the KL divergence between the predicted distribution over an unlabelled example and its unlabelled augmented version.
+> - [AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment)([Cubuk, et al. 2018](https://arxiv.org/abs/1805.09501)): Inspired by [NAS](https://lilianweng.github.io/posts/2020-08-06-nas/), [AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment) frames the problem of learning best data augmentation operations (i.e. shearing, rotation, invert, etc.) for image classification as an RL problem and looks for the combination that leads to the highest accuracy on the evaluation set.
+> - RandAugment ([Cubuk et al., 2019](https://arxiv.org/abs/1909.13719)): RandAugment greatly reduces the search space of [AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment) by controlling the magnitudes of different transformation operations with a single magnitude parameter.
+> - PBA (Population based augmentation; [Ho et al., 2019](https://arxiv.org/abs/1905.05393)): PBA combined PBT ([Jaderberg et al, 2017](https://arxiv.org/abs/1711.09846)) with [AutoAugment](https://lilianweng.github.io/posts/2019-05-05-domain-randomization/#AutoAugment), using the evolutionary algorithm to train a population of children models in parallel to evolve the best augmentation strategies.
+> - UDA (Unsupervised Data Augmentation; [Xie et al., 2019](https://arxiv.org/abs/1904.12848)): Among a set of possible augmentation strategies, UDA selects those to minimize the KL divergence between the predicted distribution over an unlabelled example and its unlabelled augmented version.
 
 #### 图像混合
 > **EN** Image Mixture
@@ -373,13 +373,13 @@ $$ \begin{aligned} \mathbb{E}_{\mathbf{u} \sim q_\beta} [\exp(f(\mathbf{x})^\top
 
 > Image mixture methods can construct new training examples from existing data points.
 
-- Mixup（Zhang et al., 2018）：在全局层面混合，对两张已有图像 $I_1$ 和 $I_2$ 做逐像素加权组合：$I_\text{mixup} \gets \alpha I_1 + (1-\alpha) I_2$，其中 $\alpha \in [0, 1]$。
-- Cutmix（Yun et al., 2019）：在区域层面混合，将一张图像的局部区域与另一张图像的其余部分组合生成新样本：$I_\text{cutmix} \gets \mathbf{M}_b \odot I_1 + (1-\mathbf{M}_b) \odot I_2$，其中 $\mathbf{M}_b \in \{0, 1\}^I$ 为二值掩码，$\odot$ 为逐元素乘法。等价于用另一张图像的同一区域填充 cutout（DeVries & Taylor 2017）区域。
-- MoCHi（「Mixing of Contrastive Hard Negatives」；Kalantidis et al. 2020）：给定查询 $\mathbf{q}$，MoCHi 维护 $K$ 个负特征的队列 $Q=\{\mathbf{n}_1, \dots, \mathbf{n}_K \}$，并按与查询的相似度 $\mathbf{q}^\top \mathbf{n}$ 降序排序。队列中前 $N$ 项视为最难负例 $Q^N$。合成难例可生成为 $\mathbf{h} = \tilde{\mathbf{h}} / |\tilde{\mathbf{h}}|$，其中 $\tilde{\mathbf{h}} = \alpha\mathbf{n}_i + (1-\alpha) \mathbf{n}_j$，$\alpha \in (0, 1)$。还可通过与查询特征混合得到更难样本：$\mathbf{h}' = \tilde{\mathbf{h}'} / |\tilde{\mathbf{h}'}|_2$，其中 $\tilde{\mathbf{h}'} = \beta\mathbf{q} + (1-\beta) \mathbf{n}_j$，$\beta \in (0, 0.5)$。
+- Mixup（[Zhang et al., 2018](https://arxiv.org/abs/1710.09412)）：在全局层面混合，对两张已有图像 $I_1$ 和 $I_2$ 做逐像素加权组合：$I_\text{mixup} \gets \alpha I_1 + (1-\alpha) I_2$，其中 $\alpha \in [0, 1]$。
+- Cutmix（[Yun et al., 2019](https://arxiv.org/abs/1905.04899)）：在区域层面混合，将一张图像的局部区域与另一张图像的其余部分组合生成新样本：$I_\text{cutmix} \gets \mathbf{M}_b \odot I_1 + (1-\mathbf{M}_b) \odot I_2$，其中 $\mathbf{M}_b \in \{0, 1\}^I$ 为二值掩码，$\odot$ 为逐元素乘法。等价于用另一张图像的同一区域填充 cutout（[DeVries & Taylor 2017](https://arxiv.org/abs/1708.04552)）区域。
+- MoCHi（「Mixing of Contrastive Hard Negatives」；[Kalantidis et al. 2020](https://arxiv.org/abs/2010.01028)）：给定查询 $\mathbf{q}$，MoCHi 维护 $K$ 个负特征的队列 $Q=\{\mathbf{n}_1, \dots, \mathbf{n}_K \}$，并按与查询的相似度 $\mathbf{q}^\top \mathbf{n}$ 降序排序。队列中前 $N$ 项视为最难负例 $Q^N$。合成难例可生成为 $\mathbf{h} = \tilde{\mathbf{h}} / |\tilde{\mathbf{h}}|$，其中 $\tilde{\mathbf{h}} = \alpha\mathbf{n}_i + (1-\alpha) \mathbf{n}_j$，$\alpha \in (0, 1)$。还可通过与查询特征混合得到更难样本：$\mathbf{h}' = \tilde{\mathbf{h}'} / |\tilde{\mathbf{h}'}|_2$，其中 $\tilde{\mathbf{h}'} = \beta\mathbf{q} + (1-\beta) \mathbf{n}_j$，$\beta \in (0, 0.5)$。
 
-> - Mixup (Zhang et al., 2018): It runs global-level mixture by creating a weighted pixel-wise combination of two existing images $I_1$ and $I_2$: $I_\text{mixup} \gets \alpha I_1 + (1-\alpha) I_2$ and $\alpha \in [0, 1]$.
-> - Cutmix (Yun et al., 2019): Cutmix does region-level mixture by generating a new example by combining a local region of one image with the rest of the other image. $I_\text{cutmix} \gets \mathbf{M}_b \odot I_1 + (1-\mathbf{M}_b) \odot I_2$, where $\mathbf{M}_b \in \{0, 1\}^I$ is a binary mask and $\odot$ is element-wise multiplication. It is equivalent to filling the cutout (DeVries & Taylor 2017) region with the same region from another image.
-> - MoCHi ("Mixing of Contrastive Hard Negatives"; Kalantidis et al. 2020): Given a query $\mathbf{q}$, MoCHi maintains a queue of $K$ negative features $Q=\{\mathbf{n}_1, \dots, \mathbf{n}_K \}$ and sorts these negative features by similarity to the query, $\mathbf{q}^\top \mathbf{n}$, in descending order. The first $N$ items in the queue are considered as the hardest negatives, $Q^N$. Then synthetic hard examples can be generated by $\mathbf{h} = \tilde{\mathbf{h}} / |\tilde{\mathbf{h}}|$ where $\tilde{\mathbf{h}} = \alpha\mathbf{n}_i + (1-\alpha) \mathbf{n}_j$ and $\alpha \in (0, 1)$. Even harder examples can be created by mixing with the query feature, $\mathbf{h}' = \tilde{\mathbf{h}'} / |\tilde{\mathbf{h}'}|_2$ where $\tilde{\mathbf{h}'} = \beta\mathbf{q} + (1-\beta) \mathbf{n}_j$ and $\beta \in (0, 0.5)$.
+> - Mixup ([Zhang et al., 2018](https://arxiv.org/abs/1710.09412)): It runs global-level mixture by creating a weighted pixel-wise combination of two existing images $I_1$ and $I_2$: $I_\text{mixup} \gets \alpha I_1 + (1-\alpha) I_2$ and $\alpha \in [0, 1]$.
+> - Cutmix ([Yun et al., 2019](https://arxiv.org/abs/1905.04899)): Cutmix does region-level mixture by generating a new example by combining a local region of one image with the rest of the other image. $I_\text{cutmix} \gets \mathbf{M}_b \odot I_1 + (1-\mathbf{M}_b) \odot I_2$, where $\mathbf{M}_b \in \{0, 1\}^I$ is a binary mask and $\odot$ is element-wise multiplication. It is equivalent to filling the cutout ([DeVries & Taylor 2017](https://arxiv.org/abs/1708.04552)) region with the same region from another image.
+> - MoCHi ("Mixing of Contrastive Hard Negatives"; [Kalantidis et al. 2020](https://arxiv.org/abs/2010.01028)): Given a query $\mathbf{q}$, MoCHi maintains a queue of $K$ negative features $Q=\{\mathbf{n}_1, \dots, \mathbf{n}_K \}$ and sorts these negative features by similarity to the query, $\mathbf{q}^\top \mathbf{n}$, in descending order. The first $N$ items in the queue are considered as the hardest negatives, $Q^N$. Then synthetic hard examples can be generated by $\mathbf{h} = \tilde{\mathbf{h}} / |\tilde{\mathbf{h}}|$ where $\tilde{\mathbf{h}} = \alpha\mathbf{n}_i + (1-\alpha) \mathbf{n}_j$ and $\alpha \in (0, 1)$. Even harder examples can be created by mixing with the query feature, $\mathbf{h}' = \tilde{\mathbf{h}'} / |\tilde{\mathbf{h}'}|_2$ where $\tilde{\mathbf{h}'} = \beta\mathbf{q} + (1-\beta) \mathbf{n}_j$ and $\beta \in (0, 0.5)$.
 
 ### 并行增强
 > **EN** Parallel Augmentation
@@ -391,15 +391,15 @@ $$ \begin{aligned} \mathbb{E}_{\mathbf{u} \sim q_\beta} [\exp(f(\mathbf{x})^\top
 #### SimCLR
 > **EN** SimCLR
 
-SimCLR（Chen et al, 2020）提出了一个用于对比学习视觉表示的简单框架。它通过在潜空间中用对比损失最大化同一样本不同增强视图之间的一致性，来学习视觉输入的表示。
+SimCLR（[Chen et al, 2020](https://arxiv.org/abs/2002.05709)）提出了一个用于对比学习视觉表示的简单框架。它通过在潜空间中用对比损失最大化同一样本不同增强视图之间的一致性，来学习视觉输入的表示。
 
-> SimCLR (Chen et al, 2020) proposed a simple framework for contrastive learning of visual representations. It learns representations for visual inputs by maximizing agreement between differently augmented views of the same sample via a contrastive loss in the latent space.
+> SimCLR ([Chen et al, 2020](https://arxiv.org/abs/2002.05709)) proposed a simple framework for contrastive learning of visual representations. It learns representations for visual inputs by maximizing agreement between differently augmented views of the same sample via a contrastive loss in the latent space.
 
 ![SimCLR](figures/LilianWeng_contrastive/SimCLR.png)
 
-用于对比学习视觉表示的简单框架。（图源：Chen et al, 2020）
+用于对比学习视觉表示的简单框架。（图源：[Chen et al, 2020](https://arxiv.org/abs/2002.05709)）
 
-> A simple framework for contrastive learning of visual representations. (Image source: Chen et al, 2020)
+> A simple framework for contrastive learning of visual representations. (Image source: [Chen et al, 2020](https://arxiv.org/abs/2002.05709))
 
 1. 随机采样大小为 $N$ 的小批量，每个样本施加两种不同的数据增强，共得到 $2N$ 个增强样本。
 
@@ -433,22 +433,22 @@ SimCLR 需要大批量以纳入足够负样本，才能获得良好性能。
 
 ![SimCLR-algo](figures/LilianWeng_contrastive/SimCLR-algo.png)
 
-SimCLR 算法。（图源：Chen et al, 2020）
+SimCLR 算法。（图源：[Chen et al, 2020](https://arxiv.org/abs/2002.05709)）
 
-> The algorithm for SimCLR. (Image source: Chen et al, 2020).
+> The algorithm for SimCLR. (Image source: [Chen et al, 2020](https://arxiv.org/abs/2002.05709)).
 
 #### Barlow Twins
 > **EN** Barlow Twins
 
-Barlow Twins（Zbontar et al. 2021）将同一样本的两个失真版本输入同一网络提取特征，并学习使两组输出特征之间的互相关矩阵接近单位阵。目标是使同一样本不同失真版本的表示向量相似，同时最小化这些向量之间的冗余。
+Barlow Twins（[Zbontar et al. 2021](https://arxiv.org/abs/2103.03230)）将同一样本的两个失真版本输入同一网络提取特征，并学习使两组输出特征之间的互相关矩阵接近单位阵。目标是使同一样本不同失真版本的表示向量相似，同时最小化这些向量之间的冗余。
 
-> Barlow Twins (Zbontar et al. 2021) feeds two distorted versions of samples into the same network to extract features and learns to make the cross-correlation matrix between these two groups of output features close to the identity. The goal is to keep the representation vectors of different distorted versions of one sample similar, while minimizing the redundancy between these vectors.
+> Barlow Twins ([Zbontar et al. 2021](https://arxiv.org/abs/2103.03230)) feeds two distorted versions of samples into the same network to extract features and learns to make the cross-correlation matrix between these two groups of output features close to the identity. The goal is to keep the representation vectors of different distorted versions of one sample similar, while minimizing the redundancy between these vectors.
 
 ![barlow-twins](figures/LilianWeng_contrastive/barlow-twins.png)
 
-Barlow Twins 学习流程示意。（图源：Zbontar et al. 2021）
+Barlow Twins 学习流程示意。（图源：[Zbontar et al. 2021](https://arxiv.org/abs/2103.03230)）
 
-> Illustration of Barlow Twins learning pipeline. (Image source: Zbontar et al. 2021).
+> Illustration of Barlow Twins learning pipeline. (Image source: [Zbontar et al. 2021](https://arxiv.org/abs/2103.03230)).
 
 设 $\mathcal{C}$ 为沿批量维度在两个相同网络输出之间计算的互相关矩阵。$\mathcal{C}$ 为方阵，大小与特征网络输出维度相同。矩阵中每个元素 $\mathcal{C}_{ij}$ 为网络输出向量在索引 $i, j$ 与批量索引 $b$ 处 $\mathbf{z}_{b,i}^A$ 与 $\mathbf{z}_{b,j}^B$ 的余弦相似度，取值在 -1（完全反相关）到 1（完全相关）之间。
 
@@ -456,22 +456,22 @@ Barlow Twins 学习流程示意。（图源：Zbontar et al. 2021）
 
 $$ \begin{aligned} \mathcal{L}_\text{BT} &= \underbrace{\sum_i (1-\mathcal{C}_{ii})^2}_\text{invariance term} + \lambda \underbrace{\sum_i\sum_{i\neq j} \mathcal{C}_{ij}^2}_\text{redundancy reduction term} \\ \text{where } \mathcal{C}_{ij} &= \frac{\sum_b \mathbf{z}^A_{b,i} \mathbf{z}^B_{b,j}}{\sqrt{\sum_b (\mathbf{z}^A_{b,i})^2}\sqrt{\sum_b (\mathbf{z}^B_{b,j})^2}} \end{aligned} $$
 
-Barlow Twins 在自监督学习上与 SOTA 方法具有竞争力。它自然避免平凡常数解（即表示坍缩），且对不同训练批量大小具有鲁棒性。
+Barlow Twins 在[自监督学习](https://lilianweng.github.io/posts/2019-11-10-self-supervised/)上与 SOTA 方法具有竞争力。它自然避免平凡常数解（即表示坍缩），且对不同训练批量大小具有鲁棒性。
 
-> Barlow Twins is competitive with SOTA methods for self-supervised learning. It naturally avoids trivial constants (i.e. collapsed representations), and is robust to different training batch sizes.
+> Barlow Twins is competitive with SOTA methods for [self-supervised learning](https://lilianweng.github.io/posts/2019-11-10-self-supervised/). It naturally avoids trivial constants (i.e. collapsed representations), and is robust to different training batch sizes.
 
 ![barlow-twins-algo](figures/LilianWeng_contrastive/barlow-twins-algo.png)
 
-Barlow Twins 的 Pytorch 风格伪代码算法。（图源：Zbontar et al. 2021）
+Barlow Twins 的 Pytorch 风格伪代码算法。（图源：[Zbontar et al. 2021](https://arxiv.org/abs/2103.03230)）
 
-> Algorithm of Barlow Twins in Pytorch style pseudo code. (Image source: Zbontar et al. 2021).
+> Algorithm of Barlow Twins in Pytorch style pseudo code. (Image source: [Zbontar et al. 2021](https://arxiv.org/abs/2103.03230)).
 
 #### BYOL
 > **EN** BYOL
 
-与上述方法不同，有趣的是，BYOL（Bootstrap Your Own Latent；Grill, et al 2020）声称在不使用负样本的情况下达到新的 SOTA 结果。它依赖两个神经网络——在线网络与目标网络——相互交互并彼此学习。目标网络（参数 $\xi$）与在线网络（参数 $\theta$）架构相同，但权重为 Polyak 平均：$\xi \leftarrow \tau \xi + (1-\tau) \theta$。
+与上述方法不同，有趣的是，BYOL（Bootstrap Your Own Latent；[Grill, et al 2020](https://arxiv.org/abs/2006.07733)）声称在不使用负样本的情况下达到新的 SOTA 结果。它依赖两个神经网络——在线网络与目标网络——相互交互并彼此学习。目标网络（参数 $\xi$）与在线网络（参数 $\theta$）架构相同，但权重为 Polyak 平均：$\xi \leftarrow \tau \xi + (1-\tau) \theta$。
 
-> Different from the above approaches, interestingly, BYOL (Bootstrap Your Own Latent; Grill, et al 2020) claims to achieve a new state-of-the-art results without using negative samples. It relies on two neural networks, referred to as online and target networks that interact and learn from each other. The target network (parameterized by $\xi$) has the same architecture as the online one (parameterized by $\theta$), but with polyak averaged weights, $\xi \leftarrow \tau \xi + (1-\tau) \theta$.
+> Different from the above approaches, interestingly, BYOL (Bootstrap Your Own Latent; [Grill, et al 2020](https://arxiv.org/abs/2006.07733)) claims to achieve a new state-of-the-art results without using negative samples. It relies on two neural networks, referred to as online and target networks that interact and learn from each other. The target network (parameterized by $\xi$) has the same architecture as the online one (parameterized by $\theta$), but with polyak averaged weights, $\xi \leftarrow \tau \xi + (1-\tau) \theta$.
 
 目标是学习可用于下游任务的表示 $y$。参数为 $\theta$ 的在线网络包含：
 
@@ -491,9 +491,9 @@ Barlow Twins 的 Pytorch 风格伪代码算法。（图源：Zbontar et al. 2021
 
 ![BYOL](figures/LilianWeng_contrastive/BYOL.png)
 
-BYOL 模型架构。训练后仅使用 $f_\theta$ 产生表示 $y=f_\theta(x)$，其余模块丢弃。$\text{sg}$ 表示 stop gradient。（图源：Grill, et al 2020）
+BYOL 模型架构。训练后仅使用 $f_\theta$ 产生表示 $y=f_\theta(x)$，其余模块丢弃。$\text{sg}$ 表示 stop gradient。（图源：[Grill, et al 2020](https://arxiv.org/abs/2006.07733)）
 
-> The model architecture of BYOL. After training, we only care about $f_\theta$ for producing representation, $y=f_\theta(x)$, and everything else is discarded. $\text{sg}$ means stop gradient. (Image source: Grill, et al 2020)
+> The model architecture of BYOL. After training, we only care about $f_\theta$ for producing representation, $y=f_\theta(x)$, and everything else is discarded. $\text{sg}$ means stop gradient. (Image source: [Grill, et al 2020](https://arxiv.org/abs/2006.07733))
 
 给定图像 $\mathbf{x}$，BYOL 损失构造如下：
 
@@ -523,13 +523,13 @@ BYOL 模型架构。训练后仅使用 $f_\theta$ 产生表示 $y=f_\theta(x)$�
 
 在没有负样本的情况下 BYOL 仍能工作良好，相当有趣且令人惊讶。后来我读到 Abe Fetterman 与 Josh Albrecht 的一篇博文，他们在复现 BYOL 时强调了两点意外发现：
 
-> It is quite interesting and surprising that without negative samples, BYOL still works well. Later I ran into this post by Abe Fetterman & Josh Albrecht, they highlighted two surprising findings while they were trying to reproduce BYOL:
+> It is quite interesting and surprising that without negative samples, BYOL still works well. Later I ran into [this post](https://untitled-ai.github.io/understanding-self-supervised-contrastive-learning.html) by Abe Fetterman & Josh Albrecht, they highlighted two surprising findings while they were trying to reproduce BYOL:
 
 1. 去掉批归一化后，BYOL 通常不比随机更好。
 2. 批归一化的存在隐式带来一种对比学习形式。他们认为使用负样本对避免模型坍缩（即：若对每个数据点都用全零表示会怎样？）很重要。批归一化隐式注入对负样本的依赖，因为无论一批输入多相似，数值都会被重分布（展开为 $\sim \mathcal{N}(0, 1$)），从而防止模型坍缩。若你从事该方向，强烈建议阅读全文。
 
 > 1. BYOL generally performs no better than random when batch normalization is removed.
-> 2. The presence of batch normalization implicitly causes a form of contrastive learning. They believe that using negative samples is important for avoiding model collapse (i.e. what if you use all-zeros representation for every data point?). Batch normalization injects dependency on negative samples inexplicitly because no matter how similar a batch of inputs are, the values are re-distributed (spread out $\sim \mathcal{N}(0, 1$) and therefore batch normalization prevents model collapse. Strongly recommend you to read the full article if you are working in this area.
+> 2. The presence of batch normalization implicitly causes a form of contrastive learning. They believe that using negative samples is important for avoiding model collapse (i.e. what if you use all-zeros representation for every data point?). Batch normalization injects dependency on negative samples inexplicitly because no matter how similar a batch of inputs are, the values are re-distributed (spread out $\sim \mathcal{N}(0, 1$) and therefore batch normalization prevents model collapse. Strongly recommend you to read the [full article](https://untitled-ai.github.io/understanding-self-supervised-contrastive-learning.html) if you are working in this area.
 
 ### 记忆库
 > **EN** Memory Bank
@@ -541,15 +541,15 @@ BYOL 模型架构。训练后仅使用 $f_\theta$ 产生表示 $y=f_\theta(x)$�
 #### 带记忆库的实例判别
 > **EN** Instance Discrimination with Memoy Bank
 
-实例对比学习（Wu et al, 2018）将类级监督推向极端，把每个实例视为独立的一类，意味着「类别」数与训练集样本数相同。因此无法训练具有如此多头的 softmax 层，而可用 NCE 近似。
+实例对比学习（[Wu et al, 2018](https://arxiv.org/abs/1805.01978v1)）将类级监督推向极端，把每个实例视为独立的一类，意味着「类别」数与训练集样本数相同。因此无法训练具有如此多头的 softmax 层，而可用 NCE 近似。
 
-> Instance contrastive learning (Wu et al, 2018) pushes the class-wise supervision to the extreme by considering each instance as a distinct class of its own. It implies that the number of "classes" will be the same as the number of samples in the training dataset. Hence, it is unfeasible to train a softmax layer with these many heads, but instead it can be approximated by NCE.
+> Instance contrastive learning ([Wu et al, 2018](https://arxiv.org/abs/1805.01978v1)) pushes the class-wise supervision to the extreme by considering each instance as a distinct class of its own. It implies that the number of "classes" will be the same as the number of samples in the training dataset. Hence, it is unfeasible to train a softmax layer with these many heads, but instead it can be approximated by NCE.
 
 ![instance-level-discrimination](figures/LilianWeng_contrastive/instance-level-discrimination.png)
 
-实例级对比学习的训练流程。所学嵌入经 L2 归一化。（图源：Wu et al, 2018）
+实例级对比学习的训练流程。所学嵌入经 L2 归一化。（图源：[Wu et al, 2018](https://arxiv.org/abs/1805.01978v1)）
 
-> The training pipeline of instance-level contrastive learning. The learned embedding is L2-normalized. (Image source: Wu et al, 2018)
+> The training pipeline of instance-level contrastive learning. The learned embedding is L2-normalized. (Image source: [Wu et al, 2018](https://arxiv.org/abs/1805.01978v1))
 
 设 $\mathbf{v} = f_\theta(x)$ 为待学习的嵌入函数，向量归一化为 $|\mathbf{v}|=1$。非参数分类器以温度 $\tau$ 预测样本 $\mathbf{v}$ 属于类 $i$ 的概率：
 
@@ -569,7 +569,7 @@ $$ P(i\vert \mathbf{v}) = \frac{\exp(\mathbf{v}^\top \mathbf{f}_i / \tau)}{\sum_
 
 由于每类仅一个实例，训练不稳定且波动大。为平滑训练，他们在基于近端优化的方法上为正样本引入额外项。最终 NCE 损失目标为：
 
-> Because there is only one instance per class, the training is unstable and fluctuates a lot. To improve the training smoothness, they introduced an extra term for positive samples in the loss function based on the proximal optimization method. The final NCE loss objective looks like:
+> Because there is only one instance per class, the training is unstable and fluctuates a lot. To improve the training smoothness, they introduced an extra term for positive samples in the loss function based on the [proximal optimization method](https://web.stanford.edu/~boyd/papers/prox_algs.html). The final NCE loss objective looks like:
 
 $$ \begin{aligned} \mathcal{L}_\text{instance} &= - \mathbb{E}_{P_d}\big[\log h(i, \mathbf{v}^{(t-1)}_i) - \lambda \|\mathbf{v}^{(t)}_i - \mathbf{v}^{(t-1)}_i\|^2_2\big] - M\mathbb{E}_{P_n}\big[\log(1 - h(i, \mathbf{v}'^{(t-1)})\big] \\ h(i, \mathbf{v}) &= \frac{P(i\vert\mathbf{v})}{P(i\vert\mathbf{v}) + MP_n(i)} \text{ where the noise distribution is uniform }P_n = 1/N \end{aligned} $$
 
@@ -580,9 +580,9 @@ $$ \begin{aligned} \mathcal{L}_\text{instance} &= - \mathbb{E}_{P_d}\big[\log h(
 #### MoCo 与 MoCo-V2
 > **EN** MoCo & MoCo-V2
 
-Momentum Contrast（MoCo；He et al, 2019）提供无监督学习视觉表示的框架，将动态字典检索结构化。字典为数据样本编码表示的大型 FIFO 队列。
+Momentum Contrast（MoCo；[He et al, 2019](https://arxiv.org/abs/1911.05722)）提供无监督学习视觉表示的框架，将动态字典检索结构化。字典为数据样本编码表示的大型 FIFO 队列。
 
-> Momentum Contrast (MoCo; He et al, 2019) provides a framework of unsupervised learning visual representation as a dynamic dictionary look-up. The dictionary is structured as a large FIFO queue of encoded representations of data samples.
+> Momentum Contrast (MoCo; [He et al, 2019](https://arxiv.org/abs/1911.05722)) provides a framework of unsupervised learning visual representation as a dynamic dictionary look-up. The dictionary is structured as a large FIFO queue of encoded representations of data samples.
 
 给定查询样本 $\mathbf{x}_q$，经编码器得到查询表示 $\mathbf{q} = f_q(\mathbf{x}_q)$。字典中的键表示列表 $\{\mathbf{k}_1, \mathbf{k}_2, \dots \}$ 由动量编码器编码：$\mathbf{k}_i = f_k (\mathbf{x}^k_i)$。假设其中仅有一个正键 $\mathbf{k}^+$ 与 $\mathbf{q}$ 匹配。论文中对 $\mathbf{x}_q$ 做不同增强的噪声副本得到 $\mathbf{k}^+$。然后在 1 个正样本与 $N-1$ 个负样本上使用温度 $\tau$ 的 InfoNCE 对比损失：
 
@@ -602,24 +602,24 @@ $$ \theta_k \leftarrow m \theta_k + (1-m) \theta_q $$
 
 ![MoCo](figures/LilianWeng_contrastive/MoCo.png)
 
-Momentum Contrast（MoCo）学习视觉表示的示意。（图源：He et al, 2019）
+Momentum Contrast（MoCo）学习视觉表示的示意。（图源：[He et al, 2019](https://arxiv.org/abs/1911.05722)）
 
-> Illustration of how Momentum Contrast (MoCo) learns visual representations. (Image source: He et al, 2019)
+> Illustration of how Momentum Contrast (MoCo) learns visual representations. (Image source: [He et al, 2019](https://arxiv.org/abs/1911.05722))
 
 相较 SimCLR，MoCo 的优势在于将批量大小与负样本数解耦；SimCLR 需要大批量以获得足够负样本，批量减小时性能会下降。
 
 > The advantage of MoCo compared to SimCLR is that MoCo decouples the batch size from the number of negatives, but SimCLR requires a large batch size in order to have enough negative samples and suffers performance drops when their batch size is reduced.
 
-SimCLR 的两项设计——（1）MLP 投影头与（2）更强的数据增强——被证明非常有效。MoCo V2（Chen et al, 2020）结合二者，在不依赖超大批量的情况下获得更好的迁移性能。
+SimCLR 的两项设计——（1）MLP 投影头与（2）更强的数据增强——被证明非常有效。MoCo V2（[Chen et al, 2020](https://arxiv.org/abs/2003.04297)）结合二者，在不依赖超大批量的情况下获得更好的迁移性能。
 
-> Two designs in SimCLR, namely, (1) an MLP projection head and (2) stronger data augmentation, are proved to be very efficient. MoCo V2 (Chen et al, 2020) combined these two designs, achieving even better transfer performance with no dependency on a very large batch size.
+> Two designs in SimCLR, namely, (1) an MLP projection head and (2) stronger data augmentation, are proved to be very efficient. MoCo V2 ([Chen et al, 2020](https://arxiv.org/abs/2003.04297)) combined these two designs, achieving even better transfer performance with no dependency on a very large batch size.
 
 #### CURL
 > **EN** CURL
 
-CURL（Srinivas, et al. 2020）将上述思想用于强化学习。它通过对原始观测 $o$ 的两个数据增强版本 $o_q$ 与 $o_k$ 用对比损失匹配嵌入来学习 RL 任务的视觉表示。CURL 主要依赖随机裁剪数据增强。键编码器实现为动量编码器，权重为查询编码器权重的 EMA，与 MoCo 相同。
+CURL（[Srinivas, et al. 2020](https://arxiv.org/abs/2004.04136)）将上述思想用于[强化学习](https://lilianweng.github.io/posts/2018-02-19-rl-overview/)。它通过对原始观测 $o$ 的两个数据增强版本 $o_q$ 与 $o_k$ 用对比损失匹配嵌入来学习 RL 任务的视觉表示。CURL 主要依赖随机裁剪数据增强。键编码器实现为动量编码器，权重为查询编码器权重的 EMA，与 MoCo 相同。
 
-> CURL (Srinivas, et al. 2020) applies the above ideas in Reinforcement Learning. It learns a visual representation for RL tasks by matching embeddings of two data-augmented versions, $o_q$ and $o_k$, of the raw observation $o$ via contrastive loss. CURL primarily relies on random crop data augmentation. The key encoder is implemented as a momentum encoder with weights as EMA of the query encoder weights, same as in MoCo.
+> CURL ([Srinivas, et al. 2020](https://arxiv.org/abs/2004.04136)) applies the above ideas in [Reinforcement Learning](https://lilianweng.github.io/posts/2018-02-19-rl-overview/). It learns a visual representation for RL tasks by matching embeddings of two data-augmented versions, $o_q$ and $o_k$, of the raw observation $o$ via contrastive loss. CURL primarily relies on random crop data augmentation. The key encoder is implemented as a momentum encoder with weights as EMA of the query encoder weights, same as in MoCo.
 
 RL 与有监督视觉任务的重要差异在于 RL 依赖连续帧之间的时间一致性。因此 CURL 对每帧栈一致地施加增强，以保留观测的时间结构信息。
 
@@ -627,9 +627,9 @@ RL 与有监督视觉任务的重要差异在于 RL 依赖连续帧之间的时�
 
 ![CURL](figures/LilianWeng_contrastive/CURL.png)
 
-CURL 架构。（图源：Srinivas, et al. 2020）
+CURL 架构。（图源：[Srinivas, et al. 2020](https://arxiv.org/abs/2004.04136)）
 
-> The architecture of CURL. (Image source: Srinivas, et al. 2020)
+> The architecture of CURL. (Image source: [Srinivas, et al. 2020](https://arxiv.org/abs/2004.04136))
 
 ### 特征聚类
 > **EN** Feature Clustering
@@ -637,15 +637,15 @@ CURL 架构。（图源：Srinivas, et al. 2020）
 #### DeepCluster
 > **EN** DeepCluster
 
-DeepCluster（Caron et al. 2018）通过 k-means 迭代聚类特征，并以簇分配作为伪标签提供监督信号。
+DeepCluster（[Caron et al. 2018](https://arxiv.org/abs/1807.05520)）通过 k-means 迭代聚类特征，并以簇分配作为伪标签提供监督信号。
 
-> DeepCluster (Caron et al. 2018) iteratively clusters features via k-means and uses cluster assignments as pseudo labels to provide supervised signals.
+> DeepCluster ([Caron et al. 2018](https://arxiv.org/abs/1807.05520)) iteratively clusters features via k-means and uses cluster assignments as pseudo labels to provide supervised signals.
 
 ![deepcluster](figures/LilianWeng_contrastive/deepcluster.png)
 
-DeepCluster 方法示意：迭代聚类深度特征并以簇分配为伪标签。（图源：Caron et al. 2018）
+DeepCluster 方法示意：迭代聚类深度特征并以簇分配为伪标签。（图源：[Caron et al. 2018](https://arxiv.org/abs/1807.05520)）
 
-> Illustration of DeepCluster method which iteratively clusters deep features and uses the cluster assignments as pseudo-labels. (Image source: Caron et al. 2018)
+> Illustration of DeepCluster method which iteratively clusters deep features and uses the cluster assignments as pseudo-labels. (Image source: [Caron et al. 2018](https://arxiv.org/abs/1807.05520))
 
 每轮迭代中，DeepCluster 用先前表示对数据点聚类，再将新簇分配作为新表示的分类目标。但该迭代过程易出现平凡解。虽不使用负样本对，却需要代价高的聚类阶段及专门措施以避免坍缩到平凡解。
 
@@ -654,15 +654,15 @@ DeepCluster 方法示意：迭代聚类深度特征并以簇分配为伪标签�
 #### SwAV
 > **EN** SwAV
 
-SwAV（Swapping Assignments between multiple Views；Caron et al. 2020）是在线对比学习算法。它从一个增强版本计算图像的 code，并尝试用同一图像的另一增强版本预测该 code。
+SwAV（Swapping Assignments between multiple Views；[Caron et al. 2020](https://arxiv.org/abs/2006.09882)）是在线对比学习算法。它从一个增强版本计算图像的 code，并尝试用同一图像的另一增强版本预测该 code。
 
-> SwAV (Swapping Assignments between multiple Views; Caron et al. 2020) is an online contrastive learning algorithm. It computes a code from an augmented version of the image and tries to predict this code using another augmented version of the same image.
+> SwAV (Swapping Assignments between multiple Views; [Caron et al. 2020](https://arxiv.org/abs/2006.09882)) is an online contrastive learning algorithm. It computes a code from an augmented version of the image and tries to predict this code using another augmented version of the same image.
 
 ![SwAV](figures/LilianWeng_contrastive/SwAV.png)
 
-SwAV 与[对比实例学习](#带记忆库的实例判别)的对比。（图源：Caron et al. 2020）
+SwAV 与[对比实例学习](#带记忆库的实例判别)的对比。（图源：[Caron et al. 2020](https://arxiv.org/abs/2006.09882)）
 
-> Comparison of SwAV and [contrastive instance learning](#instance-discrimination-with-memoy-bank). (Image source: Caron et al. 2020)
+> Comparison of SwAV and [contrastive instance learning](#instance-discrimination-with-memoy-bank). (Image source: [Caron et al. 2020](https://arxiv.org/abs/2006.09882))
 
 给定两种不同增强下图像的特征 $\mathbf{z}_t$ 与 $\mathbf{z}_s$，SwAV 计算对应 code $\mathbf{q}_t$、$\mathbf{q}_s$，损失通过交换两个 code 并用 $\ell(.)$ 度量特征与 code 的拟合程度来量化。
 
@@ -686,9 +686,9 @@ $$ \begin{aligned} \max_{\mathbf{Q}\in\mathcal{Q}} &\text{Tr}(\mathbf{Q}^\top \m
 
 > where $\mathcal{H}$ is the entropy, $\mathcal{H}(\mathbf{Q}) = - \sum_{ij} \mathbf{Q}_{ij} \log \mathbf{Q}_{ij}$, controlling the smoothness of the code. The coefficient $\epsilon$ should not be too large; otherwise, all the samples will be assigned uniformly to all the clusters. The candidate set of solutions for $\mathbf{Q}$ requires every mapping matrix to have each row sum up to $1/K$ and each column to sum up to $1/B$, enforcing that each prototype gets selected at least $B/K$ times on average.
 
-SwAV 依赖迭代 Sinkhorn-Knopp 算法（Cuturi 2013）求解 $\mathbf{Q}$。
+SwAV 依赖迭代 Sinkhorn-Knopp 算法（[Cuturi 2013](https://arxiv.org/abs/1306.0895)）求解 $\mathbf{Q}$。
 
-> SwAV relies on the iterative Sinkhorn-Knopp algorithm (Cuturi 2013) to find the solution for $\mathbf{Q}$.
+> SwAV relies on the iterative Sinkhorn-Knopp algorithm ([Cuturi 2013](https://arxiv.org/abs/1306.0895)) to find the solution for $\mathbf{Q}$.
 
 ### 利用有监督数据集
 > **EN** Working with Supervised Datasets
@@ -696,15 +696,15 @@ SwAV 依赖迭代 Sinkhorn-Knopp 算法（Cuturi 2013）求解 $\mathbf{Q}$。
 #### CLIP
 > **EN** CLIP
 
-CLIP（Contrastive Language-Image Pre-training；Radford et al. 2021）联合训练文本编码器与图像特征提取器，预训练任务为预测哪段 caption 与哪张图像配对。
+CLIP（Contrastive Language-Image Pre-training；[Radford et al. 2021](https://arxiv.org/abs/2103.00020)）联合训练文本编码器与图像特征提取器，预训练任务为预测哪段 caption 与哪张图像配对。
 
-> CLIP (Contrastive Language-Image Pre-training; Radford et al. 2021) jointly trains a text encoder and an image feature extractor over the pretraining task that predicts which caption goes with which image.
+> CLIP (Contrastive Language-Image Pre-training; [Radford et al. 2021](https://arxiv.org/abs/2103.00020)) jointly trains a text encoder and an image feature extractor over the pretraining task that predicts which caption goes with which image.
 
 ![CLIP](figures/LilianWeng_contrastive/CLIP.png)
 
-CLIP 在图文对上的对比预训练示意。（图源：Radford et al. 2021）
+CLIP 在图文对上的对比预训练示意。（图源：[Radford et al. 2021](https://arxiv.org/abs/2103.00020)）
 
-> Illustration of CLIP contrastive pre-training over text-image pairs. (Image source: Radford et al. 2021)
+> Illustration of CLIP contrastive pre-training over text-image pairs. (Image source: [Radford et al. 2021](https://arxiv.org/abs/2103.00020))
 
 给定 $N$ 个（图像，文本）对的 batch，CLIP 计算该 batch 内全部 $N\times N$ 个（图像，文本）候选之间的稠密余弦相似度矩阵。文本与图像编码器联合训练，最大化 $N$ 对正确（图像，文本）关联的相似度，同时最小化 $N(N-1)$ 对错误关联的相似度，通过对稠密矩阵的对称交叉熵损失实现。
 
@@ -716,9 +716,9 @@ CLIP 的 Numpy 风格伪代码见下图。
 
 ![CLIP-algo](figures/LilianWeng_contrastive/CLIP-algo.png)
 
-CLIP 的 Numpy 风格伪代码算法。（图源：Radford et al. 2021）
+CLIP 的 Numpy 风格伪代码算法。（图源：[Radford et al. 2021](https://arxiv.org/abs/2103.00020)）
 
-> CLIP algorithm in Numpy style pseudo code. (Image source: Radford et al. 2021)
+> CLIP algorithm in Numpy style pseudo code. (Image source: [Radford et al. 2021](https://arxiv.org/abs/2103.00020))
 
 相较上述学习良好视觉表示的方法，CLIP 的特别之处在于「将自然语言作为训练信号」。它需要可获知哪段文本与哪张图像匹配的有监督数据集，在 4 亿（文本，图像）对上训练，数据来自互联网。查询列表包含英文维基百科中出现至少 100 次的全部词。有趣的是，他们发现基于 Transformer 的语言模型在零样本 ImageNet 分类上比词袋（BoW）文本编码器慢 3 倍。采用对比目标而非预测与图像关联的确切词（图像描述任务常用方法）可再将数据效率提升约 4 倍。
 
@@ -726,9 +726,9 @@ CLIP 的 Numpy 风格伪代码算法。（图源：Radford et al. 2021）
 
 ![CLIP-efficiency](figures/LilianWeng_contrastive/CLIP-efficiency.png)
 
-词袋文本编码与对比训练目标可带来数倍数据效率提升。（图源：Radford et al. 2021）
+词袋文本编码与对比训练目标可带来数倍数据效率提升。（图源：[Radford et al. 2021](https://arxiv.org/abs/2103.00020)）
 
-> Using bag-of-words text encoding and contrastive training objectives can bring in multiple folds of data efficiency improvement. (Image source: Radford et al. 2021)
+> Using bag-of-words text encoding and contrastive training objectives can bring in multiple folds of data efficiency improvement. (Image source: [Radford et al. 2021](https://arxiv.org/abs/2103.00020))
 
 CLIP 产生良好的视觉表示，可非平凡地迁移到许多 CV 基准，结果与有监督基线具有竞争力。在测试的迁移任务中，CLIP 在非常细粒度分类以及计数物体数量等抽象或系统性任务上表现吃力。CLIP 模型的迁移性能与模型计算量平滑相关。
 
@@ -737,15 +737,15 @@ CLIP 产生良好的视觉表示，可非平凡地迁移到许多 CV 基准，�
 #### 有监督对比学习
 > **EN** Supervised Contrastive Learning
 
-交叉熵损失存在若干已知问题，如对噪声标签缺乏鲁棒性、可能出现较差间隔。对交叉熵的改进包括 curated 更好的训练数据，如标签平滑与数据增强。有监督对比损失（Supervised Contrastive Loss；Khosla et al. 2021）旨在比交叉熵更有效地利用标签信息，要求同类归一化嵌入彼此更接近，不同类比嵌入更远离。
+交叉熵损失存在若干已知问题，如对噪声标签缺乏鲁棒性、可能出现较差间隔。对交叉熵的改进包括 curated 更好的训练数据，如标签平滑与数据增强。有监督对比损失（Supervised Contrastive Loss；[Khosla et al. 2021](https://arxiv.org/abs/2004.11362)）旨在比交叉熵更有效地利用标签信息，要求同类归一化嵌入彼此更接近，不同类比嵌入更远离。
 
-> There are several known issues with cross entropy loss, such as the lack of robustness to noisy labels and the possibility of poor margins. Existing improvement for cross entropy loss involves the curation of better training data, such as label smoothing and data augmentation. Supervised Contrastive Loss (Khosla et al. 2021) aims to leverage label information more effectively than cross entropy, imposing that normalized embeddings from the same class are closer together than embeddings from different classes.
+> There are several known issues with cross entropy loss, such as the lack of robustness to noisy labels and the possibility of poor margins. Existing improvement for cross entropy loss involves the curation of better training data, such as label smoothing and data augmentation. Supervised Contrastive Loss ([Khosla et al. 2021](https://arxiv.org/abs/2004.11362)) aims to leverage label information more effectively than cross entropy, imposing that normalized embeddings from the same class are closer together than embeddings from different classes.
 
 ![sup-con](figures/LilianWeng_contrastive/sup-con.png)
 
-有监督与自监督对比损失对比。有监督对比学习除增强版本外，还将同类不同样本视为正例。（图源：Khosla et al. 2021）
+有监督与自监督对比损失对比。有监督对比学习除增强版本外，还将同类不同样本视为正例。（图源：[Khosla et al. 2021](https://arxiv.org/abs/2004.11362)）
 
-> Supervised vs self-supervised contrastive losses. Supervised contrastive learning considers different samples from the same class as positive examples, in addition to augmented versions. (Image source: Khosla et al. 2021)
+> Supervised vs self-supervised contrastive losses. Supervised contrastive learning considers different samples from the same class as positive examples, in addition to augmented versions. (Image source: [Khosla et al. 2021](https://arxiv.org/abs/2004.11362))
 
 给定随机采样的 $n$ 个（图像，标签）对 $\{\mathbf{x}_i, y_i\}_{i=1}^n$，对每个样本施加两次随机增强，得到 $2n$ 个训练对 $\{\tilde{\mathbf{x}}_i, \tilde{y}_i\}_{i=1}^{2n}$。
 
@@ -793,9 +793,9 @@ $$ \mathcal{L}_\text{supcon} = - \sum_{i=1}^{2n} \frac{1}{2 \vert N_i \vert - 1}
 
 > **EN** Lexical Edits
 
-EDA（Easy Data Augmentation；Wei & Zou 2019）定义了一组简单但强大的文本增强操作。给定一个句子，EDA 随机选择并应用以下四种简单操作之一：
+EDA（Easy Data Augmentation；[Wei & Zou 2019](https://arxiv.org/abs/1901.11196)）定义了一组简单但强大的文本增强操作。给定一个句子，EDA 随机选择并应用以下四种简单操作之一：
 
-> EDA (Easy Data Augmentation; Wei & Zou 2019) defines a set of simple but powerful operations for text augmentation. Given a sentence, EDA randomly chooses and applies one of four simple operations:
+> EDA (Easy Data Augmentation; [Wei & Zou 2019](https://arxiv.org/abs/1901.11196)) defines a set of simple but powerful operations for text augmentation. Given a sentence, EDA randomly chooses and applies one of four simple operations:
 
 1. 同义词替换（SR）：将 $n$ 个随机非停用词替换为其同义词。
 2. 随机插入（RI）：在句子的随机位置插入一个从随机选定的非停用词的同义词。
@@ -819,27 +819,27 @@ EDA 在多个分类基准数据集上被证明能提升分类准确率，相比�
 
 EDA 在多个分类基准上带来性能提升。
 
-> EDA leads to performance improvement on several classification benchmarks. (Image source: Wei & Zou 2019)
+> EDA leads to performance improvement on several classification benchmarks. (Image source: [Wei & Zou 2019](https://arxiv.org/abs/1901.11196))
 
-在 Contextual Augmentation（Sosuke Kobayashi, 2018）中，位置 $i$ 处词 $w_i$ 的新替换可以从给定概率分布 $p(.\mid S\setminus\{w_i\})$ 中平滑采样，该分布由类似 BERT 的双向语言模型预测。
+在 Contextual Augmentation（[Sosuke Kobayashi, 2018](https://arxiv.org/abs/1805.06201)）中，位置 $i$ 处词 $w_i$ 的新替换可以从给定概率分布 $p(.\mid S\setminus\{w_i\})$ 中平滑采样，该分布由类似 BERT 的双向语言模型预测。
 
-> In Contextual Augmentation (Sosuke Kobayashi, 2018), new substitutes for word $w_i$ at position $i$ can be smoothly sampled from a given probability distribution, $p(.\mid S\setminus\{w_i\})$, which is predicted by a bidirectional LM like BERT.
+> In Contextual Augmentation ([Sosuke Kobayashi, 2018](https://arxiv.org/abs/1805.06201)), new substitutes for word $w_i$ at position $i$ can be smoothly sampled from a given probability distribution, $p(.\mid S\setminus\{w_i\})$, which is predicted by a bidirectional LM like BERT.
 
 #### 回译
 
 > **EN** Back-translation
 
-CERT（Contrastive self-supervised Encoder Representations from Transformers；Fang et al. (2020)；code）通过回译生成增强句子。可以使用针对不同语言的不同翻译模型来创建不同版本的增强。一旦我们有了文本样本的噪声版本，就可以使用上文介绍的许多对比学习框架（例如 MoCo）来学习句子嵌入。
+CERT（Contrastive self-supervised Encoder Representations from Transformers；[Fang et al. (2020)](https://arxiv.org/abs/2005.12766)；[code](https://github.com/UCSD-AI4H/CERT)）通过回译生成增强句子。可以使用针对不同语言的不同翻译模型来创建不同版本的增强。一旦我们有了文本样本的噪声版本，就可以使用上文介绍的许多对比学习框架（例如 MoCo）来学习句子嵌入。
 
-> CERT (Contrastive self-supervised Encoder Representations from Transformers; Fang et al. (2020); code) generates augmented sentences via back-translation. Various translation models for different languages can be employed for creating different versions of augmentations. Once we have a noise version of text samples, many contrastive learning frameworks introduced above, such as MoCo, can be used to learn sentence embedding.
+> CERT (Contrastive self-supervised Encoder Representations from Transformers; [Fang et al. (2020)](https://arxiv.org/abs/2005.12766); [code](https://github.com/UCSD-AI4H/CERT)) generates augmented sentences via back-translation. Various translation models for different languages can be employed for creating different versions of augmentations. Once we have a noise version of text samples, many contrastive learning frameworks introduced above, such as MoCo, can be used to learn sentence embedding.
 
 #### Dropout 与截断
 
 > **EN** Dropout and Cutoff
 
-Shen 等人（2020）提出将截断（Cutoff）应用于文本增强，灵感来自 cross-view training。他们提出了三种截断增强策略：
+Shen 等人（2020）提出将截断（Cutoff）应用于文本增强，灵感来自 [cross-view training](https://lilianweng.github.io/posts/2019-01-31-lm/#cross-view-training)。他们提出了三种截断增强策略：
 
-> Shen et al. (2020) proposed to apply Cutoff to text augmentation, inspired by cross-view training. They proposed three cutoff augmentation strategies:
+> [Shen et al. (2020)](https://arxiv.org/abs/2009.13818) proposed to apply Cutoff to text augmentation, inspired by [cross-view training](https://lilianweng.github.io/posts/2019-01-31-lm/#cross-view-training). They proposed three cutoff augmentation strategies:
 
 1. Token cutoff 移除若干选定 token 的信息。为确保没有数据泄漏，输入、位置编码及其他相关嵌入矩阵中对应的 token 都应置零。
 2. Feature cutoff 移除若干特征列。
@@ -853,21 +853,21 @@ Shen 等人（2020）提出将截断（Cutoff）应用于文本增强，灵感�
 
 token、feature 与 span 截断增强策略示意图。
 
-> Schematic illustration of token, feature and span cutoff augmentation strategies. (Image source: Shen et al. 2020)
+> Schematic illustration of token, feature and span cutoff augmentation strategies. (Image source: [Shen et al. 2020](https://arxiv.org/abs/2009.13818))
 
 可以为一个样本创建多个增强版本。训练时，Shen 等人（2020）应用额外的 KL 散度项来衡量不同增强样本预测之间的一致性。
 
-> Multiple augmented versions of one sample can be created. When training, Shen et al. (2020) applied an additional KL-divergence term to measure the consensus between predictions from different augmented samples.
+> Multiple augmented versions of one sample can be created. When training, [Shen et al. (2020)](https://arxiv.org/abs/2009.13818) applied an additional KL-divergence term to measure the consensus between predictions from different augmented samples.
 
-SimCSE（Gao et al. 2021；code）从无监督数据中学习，仅通过 dropout 噪声预测句子自身。换言之，他们将 dropout 作为文本序列的数据增强。一个样本简单地以不同的 dropout mask 两次输入编码器，这两个版本构成正样本对，批次内其他样本则视为负样本对。这与截断增强颇为相似，但 dropout 更灵活，对被 mask 掉的内容缺乏明确定义的语义含义。
+SimCSE（[Gao et al. 2021](https://arxiv.org/abs/2104.08821)；code）从无监督数据中学习，仅通过 dropout 噪声预测句子自身。换言之，他们将 dropout 作为文本序列的数据增强。一个样本简单地以不同的 dropout mask 两次输入编码器，这两个版本构成正样本对，批次内其他样本则视为负样本对。这与截断增强颇为相似，但 dropout 更灵活，对被 mask 掉的内容缺乏明确定义的语义含义。
 
-> SimCSE (Gao et al. 2021; code) learns from unsupervised data by predicting a sentence from itself with only dropout noise. In other words, they treat dropout as data augmentation for text sequences. A sample is simply fed into the encoder twice with different dropout masks and these two versions are the positive pair where the other in-batch samples are considered as negative pairs. It feels quite similar to the cutoff augmentation, but dropout is more flexible with less well-defined semantic meaning of what content can be masked off.
+> SimCSE ([Gao et al. 2021](https://arxiv.org/abs/2104.08821); code) learns from unsupervised data by predicting a sentence from itself with only dropout noise. In other words, they treat dropout as data augmentation for text sequences. A sample is simply fed into the encoder twice with different dropout masks and these two versions are the positive pair where the other in-batch samples are considered as negative pairs. It feels quite similar to the cutoff augmentation, but dropout is more flexible with less well-defined semantic meaning of what content can be masked off.
 
 ![SimCSE](figures/LilianWeng_contrastive/SimCSE.png)
 
 SimCSE 通过应用不同的 dropout mask 创建增强样本。监督版本利用自然语言推断（NLI）数据集，给定句子对预测正样本（蕴含）或负样本（矛盾）。
 
-> SimCSE creates augmented samples by applying different dropout masks. The supervised version leverages NLI datasets to predict positive (entailment) or negative (contradiction) given a pair of sentences. (Image source: Gao et al. 2021)
+> SimCSE creates augmented samples by applying different dropout masks. The supervised version leverages NLI datasets to predict positive (entailment) or negative (contradiction) given a pair of sentences. (Image source: [Gao et al. 2021](https://arxiv.org/abs/2104.08821))
 
 他们在 7 个 STS（Semantic Text Similarity，语义文本相似度）数据集上进行了实验，计算句子嵌入之间的余弦相似度。他们还尝试了可选的 MLM 辅助目标损失，以帮助避免灾难性遗忘 token 级知识。该辅助损失被发现有助于提升迁移任务上的性能，但在主要 STS 任务上有一致的下降。
 
@@ -877,7 +877,7 @@ SimCSE 通过应用不同的 dropout mask 创建增强样本。监督版本利�
 
 SimCSE 在一组 STS 基准上的实验结果。
 
-> Experiment numbers on a collection of STS benchmarks with SimCES. (Image source: Gao et al. 2021)
+> Experiment numbers on a collection of STS benchmarks with SimCES. (Image source: [Gao et al. 2021](https://arxiv.org/abs/2104.08821))
 
 ### 来自 NLI 的监督
 
@@ -887,17 +887,17 @@ SimCSE 在一组 STS 基准上的实验结果。
 
 > The pre-trained BERT sentence embedding without any fine-tuning has been found to have poor performance for semantic similarity tasks. Instead of using the raw embeddings directly, we need to refine the embedding with further fine-tuning.
 
-自然语言推断（NLI）任务是提供监督信号以学习句子嵌入的主要数据来源；例如 SNLI、MNLI 和 QQP。
+自然语言推断（NLI）任务是提供监督信号以学习句子嵌入的主要数据来源；例如 [SNLI](https://nlp.stanford.edu/projects/snli/)、[MNLI](https://cims.nyu.edu/~sbowman/multinli/) 和 [QQP](https://www.kaggle.com/c/quora-question-pairs)。
 
-> Natural Language Inference (NLI) tasks are the main data sources to provide supervised signals for learning sentence embedding; such as SNLI, MNLI, and QQP.
+> Natural Language Inference (NLI) tasks are the main data sources to provide supervised signals for learning sentence embedding; such as [SNLI](https://nlp.stanford.edu/projects/snli/), [MNLI](https://cims.nyu.edu/~sbowman/multinli/), and [QQP](https://www.kaggle.com/c/quora-question-pairs).
 
 #### Sentence-BERT
 
 > **EN** Sentence-BERT
 
-SBERT（Sentence-BERT）（Reimers & Gurevych, 2019）依赖孪生网络与三元组网络架构来学习句子嵌入，使得句子相似度可以通过嵌入对之间的余弦相似度来估计。注意，学习 SBERT 依赖监督数据，因为它在多个 NLI 数据集上进行了微调。
+SBERT（Sentence-BERT）（[Reimers & Gurevych, 2019](https://arxiv.org/abs/1908.10084)）依赖孪生网络与三元组网络架构来学习句子嵌入，使得句子相似度可以通过嵌入对之间的余弦相似度来估计。注意，学习 SBERT 依赖监督数据，因为它在多个 NLI 数据集上进行了微调。
 
-> SBERT (Sentence-BERT) (Reimers & Gurevych, 2019) relies on siamese and triplet network architectures to learn sentence embeddings such that the sentence similarity can be estimated by cosine similarity between pairs of embeddings. Note that learning SBERT depends on supervised data, as it is fine-tuned on several NLI datasets.
+> SBERT (Sentence-BERT) ([Reimers & Gurevych, 2019](https://arxiv.org/abs/1908.10084)) relies on siamese and triplet network architectures to learn sentence embeddings such that the sentence similarity can be estimated by cosine similarity between pairs of embeddings. Note that learning SBERT depends on supervised data, as it is fine-tuned on several NLI datasets.
 
 他们在 BERT 模型之上实验了若干不同的预测头：
 
@@ -919,17 +919,17 @@ SBERT（Sentence-BERT）（Reimers & Gurevych, 2019）依赖孪生网络与三�
 
 Sentence-BERT 训练框架示意图，含 softmax 分类头与回归头。
 
-> Illustration of Sentence-BERT training framework with softmax classification head and regression head. (Image source: Reimers & Gurevych, 2019)
+> Illustration of Sentence-BERT training framework with softmax classification head and regression head. (Image source: [Reimers & Gurevych, 2019](https://arxiv.org/abs/1908.10084))
 
-SentEval 库（Conneau and Kiela, 2018）常用于评估所学句子嵌入的质量。SBERT 在当时（2019 年 8 月）的 7 项任务中有 5 项优于其他基线。
+[SentEval](https://github.com/facebookresearch/SentEval) 库（[Conneau and Kiela, 2018](https://arxiv.org/abs/1803.05449)）常用于评估所学句子嵌入的质量。SBERT 在当时（2019 年 8 月）的 7 项任务中有 5 项优于其他基线。
 
-> The SentEval library (Conneau and Kiela, 2018) is commonly used for evaluating the quality of learned sentence embedding. SBERT outperformed other baselines at that time (Aug 2019) on 5 out of 7 tasks.
+> The [SentEval](https://github.com/facebookresearch/SentEval) library ([Conneau and Kiela, 2018](https://arxiv.org/abs/1803.05449)) is commonly used for evaluating the quality of learned sentence embedding. SBERT outperformed other baselines at that time (Aug 2019) on 5 out of 7 tasks.
 
 ![SBERT-SentEval](figures/LilianWeng_contrastive/SBERT-SentEval.png)
 
-Sentence-BERT 在 SentEval 基准上的性能。
+Sentence-BERT 在 [SentEval](https://github.com/facebookresearch/SentEval) 基准上的性能。
 
-> The performance of Sentence-BERT on the SentEval benchmark. (Image source: Reimers & Gurevych, 2019)
+> The performance of Sentence-BERT on the [SentEval](https://github.com/facebookresearch/SentEval) benchmark. (Image source: [Reimers & Gurevych, 2019](https://arxiv.org/abs/1908.10084))
 
 #### BERT-flow
 
@@ -937,17 +937,17 @@ Sentence-BERT 在 SentEval 基准上的性能。
 
 若嵌入在各维度上均匀分布，则称嵌入表示空间为各向同性（isotropic）；否则为各向异性（anisotropic）。Li 等人（2020）表明，预训练 BERT 学习到的是非平滑的各向异性句子嵌入语义空间，因此在未经微调时文本相似度任务表现较差。经验上，他们观察到 BERT 句子嵌入存在两个问题：词频使嵌入空间产生偏置——高频词靠近原点，低频词远离原点；低频词稀疏散布——低频词嵌入往往离其 $k$-NN 邻居更远，而高频词嵌入更密集地聚集。
 
-> The embedding representation space is deemed isotropic if embeddings are uniformly distributed on each dimension; otherwise, it is anisotropic. Li et al, (2020) showed that a pre-trained BERT learns a non-smooth anisotropic semantic space of sentence embeddings and thus leads to poor performance for text similarity tasks without fine-tuning. Empirically, they observed two issues with BERT sentence embedding: Word frequency biases the embedding space. High-frequency words are close to the origin, but low-frequency ones are far away from the origin. Low-frequency words scatter sparsely. The embeddings of low-frequency words tend to be farther to their $k$-NN neighbors, while the embeddings of high-frequency words concentrate more densely.
+> The embedding representation space is deemed isotropic if embeddings are uniformly distributed on each dimension; otherwise, it is anisotropic. [Li et al, (2020)](https://arxiv.org/abs/2011.05864) showed that a pre-trained BERT learns a non-smooth anisotropic semantic space of sentence embeddings and thus leads to poor performance for text similarity tasks without fine-tuning. Empirically, they observed two issues with BERT sentence embedding: Word frequency biases the embedding space. High-frequency words are close to the origin, but low-frequency ones are far away from the origin. Low-frequency words scatter sparsely. The embeddings of low-frequency words tend to be farther to their $k$-NN neighbors, while the embeddings of high-frequency words concentrate more densely.
 
-BERT-flow（Li et al, 2020；code）通过归一化流（normalizing flows）将嵌入变换为平滑且各向同性的高斯分布。
+BERT-flow（[Li et al, 2020](https://arxiv.org/abs/2011.05864)；code）通过归一化流（[normalizing flows](https://lilianweng.github.io/posts/2018-10-13-flow-models/#what-is-normalizing-flows)）将嵌入变换为平滑且各向同性的高斯分布。
 
-> BERT-flow (Li et al, 2020; code) was proposed to transform the embedding to a smooth and isotropic Gaussian distribution via normalizing flows.
+> BERT-flow ([Li et al, 2020](https://arxiv.org/abs/2011.05864); code) was proposed to transform the embedding to a smooth and isotropic Gaussian distribution via [normalizing flows](https://lilianweng.github.io/posts/2018-10-13-flow-models/#what-is-normalizing-flows).
 
 ![BERT-flow](figures/LilianWeng_contrastive/BERT-flow.png)
 
 BERT-flow 中对原始句子嵌入空间进行基于流的校准示意图。
 
-> Illustration of the flow-based calibration over the original sentence embedding space in BERT-flow. (Image source: Li et al, 2020)
+> Illustration of the flow-based calibration over the original sentence embedding space in BERT-flow. (Image source: [Li et al, 2020](https://arxiv.org/abs/2011.05864))
 
 令 $\mathcal{U}$ 为观测到的 BERT 句子嵌入空间，$\mathcal{Z}$ 为期望的潜空间（标准高斯）。于是 $p_\mathcal{Z}$ 为高斯密度函数，$f_\phi: \mathcal{Z}\to\mathcal{U}$ 为可逆变换：
 
@@ -967,7 +967,7 @@ $$ \max_\phi\mathbb{E}_{\mathbf{u}=\text{BERT}(s), s\sim\mathcal{D}} \Big[ \log 
 
 BERT-flow 被证明在大多数 STS 任务上提升性能，无论是否使用 NLI 数据集的监督。由于学习归一化流进行校准不需要标签，它可以利用包括验证集与测试集在内的整个数据集。
 
-> BERT-flow was shown to improve the performance on most STS tasks either with or without supervision from NLI datasets. Because learning normalizing flows for calibration does not require labels, it can utilize the entire dataset including validation and test sets.
+> BERT-flow was shown to improve the performance on most STS tasks either with or without supervision from NLI datasets. Because learning [normalizing flows](https://lilianweng.github.io/posts/2018-10-13-flow-models/#what-is-normalizing-flows) for calibration does not require labels, it can utilize the entire dataset including validation and test sets.
 
 #### 白化操作
 
@@ -975,7 +975,7 @@ BERT-flow 被证明在大多数 STS 任务上提升性能，无论是否使用 N
 
 Su 等人（2021）应用白化（whitening）操作以改善所学表示的各向同性，并降低句子嵌入的维度。
 
-> Su et al. (2021) applied whitening operation to improve the isotropy of the learned representation and also to reduce the dimensionality of sentence embedding.
+> [Su et al. (2021)](https://arxiv.org/abs/2103.15316) applied whitening operation to improve the isotropy of the learned representation and also to reduce the dimensionality of sentence embedding.
 
 他们将句子向量的均值变换为 0，协方差矩阵变换为单位矩阵。给定样本集 $\{\mathbf{x}_i\}_{i=1}^N$，令 $\tilde{\mathbf{x}}_i$ 与 $\tilde{\Sigma}$ 为变换后的样本及对应协方差矩阵：
 
@@ -983,9 +983,9 @@ Su 等人（2021）应用白化（whitening）操作以改善所学表示的各�
 
 $$ \begin{aligned} \mu &= \frac{1}{N}\sum_{i=1}^N \mathbf{x}_i \quad \Sigma = \frac{1}{N}\sum_{i=1}^N (\mathbf{x}_i - \mu)^\top (\mathbf{x}_i - \mu) \\ \tilde{\mathbf{x}}_i &= (\mathbf{x}_i - \mu)W \quad \tilde{\Sigma} = W^\top\Sigma W = I \text{ thus } \Sigma = (W^{-1})^\top W^{-1} \end{aligned} $$
 
-若对 $\Sigma$ 做 SVD 分解 $\Sigma = U\Lambda U^\top$，则有 $W^{-1}=\sqrt{\Lambda} U^\top$ 且 $W=U\sqrt{\Lambda^{-1}}$。在 SVD 中，$U$ 为正交矩阵，列向量为特征向量；$\Lambda$ 为对角矩阵，对角元素为排序后的正特征值。
+若对 $\Sigma$ 做 [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition) 分解 $\Sigma = U\Lambda U^\top$，则有 $W^{-1}=\sqrt{\Lambda} U^\top$ 且 $W=U\sqrt{\Lambda^{-1}}$。在 [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition) 中，$U$ 为正交矩阵，列向量为特征向量；$\Lambda$ 为对角矩阵，对角元素为排序后的正特征值。
 
-> If we get SVD decomposition of $\Sigma = U\Lambda U^\top$, we will have $W^{-1}=\sqrt{\Lambda} U^\top$ and $W=U\sqrt{\Lambda^{-1}}$. Note that within SVD, $U$ is an orthogonal matrix with column vectors as eigenvectors and $\Lambda$ is a diagonal matrix with all positive elements as sorted eigenvalues.
+> If we get [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition) decomposition of $\Sigma = U\Lambda U^\top$, we will have $W^{-1}=\sqrt{\Lambda} U^\top$ and $W=U\sqrt{\Lambda^{-1}}$. Note that within [SVD](https://en.wikipedia.org/wiki/Singular_value_decomposition), $U$ is an orthogonal matrix with column vectors as eigenvectors and $\Lambda$ is a diagonal matrix with all positive elements as sorted eigenvalues.
 
 可通过只取 $W$ 的前 $k$ 列来应用降维策略，称为 `Whitening`-$k$。
 
@@ -995,7 +995,7 @@ $$ \begin{aligned} \mu &= \frac{1}{N}\sum_{i=1}^N \mathbf{x}_i \quad \Sigma = \f
 
 whitening-$k$ 操作的伪代码。
 
-> Pseudo code of the whitening-$k$ operation. (Image source: Su et al. 2021)
+> Pseudo code of the whitening-$k$ operation. (Image source: [Su et al. 2021](https://arxiv.org/abs/2103.15316))
 
 白化操作被证明优于 BERT-flow，在 256 维句子嵌入下于许多 STS 基准上达到 SOTA，无论是否使用 NLI 监督。
 
@@ -1009,15 +1009,15 @@ whitening-$k$ 操作的伪代码。
 
 > **EN** Context Prediction
 
-Quick-Thought（QT）向量（Logeswaran & Lee, 2018）将句子表示学习表述为分类问题：给定一个句子及其上下文，分类器根据向量表示区分上下文句子与其他对比句子（“完形填空”测试）。这种表述移除了导致训练变慢的 softmax 输出层。
+Quick-Thought（QT）向量（[Logeswaran & Lee, 2018](https://arxiv.org/abs/1803.02893)）将句子表示学习表述为分类问题：给定一个句子及其上下文，分类器根据向量表示区分上下文句子与其他对比句子（“完形填空”测试）。这种表述移除了导致训练变慢的 softmax 输出层。
 
-> Quick-Thought (QT) vectors (Logeswaran & Lee, 2018) formulate sentence representation learning as a classification problem: Given a sentence and its context, a classifier distinguishes context sentences from other contrastive sentences based on their vector representations ("cloze test"). Such a formulation removes the softmax output layer which causes training slowdown.
+> Quick-Thought (QT) vectors ([Logeswaran & Lee, 2018](https://arxiv.org/abs/1803.02893)) formulate sentence representation learning as a classification problem: Given a sentence and its context, a classifier distinguishes context sentences from other contrastive sentences based on their vector representations ("[cloze test](https://lilianweng.github.io/posts/2019-01-31-lm/#MLM)"). Such a formulation removes the softmax output layer which causes training slowdown.
 
 ![quick-thought](figures/LilianWeng_contrastive/quick-thought.png)
 
 Quick-Thought 句子嵌入向量学习示意图。
 
-> Illustration of how Quick-Thought sentence embedding vectors are learned. (Image source: Logeswaran & Lee, 2018)
+> Illustration of how Quick-Thought sentence embedding vectors are learned. (Image source: [Logeswaran & Lee, 2018](https://arxiv.org/abs/1803.02893))
 
 令 $f(.)$ 与 $g(.)$ 为将句子 $s$ 编码为定长向量的两个函数。令 $C(s)$ 为 $s$ 的上下文句子集合，$S(s)$ 为候选句子集合，其中仅包含一个上下文句子 $s_c \in C(s)$ 及许多非上下文负样本句子。Quick Thoughts 模型学习优化预测唯一真实上下文句子 $s_c \in S(s)$ 的概率。当将句子对 $(s, s_c)$ 视为正样本对、而将其他对 $(s, s')$（$s' \in S(s), s'\neq s_c$）视为负样本时，这本质上就是 NCE 损失。
 
@@ -1029,15 +1029,15 @@ $$ \mathcal{L}_\text{QT} = - \sum_{s \in \mathcal{D}} \sum_{s_c \in C(s)} \log p
 
 > **EN** Mutual Information Maximization
 
-IS-BERT（Info-Sentence BERT）（Zhang et al. 2020；code）采用基于互信息最大化的自监督学习目标，以无监督方式学习良好的句子嵌入。
+IS-BERT（Info-Sentence BERT）（[Zhang et al. 2020](https://arxiv.org/abs/2009.12061)；code）采用基于互信息最大化的[自监督学习](https://lilianweng.github.io/posts/2019-11-10-self-supervised/)目标，以无监督方式学习良好的句子嵌入。
 
-> IS-BERT (Info-Sentence BERT) (Zhang et al. 2020; code) adopts a self-supervised learning objective based on mutual information maximization to learn good sentence embeddings in the unsupervised manners.
+> IS-BERT (Info-Sentence BERT) ([Zhang et al. 2020](https://arxiv.org/abs/2009.12061); code) adopts a [self-supervised learning](https://lilianweng.github.io/posts/2019-11-10-self-supervised/) objective based on mutual information maximization to learn good sentence embeddings in the unsupervised manners.
 
 ![IS-BERT](figures/LilianWeng_contrastive/IS-BERT.png)
 
 Info-Sentence BERT 示意图。
 
-> Illustration of Info-Sentence BERT. (Image source: Zhang et al. 2020)
+> Illustration of Info-Sentence BERT. (Image source: [Zhang et al. 2020](https://arxiv.org/abs/2009.12061))
 
 IS-BERT 工作流程如下：
 
@@ -1059,9 +1059,9 @@ IS-BERT 工作流程如下：
 
 > The global sentence representation $\mathcal{E}_\theta(\mathbf{x})$ is computed by applying a mean-over-time pooling layer on the token representations $\mathcal{F}_\theta(\mathbf{x}) = \{\mathcal{F}_\theta^{(i)} (\mathbf{x}) \in \mathbb{R}^d\}_{i=1}^l$.
 
-由于互信息估计对连续高维随机变量通常不可 tract，IS-BERT 依赖 Jensen-Shannon 估计器（Nowozin et al., 2016, Hjelm et al., 2019）来最大化 $\mathcal{E}_\theta(\mathbf{x})$ 与 $\mathcal{F}_\theta^{(i)} (\mathbf{x})$ 之间的互信息。
+由于互信息估计对连续高维随机变量通常不可 tract，IS-BERT 依赖 Jensen-Shannon 估计器（[Nowozin et al., 2016](https://arxiv.org/abs/1606.00709), [Hjelm et al., 2019](https://arxiv.org/abs/1808.06670)）来最大化 $\mathcal{E}_\theta(\mathbf{x})$ 与 $\mathcal{F}_\theta^{(i)} (\mathbf{x})$ 之间的互信息。
 
-> Since the mutual information estimation is generally intractable for continuous and high-dimensional random variables, IS-BERT relies on the Jensen-Shannon estimator (Nowozin et al., 2016, Hjelm et al., 2019) to maximize the mutual information between $\mathcal{E}_\theta(\mathbf{x})$ and $\mathcal{F}_\theta^{(i)} (\mathbf{x})$.
+> Since the mutual information estimation is generally intractable for continuous and high-dimensional random variables, IS-BERT relies on the Jensen-Shannon estimator ([Nowozin et al., 2016](https://arxiv.org/abs/1606.00709), [Hjelm et al., 2019](https://arxiv.org/abs/1808.06670)) to maximize the mutual information between $\mathcal{E}_\theta(\mathbf{x})$ and $\mathcal{F}_\theta^{(i)} (\mathbf{x})$.
 
 $$ I^\text{JSD}_\omega(\mathcal{F}_\theta^{(i)} (\mathbf{x}); \mathcal{E}_\theta(\mathbf{x})) = \mathbb{E}_{\mathbf{x}\sim P} [-\text{sp}(-T_\omega(\mathcal{F}_\theta^{(i)} (\mathbf{x}); \mathcal{E}_\theta(\mathbf{x})))] \\ - \mathbb{E}_{\mathbf{x}\sim P, \mathbf{x}' \sim\tilde{P}} [\text{sp}(T_\omega(\mathcal{F}_\theta^{(i)} (\mathbf{x}'); \mathcal{E}_\theta(\mathbf{x})))] $$
 
@@ -1069,15 +1069,15 @@ $$ I^\text{JSD}_\omega(\mathcal{F}_\theta^{(i)} (\mathbf{x}); \mathcal{E}_\theta
 
 > where $T_\omega: \mathcal{F}\times\mathcal{E} \to \mathbb{R}$ is a learnable network with parameters $\omega$, generating discriminator scores. The negative sample $\mathbf{x}'$ is sampled from the distribution $\tilde{P}=P$. And $\text{sp}(x)=\log(1+e^x)$ is the softplus activation function.
 
-IS-BERT 在 SentEval 上的无监督结果优于大多数无监督基线（2020 年 9 月），但 unsurprisingly 弱于监督运行。使用带标签的 NLI 数据集时，IS-BERT 产生与 SBERT 相当的结果（见图 25 与 30）。
+IS-BERT 在 [SentEval](https://github.com/facebookresearch/SentEval) 上的无监督结果优于大多数无监督基线（2020 年 9 月），但 unsurprisingly 弱于监督运行。使用带标签的 NLI 数据集时，IS-BERT 产生与 SBERT 相当的结果（见图 25 与 30）。
 
-> The unsupervised numbers on SentEval with IS-BERT outperforms most of the unsupervised baselines (Sep 2020), but unsurprisingly weaker than supervised runs. When using labelled NLI datasets, IS-BERT produces results comparable with SBERT (See Fig. 25 & 30).
+> The unsupervised numbers on [SentEval](https://github.com/facebookresearch/SentEval) with IS-BERT outperforms most of the unsupervised baselines (Sep 2020), but unsurprisingly weaker than supervised runs. When using labelled NLI datasets, IS-BERT produces results comparable with SBERT (See Fig. 25 & 30).
 
 ![IS-BERT-SentEval](figures/LilianWeng_contrastive/IS-BERT-SentEval.png)
 
-IS-BERT 在 SentEval 基准上的性能。
+IS-BERT 在 [SentEval](https://github.com/facebookresearch/SentEval) 基准上的性能。
 
-> The performance of IS-BERT on the SentEval benchmark. (Image source: Zhang et al. 2020)
+> The performance of IS-BERT on the [SentEval](https://github.com/facebookresearch/SentEval) benchmark. (Image source: [Zhang et al. 2020](https://arxiv.org/abs/2009.12061))
 
 ## 引用
 
@@ -1113,138 +1113,138 @@ Weng, Lilian. (May 2021). Contrastive representation learning. Lil'Log. https://
 
 > **EN** References
 
-[1] Sumit Chopra, Raia Hadsell and Yann LeCun.「Learning a similarity metric discriminatively, with application to face verification.」/「判别式学习相似度度量及其在人脸验证中的应用。」CVPR 2005.
+[1] Sumit Chopra, Raia Hadsell and Yann LeCun.「[Learning a similarity metric discriminatively, with application to face verification.](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf)」/「判别式学习相似度度量及其在人脸验证中的应用。」CVPR 2005.
 
-> [1] Sumit Chopra, Raia Hadsell and Yann LeCun."Learning a similarity metric discriminatively, with application to face verification." CVPR 2005.
+> [1] Sumit Chopra, Raia Hadsell and Yann LeCun."[Learning a similarity metric discriminatively, with application to face verification.](http://yann.lecun.com/exdb/publis/pdf/chopra-05.pdf)" CVPR 2005.
 
-[2] Florian Schroff, Dmitry Kalenichenko and James Philbin.「FaceNet: A Unified Embedding for Face Recognition and Clustering.」/「FaceNet：用于人脸识别与聚类的统一嵌入。」CVPR 2015.
+[2] Florian Schroff, Dmitry Kalenichenko and James Philbin.「[FaceNet: A Unified Embedding for Face Recognition and Clustering.](https://arxiv.org/abs/1503.03832)」/「FaceNet：用于人脸识别与聚类的统一嵌入。」CVPR 2015.
 
-> [2] Florian Schroff, Dmitry Kalenichenko and James Philbin."FaceNet: A Unified Embedding for Face Recognition and Clustering." CVPR 2015.
+> [2] Florian Schroff, Dmitry Kalenichenko and James Philbin."[FaceNet: A Unified Embedding for Face Recognition and Clustering.](https://arxiv.org/abs/1503.03832)" CVPR 2015.
 
-[3] Hyun Oh Song et al.「Deep Metric Learning via Lifted Structured Feature Embedding.」/「通过提升结构化特征嵌入进行深度度量学习。」CVPR 2016. [code]
+[3] Hyun Oh Song et al.「[Deep Metric Learning via Lifted Structured Feature Embedding.](https://arxiv.org/abs/1511.06452)」/「通过提升结构化特征嵌入进行深度度量学习。」CVPR 2016. [code](https://github.com/rksltnl/Deep-Metric-Learning-CVPR16)
 
-> [3] Hyun Oh Song et al."Deep Metric Learning via Lifted Structured Feature Embedding." CVPR 2016. [code]
+> [3] Hyun Oh Song et al."[Deep Metric Learning via Lifted Structured Feature Embedding.](https://arxiv.org/abs/1511.06452)" CVPR 2016. [code](https://github.com/rksltnl/Deep-Metric-Learning-CVPR16)
 
-[4] Ruslan Salakhutdinov and Geoff Hinton.「Learning a Nonlinear Embedding by Preserving Class Neighbourhood Structure」/「通过保持类邻域结构学习非线性嵌入」AISTATS 2007.
+[4] Ruslan Salakhutdinov and Geoff Hinton.「[Learning a Nonlinear Embedding by Preserving Class Neighbourhood Structure](http://proceedings.mlr.press/v2/salakhutdinov07a.html)」/「通过保持类邻域结构学习非线性嵌入」AISTATS 2007.
 
-> [4] Ruslan Salakhutdinov and Geoff Hinton."Learning a Nonlinear Embedding by Preserving Class Neighbourhood Structure" AISTATS 2007.
+> [4] Ruslan Salakhutdinov and Geoff Hinton."[Learning a Nonlinear Embedding by Preserving Class Neighbourhood Structure](http://proceedings.mlr.press/v2/salakhutdinov07a.html)" AISTATS 2007.
 
-[5] Michael Gutmann and Aapo Hyvärinen.「Noise-contrastive estimation: A new estimation principle for unnormalized statistical models.」/「噪声对比估计：非归一化统计模型的新估计原理。」AISTATS 2010.
+[5] Michael Gutmann and Aapo Hyvärinen.「[Noise-contrastive estimation: A new estimation principle for unnormalized statistical models.](http://proceedings.mlr.press/v9/gutmann10a.html)」/「噪声对比估计：非归一化统计模型的新估计原理。」AISTATS 2010.
 
-> [5] Michael Gutmann and Aapo Hyvärinen."Noise-contrastive estimation: A new estimation principle for unnormalized statistical models." AISTATS 2010.
+> [5] Michael Gutmann and Aapo Hyvärinen."[Noise-contrastive estimation: A new estimation principle for unnormalized statistical models.](http://proceedings.mlr.press/v9/gutmann10a.html)" AISTATS 2010.
 
-[6] Kihyuk Sohn et al.「Improved Deep Metric Learning with Multi-class N-pair Loss Objective」/「使用多类 N-pair 损失目标改进深度度量学习」NIPS 2016.
+[6] Kihyuk Sohn et al.「[Improved Deep Metric Learning with Multi-class N-pair Loss Objective](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html)」/「使用多类 N-pair 损失目标改进深度度量学习」NIPS 2016.
 
-> [6] Kihyuk Sohn et al."Improved Deep Metric Learning with Multi-class N-pair Loss Objective" NIPS 2016.
+> [6] Kihyuk Sohn et al."[Improved Deep Metric Learning with Multi-class N-pair Loss Objective](https://papers.nips.cc/paper/2016/hash/6b180037abbebea991d8b1232f8a8ca9-Abstract.html)" NIPS 2016.
 
-[7] Nicholas Frosst, Nicolas Papernot and Geoffrey Hinton.「Analyzing and Improving Representations with the Soft Nearest Neighbor Loss.」/「用 Soft 最近邻损失分析与改进表示。」ICML 2019
+[7] Nicholas Frosst, Nicolas Papernot and Geoffrey Hinton.「[Analyzing and Improving Representations with the Soft Nearest Neighbor Loss.](http://proceedings.mlr.press/v97/frosst19a.html)」/「用 Soft 最近邻损失分析与改进表示。」ICML 2019
 
-> [7] Nicholas Frosst, Nicolas Papernot and Geoffrey Hinton."Analyzing and Improving Representations with the Soft Nearest Neighbor Loss." ICML 2019
+> [7] Nicholas Frosst, Nicolas Papernot and Geoffrey Hinton."[Analyzing and Improving Representations with the Soft Nearest Neighbor Loss.](http://proceedings.mlr.press/v97/frosst19a.html)" ICML 2019
 
-[8] Tongzhou Wang and Phillip Isola.「Understanding Contrastive Representation Learning through Alignment and Uniformity on the Hypersphere.」/「通过超球面上的对齐与均匀性理解对比表示学习。」ICML 2020. [code]
+[8] Tongzhou Wang and Phillip Isola.「[Understanding Contrastive Representation Learning through Alignment and Uniformity on the Hypersphere.](https://arxiv.org/abs/2005.10242)」/「通过超球面上的对齐与均匀性理解对比表示学习。」ICML 2020. [code](https://ssnl.github.io/hypersphere/)
 
-> [8] Tongzhou Wang and Phillip Isola."Understanding Contrastive Representation Learning through Alignment and Uniformity on the Hypersphere." ICML 2020. [code]
+> [8] Tongzhou Wang and Phillip Isola."[Understanding Contrastive Representation Learning through Alignment and Uniformity on the Hypersphere.](https://arxiv.org/abs/2005.10242)" ICML 2020. [code](https://ssnl.github.io/hypersphere/)
 
-[9] Zhirong Wu et al.「Unsupervised feature learning via non-parametric instance-level discrimination.」/「通过非参数实例级判别进行无监督特征学习。」CVPR 2018.
+[9] Zhirong Wu et al.「[Unsupervised feature learning via non-parametric instance-level discrimination.](https://arxiv.org/abs/1805.01978)」/「通过非参数实例级判别进行无监督特征学习。」CVPR 2018.
 
-> [9] Zhirong Wu et al."Unsupervised feature learning via non-parametric instance-level discrimination." CVPR 2018.
+> [9] Zhirong Wu et al."[Unsupervised feature learning via non-parametric instance-level discrimination.](https://arxiv.org/abs/1805.01978)" CVPR 2018.
 
-[10] Ekin D. Cubuk et al.「AutoAugment: Learning augmentation policies from data.」/「AutoAugment：从数据中学习增强策略。」arXiv preprint arXiv:1805.09501 (2018).
+[10] Ekin D. Cubuk et al.「[AutoAugment: Learning augmentation policies from data.](https://arxiv.org/abs/1805.09501)」/「AutoAugment：从数据中学习增强策略。」arXiv preprint arXiv:1805.09501 (2018).
 
-> [10] Ekin D. Cubuk et al."AutoAugment: Learning augmentation policies from data." arXiv preprint arXiv:1805.09501 (2018).
+> [10] Ekin D. Cubuk et al."[AutoAugment: Learning augmentation policies from data.](https://arxiv.org/abs/1805.09501)" arXiv preprint arXiv:1805.09501 (2018).
 
-[11] Daniel Ho et al.「Population Based Augmentation: Efficient Learning of Augmentation Policy Schedules.」/「基于种群的增强：高效学习增强策略调度。」ICML 2019.
+[11] Daniel Ho et al.「[Population Based Augmentation: Efficient Learning of Augmentation Policy Schedules.](https://arxiv.org/abs/1905.05393)」/「基于种群的增强：高效学习增强策略调度。」ICML 2019.
 
-> [11] Daniel Ho et al."Population Based Augmentation: Efficient Learning of Augmentation Policy Schedules." ICML 2019.
+> [11] Daniel Ho et al."[Population Based Augmentation: Efficient Learning of Augmentation Policy Schedules.](https://arxiv.org/abs/1905.05393)" ICML 2019.
 
-[12] Ekin D. Cubuk & Barret Zoph et al.「RandAugment: Practical automated data augmentation with a reduced search space.」/「RandAugment：搜索空间缩减的实用自动化数据增强。」arXiv preprint arXiv:1909.13719 (2019).
+[12] Ekin D. Cubuk & Barret Zoph et al.「[RandAugment: Practical automated data augmentation with a reduced search space.](https://arxiv.org/abs/1909.13719)」/「RandAugment：搜索空间缩减的实用自动化数据增强。」arXiv preprint arXiv:1909.13719 (2019).
 
-> [12] Ekin D. Cubuk & Barret Zoph et al."RandAugment: Practical automated data augmentation with a reduced search space." arXiv preprint arXiv:1909.13719 (2019).
+> [12] Ekin D. Cubuk & Barret Zoph et al."[RandAugment: Practical automated data augmentation with a reduced search space.](https://arxiv.org/abs/1909.13719)" arXiv preprint arXiv:1909.13719 (2019).
 
-[13] Hongyi Zhang et al.「mixup: Beyond Empirical Risk Minimization.」/「mixup：超越经验风险最小化。」ICLR 2017.
+[13] Hongyi Zhang et al.「[mixup: Beyond Empirical Risk Minimization.](https://arxiv.org/abs/1710.09412)」/「mixup：超越经验风险最小化。」ICLR 2017.
 
-> [13] Hongyi Zhang et al."mixup: Beyond Empirical Risk Minimization." ICLR 2017.
+> [13] Hongyi Zhang et al."[mixup: Beyond Empirical Risk Minimization.](https://arxiv.org/abs/1710.09412)" ICLR 2017.
 
-[14] Sangdoo Yun et al.「CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features.」/「CutMix：训练具有可定位特征的强分类器的正则化策略。」ICCV 2019.
+[14] Sangdoo Yun et al.「[CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features.](https://arxiv.org/abs/1905.04899)」/「CutMix：训练具有可定位特征的强分类器的正则化策略。」ICCV 2019.
 
-> [14] Sangdoo Yun et al."CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features." ICCV 2019.
+> [14] Sangdoo Yun et al."[CutMix: Regularization Strategy to Train Strong Classifiers with Localizable Features.](https://arxiv.org/abs/1905.04899)" ICCV 2019.
 
-[15] Yannis Kalantidis et al.「Mixing of Contrastive Hard Negatives」/「对比硬负样本的混合」NeuriPS 2020.
+[15] Yannis Kalantidis et al.「[Mixing of Contrastive Hard Negatives](https://arxiv.org/abs/2010.01028)」/「对比硬负样本的混合」NeuriPS 2020.
 
-> [15] Yannis Kalantidis et al."Mixing of Contrastive Hard Negatives" NeuriPS 2020.
+> [15] Yannis Kalantidis et al."[Mixing of Contrastive Hard Negatives](https://arxiv.org/abs/2010.01028)" NeuriPS 2020.
 
-[16] Ashish Jaiswal et al.「A Survey on Contrastive Self-Supervised Learning.」/「对比自监督学习综述。」arXiv preprint arXiv:2011.00362 (2021)
+[16] Ashish Jaiswal et al.「[A Survey on Contrastive Self-Supervised Learning.](https://arxiv.org/abs/2011.00362)」/「对比自监督学习综述。」arXiv preprint arXiv:2011.00362 (2021)
 
-> [16] Ashish Jaiswal et al."A Survey on Contrastive Self-Supervised Learning." arXiv preprint arXiv:2011.00362 (2021)
+> [16] Ashish Jaiswal et al."[A Survey on Contrastive Self-Supervised Learning.](https://arxiv.org/abs/2011.00362)" arXiv preprint arXiv:2011.00362 (2021)
 
-[17] Jure Zbontar et al.「Barlow Twins: Self-Supervised Learning via Redundancy Reduction.」/「Barlow Twins：通过冗余削减的自监督学习。」arXiv preprint arXiv:2103.03230 (2021) [code]
+[17] Jure Zbontar et al.「[Barlow Twins: Self-Supervised Learning via Redundancy Reduction.](https://arxiv.org/abs/2103.03230)」/「Barlow Twins：通过冗余削减的自监督学习。」arXiv preprint arXiv:2103.03230 (2021) [code](https://github.com/facebookresearch/barlowtwins)
 
-> [17] Jure Zbontar et al."Barlow Twins: Self-Supervised Learning via Redundancy Reduction." arXiv preprint arXiv:2103.03230 (2021) [code]
+> [17] Jure Zbontar et al."[Barlow Twins: Self-Supervised Learning via Redundancy Reduction.](https://arxiv.org/abs/2103.03230)" arXiv preprint arXiv:2103.03230 (2021) [code](https://github.com/facebookresearch/barlowtwins)
 
-[18] Alec Radford, et al.「Learning Transferable Visual Models From Natural Language Supervision」/「从自然语言监督学习可迁移视觉模型」arXiv preprint arXiv:2103.00020 (2021)
+[18] Alec Radford, et al.「[Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020)」/「从自然语言监督学习可迁移视觉模型」arXiv preprint arXiv:2103.00020 (2021)
 
-> [18] Alec Radford, et al."Learning Transferable Visual Models From Natural Language Supervision" arXiv preprint arXiv:2103.00020 (2021)
+> [18] Alec Radford, et al."[Learning Transferable Visual Models From Natural Language Supervision](https://arxiv.org/abs/2103.00020)" arXiv preprint arXiv:2103.00020 (2021)
 
-[19] Mathilde Caron et al.「Unsupervised Learning of Visual Features by Contrasting Cluster Assignments (SwAV).」/「通过对比聚类分配无监督学习视觉特征（SwAV）。」NeuriPS 2020.
+[19] Mathilde Caron et al.「[Unsupervised Learning of Visual Features by Contrasting Cluster Assignments (SwAV).](https://arxiv.org/abs/2006.09882)」/「通过对比聚类分配无监督学习视觉特征（SwAV）。」NeuriPS 2020.
 
-> [19] Mathilde Caron et al."Unsupervised Learning of Visual Features by Contrasting Cluster Assignments (SwAV)." NeuriPS 2020.
+> [19] Mathilde Caron et al."[Unsupervised Learning of Visual Features by Contrasting Cluster Assignments (SwAV).](https://arxiv.org/abs/2006.09882)" NeuriPS 2020.
 
-[20] Mathilde Caron et al.「Deep Clustering for Unsupervised Learning of Visual Features.」/「用于无监督视觉特征学习的深度聚类。」ECCV 2018.
+[20] Mathilde Caron et al.「[Deep Clustering for Unsupervised Learning of Visual Features.](https://arxiv.org/abs/1807.05520)」/「用于无监督视觉特征学习的深度聚类。」ECCV 2018.
 
-> [20] Mathilde Caron et al."Deep Clustering for Unsupervised Learning of Visual Features." ECCV 2018.
+> [20] Mathilde Caron et al."[Deep Clustering for Unsupervised Learning of Visual Features.](https://arxiv.org/abs/1807.05520)" ECCV 2018.
 
-[21] Prannay Khosla et al.「Supervised Contrastive Learning.」/「监督对比学习。」NeurIPS 2020.
+[21] Prannay Khosla et al.「[Supervised Contrastive Learning.](https://arxiv.org/abs/2004.11362)」/「监督对比学习。」NeurIPS 2020.
 
-> [21] Prannay Khosla et al."Supervised Contrastive Learning." NeurIPS 2020.
+> [21] Prannay Khosla et al."[Supervised Contrastive Learning.](https://arxiv.org/abs/2004.11362)" NeurIPS 2020.
 
-[22] Aaron van den Oord, Yazhe Li & Oriol Vinyals.「Representation Learning with Contrastive Predictive Coding」/「对比预测编码的表示学习」arXiv preprint arXiv:1807.03748 (2018).
+[22] Aaron van den Oord, Yazhe Li & Oriol Vinyals.「Representation Learning with [Contrastive Predictive Coding](https://lilianweng.github.io/posts/2019-11-10-self-supervised/#contrastive-predictive-coding)」/「[对比预测编码](https://lilianweng.github.io/posts/2019-11-10-self-supervised/#contrastive-predictive-coding)的表示学习」arXiv preprint arXiv:1807.03748 (2018).
 
-> [22] Aaron van den Oord, Yazhe Li & Oriol Vinyals."Representation Learning with Contrastive Predictive Coding" arXiv preprint arXiv:1807.03748 (2018).
+> [22] Aaron van den Oord, Yazhe Li & Oriol Vinyals."Representation Learning with [Contrastive Predictive Coding](https://lilianweng.github.io/posts/2019-11-10-self-supervised/#contrastive-predictive-coding)" arXiv preprint arXiv:1807.03748 (2018).
 
-[23] Jason Wei and Kai Zou.「EDA: Easy data augmentation techniques for boosting performance on text classification tasks.」/「EDA：提升文本分类任务性能的简易数据增强技术。」EMNLP-IJCNLP 2019.
+[23] Jason Wei and Kai Zou.「[EDA: Easy data augmentation techniques for boosting performance on text classification tasks.](https://arxiv.org/abs/1901.11196)」/「EDA：提升文本分类任务性能的简易数据增强技术。」EMNLP-IJCNLP 2019.
 
-> [23] Jason Wei and Kai Zou."EDA: Easy data augmentation techniques for boosting performance on text classification tasks." EMNLP-IJCNLP 2019.
+> [23] Jason Wei and Kai Zou."[EDA: Easy data augmentation techniques for boosting performance on text classification tasks.](https://arxiv.org/abs/1901.11196)" EMNLP-IJCNLP 2019.
 
-[24] Sosuke Kobayashi.「Contextual Augmentation: Data Augmentation by Words with Paradigmatic Relations.」/「Contextual Augmentation：基于范式关系的词级数据增强。」NAACL 2018
+[24] Sosuke Kobayashi.「[Contextual Augmentation: Data Augmentation by Words with Paradigmatic Relations.](https://arxiv.org/abs/1805.06201)」/「Contextual Augmentation：基于范式关系的词级数据增强。」NAACL 2018
 
-> [24] Sosuke Kobayashi."Contextual Augmentation: Data Augmentation by Words with Paradigmatic Relations." NAACL 2018
+> [24] Sosuke Kobayashi."[Contextual Augmentation: Data Augmentation by Words with Paradigmatic Relations.](https://arxiv.org/abs/1805.06201)" NAACL 2018
 
-[25] Hongchao Fang et al.「CERT: Contrastive self-supervised learning for language understanding.」/「CERT：用于语言理解的对比自监督学习。」arXiv preprint arXiv:2005.12766 (2020).
+[25] Hongchao Fang et al.「CERT: Contrastive [self-supervised learning](https://lilianweng.github.io/posts/2019-11-10-self-supervised/) for language understanding.」/「CERT：用于语言理解的对比自监督学习。」arXiv preprint arXiv:2005.12766 (2020).
 
-> [25] Hongchao Fang et al."CERT: Contrastive self-supervised learning for language understanding." arXiv preprint arXiv:2005.12766 (2020).
+> [25] Hongchao Fang et al."CERT: Contrastive [self-supervised learning](https://lilianweng.github.io/posts/2019-11-10-self-supervised/) for language understanding." arXiv preprint arXiv:2005.12766 (2020).
 
-[26] Dinghan Shen et al.「A Simple but Tough-to-Beat Data Augmentation Approach for Natural Language Understanding and Generation.」/「一种简单但难以击败的自然语言理解与生成数据增强方法。」arXiv preprint arXiv:2009.13818 (2020) [code]
+[26] Dinghan Shen et al.「[A Simple but Tough-to-Beat Data Augmentation Approach for Natural Language Understanding and Generation.](https://arxiv.org/abs/2009.13818)」/「一种简单但难以击败的自然语言理解与生成数据增强方法。」arXiv preprint arXiv:2009.13818 (2020) [code](https://github.com/dinghanshen/cutoff)
 
-> [26] Dinghan Shen et al."A Simple but Tough-to-Beat Data Augmentation Approach for Natural Language Understanding and Generation." arXiv preprint arXiv:2009.13818 (2020) [code]
+> [26] Dinghan Shen et al."[A Simple but Tough-to-Beat Data Augmentation Approach for Natural Language Understanding and Generation.](https://arxiv.org/abs/2009.13818)" arXiv preprint arXiv:2009.13818 (2020) [code](https://github.com/dinghanshen/cutoff)
 
-[27] Tianyu Gao et al.「SimCSE: Simple Contrastive Learning of Sentence Embeddings.」/「SimCSE：句子嵌入的简单对比学习。」arXiv preprint arXiv:2104.08821 (2020). [code]
+[27] Tianyu Gao et al.「[SimCSE: Simple Contrastive Learning of Sentence Embeddings.](https://arxiv.org/abs/2104.08821)」/「SimCSE：句子嵌入的简单对比学习。」arXiv preprint arXiv:2104.08821 (2020). [code](https://github.com/princeton-nlp/SimCSE)
 
-> [27] Tianyu Gao et al."SimCSE: Simple Contrastive Learning of Sentence Embeddings." arXiv preprint arXiv:2104.08821 (2020). [code]
+> [27] Tianyu Gao et al."[SimCSE: Simple Contrastive Learning of Sentence Embeddings.](https://arxiv.org/abs/2104.08821)" arXiv preprint arXiv:2104.08821 (2020). [code](https://github.com/princeton-nlp/SimCSE)
 
-[28] Nils Reimers and Iryna Gurevych.「Sentence-BERT: Sentence embeddings using Siamese BERT-networks.」/「Sentence-BERT：使用孪生 BERT 网络的句子嵌入。」EMNLP 2019.
+[28] Nils Reimers and Iryna Gurevych.「[Sentence-BERT: Sentence embeddings using Siamese BERT-networks.](https://arxiv.org/abs/1908.10084)」/「Sentence-BERT：使用孪生 BERT 网络的句子嵌入。」EMNLP 2019.
 
-> [28] Nils Reimers and Iryna Gurevych."Sentence-BERT: Sentence embeddings using Siamese BERT-networks." EMNLP 2019.
+> [28] Nils Reimers and Iryna Gurevych."[Sentence-BERT: Sentence embeddings using Siamese BERT-networks.](https://arxiv.org/abs/1908.10084)" EMNLP 2019.
 
-[29] Jianlin Su et al.「Whitening sentence representations for better semantics and faster retrieval.」/「白化句子表示以获得更好语义与更快检索。」arXiv preprint arXiv:2103.15316 (2021). [code]
+[29] Jianlin Su et al.「[Whitening sentence representations for better semantics and faster retrieval.](https://arxiv.org/abs/2103.15316)」/「白化句子表示以获得更好语义与更快检索。」arXiv preprint arXiv:2103.15316 (2021). [code](https://github.com/bojone/BERT-whitening)
 
-> [29] Jianlin Su et al."Whitening sentence representations for better semantics and faster retrieval." arXiv preprint arXiv:2103.15316 (2021). [code]
+> [29] Jianlin Su et al."[Whitening sentence representations for better semantics and faster retrieval.](https://arxiv.org/abs/2103.15316)" arXiv preprint arXiv:2103.15316 (2021). [code](https://github.com/bojone/BERT-whitening)
 
-[30] Yan Zhang et al.「An unsupervised sentence embedding method by mutual information maximization.」/「一种通过互信息最大化实现的无监督句子嵌入方法。」EMNLP 2020. [code]
+[30] Yan Zhang et al.「[An unsupervised sentence embedding method by mutual information maximization.](https://arxiv.org/abs/2009.12061)」/「一种通过互信息最大化实现的无监督句子嵌入方法。」EMNLP 2020. [code](https://github.com/yanzhangnlp/IS-BERT)
 
-> [30] Yan Zhang et al."An unsupervised sentence embedding method by mutual information maximization." EMNLP 2020. [code]
+> [30] Yan Zhang et al."[An unsupervised sentence embedding method by mutual information maximization.](https://arxiv.org/abs/2009.12061)" EMNLP 2020. [code](https://github.com/yanzhangnlp/IS-BERT)
 
-[31] Bohan Li et al.「On the sentence embeddings from pre-trained language models.」/「论预训练语言模型的句子嵌入。」EMNLP 2020.
+[31] Bohan Li et al.「[On the sentence embeddings from pre-trained language models.](https://arxiv.org/abs/2011.05864)」/「论预训练语言模型的句子嵌入。」EMNLP 2020.
 
-> [31] Bohan Li et al."On the sentence embeddings from pre-trained language models." EMNLP 2020.
+> [31] Bohan Li et al."[On the sentence embeddings from pre-trained language models.](https://arxiv.org/abs/2011.05864)" EMNLP 2020.
 
-[32] Lajanugen Logeswaran and Honglak Lee.「An efficient framework for learning sentence representations.」/「学习句子表示的高效框架。」ICLR 2018.
+[32] Lajanugen Logeswaran and Honglak Lee.「[An efficient framework for learning sentence representations.](https://arxiv.org/abs/1803.02893)」/「学习句子表示的高效框架。」ICLR 2018.
 
-> [32] Lajanugen Logeswaran and Honglak Lee."An efficient framework for learning sentence representations." ICLR 2018.
+> [32] Lajanugen Logeswaran and Honglak Lee."[An efficient framework for learning sentence representations.](https://arxiv.org/abs/1803.02893)" ICLR 2018.
 
-[33] Joshua Robinson, et al.「Contrastive Learning with Hard Negative Samples.」/「带硬负样本的对比学习。」ICLR 2021.
+[33] Joshua Robinson, et al.「[Contrastive Learning with Hard Negative Samples.](https://arxiv.org/abs/2010.04592)」/「带硬负样本的对比学习。」ICLR 2021.
 
-> [33] Joshua Robinson, et al."Contrastive Learning with Hard Negative Samples." ICLR 2021.
+> [33] Joshua Robinson, et al."[Contrastive Learning with Hard Negative Samples.](https://arxiv.org/abs/2010.04592)" ICLR 2021.
 
-[34] Ching-Yao Chuang et al.「Debiased Contrastive Learning.」/「去偏对比学习。」NeuriPS 2020.
+[34] Ching-Yao Chuang et al.「[Debiased Contrastive Learning.](https://arxiv.org/abs/2007.00224)」/「去偏对比学习。」NeuriPS 2020.
 
-> [34] Ching-Yao Chuang et al."Debiased Contrastive Learning." NeuriPS 2020.
+> [34] Ching-Yao Chuang et al."[Debiased Contrastive Learning.](https://arxiv.org/abs/2007.00224)" NeuriPS 2020.
