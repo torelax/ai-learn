@@ -1,7 +1,6 @@
 # DeVE-QA：稠密视频事件问答与数据构建
 
 > paper: [Question-Answering Dense Video Events](https://arxiv.org/abs/2409.04388)（SIGIR 2025；arXiv:2409.04388v4）  
-> local PDF: `docs/papers/embedding/DeVE-QA_2409.04388.pdf`  
 > HTML: https://arxiv.org/html/2409.04388v4  
 > code/data: 录用后开源（文中声明）  
 > backbone: LLaMA-VID（层级 caption）+ GPT-4o / Gemini（QA）+ CLIP（一致性 / 干扰项）  

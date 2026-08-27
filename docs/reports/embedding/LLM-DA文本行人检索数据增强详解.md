@@ -1,7 +1,6 @@
 # LLM-DA：基于大模型的文本行人检索数据增强
 
 > paper: [Data Augmentation for Text-based Person Retrieval Using Large Language Models](https://arxiv.org/abs/2405.11971)（arXiv:2405.11971）  
-> local PDF: `docs/papers/embedding/LLM-DA-TPR_2405.11971.pdf`  
 > HTML: https://arxiv.org/html/2405.11971v1  
 > backbone: Vicuna（改写）+ Sentence-Transformers（忠实度）+ CLIP（检索学生）  
 > date: 2024-05  

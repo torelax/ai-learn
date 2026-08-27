@@ -2,7 +2,7 @@
 
 学习/调研文档（自 vlm_train / modelforge 迁入）。**Markdown 为源文件**；仅保留《图文 Embedding 模型技术综述》的 HTML 供审阅对照。
 
-论文 PDF 本地副本：`docs/papers/embedding/`（不入库）。Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范见根目录 [AGENTS.md](../../../AGENTS.md)。
+Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范见根目录 [AGENTS.md](../../../AGENTS.md)。
 
 ## 总览与规划
 
@@ -66,8 +66,7 @@
 | 文档 | 论文 / 来源 |
 |------|-------------|
 | [E5详解.md](E5详解.md) | [arXiv:2212.03533](https://arxiv.org/abs/2212.03533) |
-| [GTE多阶段对比学习详解.md](GTE多阶段对比学习详解.md) | [arXiv:2308.03281](https://arxiv.org/abs/2308.03281)（GTE 原始 BERT 版；两阶段对比范式，被 Conan/BGE/gte-Qwen 沿用） |
-| [gte-Qwen2详解.md](gte-Qwen2详解.md) | 方法 [arXiv:2308.03281](https://arxiv.org/abs/2308.03281) + [HF gte-Qwen2-7B](https://huggingface.co/Alibaba-NLP/gte-Qwen2-7B-instruct) |
+| [GTE系列详解.md](GTE系列详解.md) | GTE [2308.03281](https://arxiv.org/abs/2308.03281) → mGTE / gte-v1.5 [2407.19669](https://arxiv.org/abs/2407.19669) → [gte-Qwen2](https://huggingface.co/Alibaba-NLP/gte-Qwen2-7B-instruct)；文末有三代演变总结 |
 | [Nomic-Embed详解.md](Nomic-Embed详解.md) | [arXiv:2402.01613](https://arxiv.org/abs/2402.01613) |
 | [LLM2Vec详解.md](LLM2Vec详解.md) | [arXiv:2404.05961](https://arxiv.org/abs/2404.05961) |
 | [Conan-embedding详解.md](Conan-embedding详解.md) | [arXiv:2408.15710](https://arxiv.org/abs/2408.15710)（v1：DHNM + Cross-GPU CBB；CMTEB） |

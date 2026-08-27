@@ -2,8 +2,6 @@
 
 > paper: [arXiv:2007.00808](https://arxiv.org/abs/2007.00808)（ICLR 2021）
 > code: [https://aka.ms/ance](https://aka.ms/ance)
-> local PDF: `docs/papers/embedding/ANCE_2007.00808.pdf`
-> 中译: `docs/papers/embedding/ANCE_2007.00808_zh.md`
 > backbone: RoBERTa / BERT Siamese（双塔共享）
 > date: 2020–2021
 > modality: 文本检索（web / OpenQA）

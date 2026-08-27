@@ -7,7 +7,7 @@
 > modality: 文本嵌入 / 检索  
 > languages: 英文 MTEB Retrieval  
 
-> 本文把 **假负例问题、positive-aware 挖负算法（TopK-MarginPos / TopK-PercPos）、教师选择与集成、NV-Retriever-v1 冲榜配方** 写全，并附论文原图。异步全局挖负见《[ANCE详解](ANCE详解.md)》；落地默认值见《[难负例挖掘工业实践](难负例挖掘工业实践.md)》。全文中译见 `docs/papers/embedding/NV-Retriever_2407.15831_zh.md`。
+> 本文把 **假负例问题、positive-aware 挖负算法（TopK-MarginPos / TopK-PercPos）、教师选择与集成、NV-Retriever-v1 冲榜配方** 写全，并附论文原图。异步全局挖负见《[ANCE详解](ANCE详解.md)》；落地默认值见《[难负例挖掘工业实践](难负例挖掘工业实践.md)》。
 
 ---
 

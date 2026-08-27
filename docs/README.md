@@ -8,6 +8,6 @@
 | [`reports/lora/`](reports/lora/) | LoRA / PEFT 调研报告 |
 | [`reports/distillation/`](reports/distillation/) | 知识蒸馏调研 |
 | [`reports/Qwen/`](reports/Qwen/) | Qwen 系列技术演进 |
-| `papers/<topic>/` | 论文 PDF 本地副本（**不入库**；如 `papers/embedding/2404.05961_LLM2Vec.pdf`） |
+| `papers/<topic>/` | 论文 PDF 本地副本（**不入库**；PDF 用论文全名 + arXiv 编号，文件夹见 `papers/embedding/GTE/` 等） |
 
 工程实现与训练数据在同级 **modelforge**（`scripts/embedding/`、`datasets/embedding/`、`tasks/cloud_emb/`）。

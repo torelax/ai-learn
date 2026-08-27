@@ -1,8 +1,6 @@
 # Conan-embedding-v2 技术详解
 
 > 基于论文 [Conan-Embedding-v2: Training an LLM from Scratch for Text Embeddings](https://arxiv.org/abs/2509.12892)（Li et al., Tencent PCG；亦见 EMNLP 2025）。
-> local PDF: `docs/papers/embedding/Conan-embedding-v2_2509.12892.pdf`
-> 中译: `docs/papers/embedding/Conan-embedding-v2_2509.12892_zh.md`
 > v1 深读：[Conan-embedding详解.md](Conan-embedding详解.md)（[arXiv:2408.15710](https://arxiv.org/abs/2408.15710)）。
 > 本文把 **从零训练 1.4B 嵌入向 LLM、soft-masking、跨语检索数据集 CLR、动态难负例 DHNM、InfoNCE/CoSENT 公式与 MTEB SOTA 宣称（2025-05）** 写全。
 
@@ -362,7 +360,7 @@ Conan-embedding-v2 把嵌入模型重新定义为 **原生嵌入 LLM**，而非�
 3. **负例**：DHNM 让难负例随学生进化；
 4. **产品形态**：1.4B、3584-d、32K、MRL——在 2025-05 口径下冲击中英 MTEB SOTA，同时保持可部署延迟。
 
-同目录对照：《LLM2Vec详解.md》（低成本改现成 Decoder）、《gte-Qwen2详解.md》（宽而深的 Qwen2 教师）、《难负例挖掘工业实践.md》（DHNM 工业位置）、《E5详解.md》（对比学习公共祖先）。
+同目录对照：《LLM2Vec详解.md》（低成本改现成 Decoder）、《GTE系列详解.md》（宽而深的 Qwen2 教师）、《难负例挖掘工业实践.md》（DHNM 工业位置）、《E5详解.md》（对比学习公共祖先）。
 
 ---
 

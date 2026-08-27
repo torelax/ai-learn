@@ -1348,7 +1348,7 @@ Client → Gateway → [Embed query] → Vector DB (ANN ± BM25)
 
 **稠密文本 Embedding**
 
-- [E5详解](E5详解.md) · [GTE多阶段对比学习详解](GTE多阶段对比学习详解.md) · [gte-Qwen2详解](gte-Qwen2详解.md) · [Nomic-Embed详解](Nomic-Embed详解.md) · [LLM2Vec详解](LLM2Vec详解.md) · [Conan-embedding详解](Conan-embedding详解.md) · [Conan-embedding-v2详解](Conan-embedding-v2详解.md) · [QZhou-Embedding详解](QZhou-Embedding详解.md) · [Token-Prepending详解](Token-Prepending详解.md) · [Jasper-Token-Compression-600M详解](Jasper-Token-Compression-600M详解.md)
+- [E5详解](E5详解.md) · [GTE系列详解](GTE系列详解.md) · [Nomic-Embed详解](Nomic-Embed详解.md) · [LLM2Vec详解](LLM2Vec详解.md) · [Conan-embedding详解](Conan-embedding详解.md) · [Conan-embedding-v2详解](Conan-embedding-v2详解.md) · [QZhou-Embedding详解](QZhou-Embedding详解.md) · [Token-Prepending详解](Token-Prepending详解.md) · [Jasper-Token-Compression-600M详解](Jasper-Token-Compression-600M详解.md)
 
 **Jina 系列**
 

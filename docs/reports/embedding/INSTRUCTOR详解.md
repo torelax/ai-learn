@@ -301,7 +301,7 @@ INSTRUCTOR 的思路后来几乎被所有主流嵌入模型直接吸收：
 - 主文 §5.5 与 §7.1「指令 / 对称非对称」相关章节：见 [Embedding 调研报告](Embedding调研报告.md)。
 - 与 E5 的指令化血脉：见 [E5 详解](E5详解.md)。
 - LLM 骨干指令化实践：见 [LLM2Vec 详解](LLM2Vec详解.md)、[Conan-embedding-v2 详解](Conan-embedding-v2详解.md)、[QZhou-Embedding 详解](QZhou-Embedding详解.md)。
-- 前置：GTR + Sentence-T5 —— 见 [GTE 多阶段对比学习详解](GTE多阶段对比学习详解.md) 中的谱系讨论。
+- 前置：GTR + Sentence-T5 —— 见 [GTE系列详解](GTE系列详解.md) 中的谱系讨论。
 
 ---
 

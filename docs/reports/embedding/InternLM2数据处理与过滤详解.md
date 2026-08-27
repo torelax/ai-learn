@@ -4,11 +4,10 @@
 > authors: Zheng Cai, Maosong Cao, … （上海人工智能实验室 InternLM 团队，53 页技术报告）
 > code / project: [InternLM/InternLM](https://github.com/InternLM/InternLM) · 长文数据方法见 [Lv et al. 2024](https://arxiv.org/abs/2402.10171)
 > refs: [Gopher](https://arxiv.org/abs/2112.11446) · [C4](https://arxiv.org/abs/2104.08758) · [RefinedWeb](https://arxiv.org/abs/2306.01116)（三条经典网页清洗/规则过滤）
-> 数据部分中译: `docs/papers/embedding/InternLM2_2403.17297_zh.md`
 > backbone: LLaMA 式 Decoder（RMSNorm + SwiGLU + GQA），1.8B / 7B / 20B
 > date: 2024-03 ; modality: 文本 + 代码 + 长上下文 ; languages: 中英 + 代码
 
-> 本文只截取 InternLM2 技术报告与 **"预训练数据处理与过滤流水线"** 相关的部分——这是 Conan-embedding v1 预训练一节里"采用 Cai et al. (2024) 所述的标准数据过滤方法"的确切出处。报告其余（基础设施 InternEvo、COOL RLHF 对齐、30+ 基准评测）不在本文展开。GTE 侧（Conan 引用的另一半"多阶段训练"）见 [GTE多阶段对比学习详解.md](GTE多阶段对比学习详解.md)。
+> 本文只截取 InternLM2 技术报告与 **"预训练数据处理与过滤流水线"** 相关的部分——这是 Conan-embedding v1 预训练一节里"采用 Cai et al. (2024) 所述的标准数据过滤方法"的确切出处。报告其余（基础设施 InternEvo、COOL RLHF 对齐、30+ 基准评测）不在本文展开。GTE 侧（Conan 引用的另一半"多阶段训练"）见 [GTE系列详解.md](GTE系列详解.md)。
 
 ---
 
@@ -174,7 +173,7 @@ Conan 的做法是"**GTE 的课表 + InternLM2 的清洗 + bge 打分（丢 <0.4
 
 | 文档 | 关系 |
 | --- | --- |
-| [GTE多阶段对比学习详解.md](GTE多阶段对比学习详解.md) | Conan 预训练引用的另一半（训练课表；数据"不清洗"路线） |
+| [GTE系列详解.md](GTE系列详解.md) | Conan 预训练引用的另一半（训练课表；数据"不清洗"路线） |
 | [Conan-embedding详解.md](Conan-embedding详解.md) | 引用本文过滤流程；7.5 亿→4 亿对 + bge 打分 |
 | [E5详解.md](E5详解.md) | 弱监督对比预训练做数据过滤的前驱 |
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 数据清洗之后的负例工程 |

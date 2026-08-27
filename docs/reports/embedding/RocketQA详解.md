@@ -3,7 +3,6 @@
 > **paper**: [arXiv:2010.08191](https://arxiv.org/abs/2010.08191)（NAACL 2021；百度）  
 > **v2**: [arXiv:2110.07367](https://arxiv.org/abs/2110.07367)（RocketQAv2：双塔 + 重排联合训练）  
 > **code**: [PaddlePaddle/RocketQA](https://github.com/PaddlePaddle/RocketQA)  
-> **local PDF**: `docs/papers/embedding/RocketQA_2010.08191.pdf` · `docs/papers/embedding/RocketQAv2_2110.07367.pdf`  
 > **backbone**: 双塔 DE（ERNIE 2.0 base）+ 交叉编码器 CE（ERNIE 2.0 large）  
 > **date**: 2020–2021  
 > **modality**: 文本稠密检索（OpenQA / Passage Ranking）  

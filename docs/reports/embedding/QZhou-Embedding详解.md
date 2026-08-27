@@ -7,7 +7,6 @@
 > **date**: 2025-08（Kingsoft AI / 金山）  
 > **modality**: 文本  
 > **languages**: 中英为主（冲榜 MTEB eng + CMTEB cmn）  
-> **local PDF**: `docs/papers/embedding/QZhou-Embedding_2508.21632.pdf`  
 > 本文写全 **多任务框架、训练/评测数据集清单、LLM 合成、Data Grouping、两阶段训练与 MTEB/CMTEB 结果**。
 
 ---

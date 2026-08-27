@@ -7,7 +7,6 @@
 > **date**: 2024-04（arXiv）；作者 BehnamGhader et al., McGill / Mila / ServiceNow
 > **modality**: 文本
 > **languages**: 实验主英文；配方语言无关，换语需重跑 MNTP/SimCSE
-> **local PDF**: `docs/papers/embedding/LLM2Vec_2404.05961.pdf`
 > 本文写全 **双向注意力、MNTP、无监督 SimCSE、监督对比微调**、Echo 对照、词级探针对齐（附录 D.1.2 / D.1.3）与表示分析。
 
 ---
@@ -341,7 +340,7 @@ LLM2Vec 用三步把「秘密编码器」变为可部署现实：
 
 再加可选公开数据监督，即可在不碰专有合成数据的约束下冲击 MTEB 前列。对工程：优先在现有 Instruct LLM 上跑通 Bi+MNTP+mean-pool，再决定是否加 SimCSE/监督；词级应用勿漏 D.1.3 对齐。对研究：Mistral 的「天生双向耐受」仍是开放谜题。
 
-同目录对照：《gte-Qwen2详解.md》（大数据多阶段 LLM 嵌入）、《Conan-embedding-v2详解.md》（soft-mask 与从零训练）、《E5详解.md》（对比学习公共底座）、《Token-Prepending详解.md》（免训练因果补丁）。
+同目录对照：《GTE系列详解.md》（大数据多阶段 LLM 嵌入）、《Conan-embedding-v2详解.md》（soft-mask 与从零训练）、《E5详解.md》（对比学习公共底座）、《Token-Prepending详解.md》（免训练因果补丁）。
 
 ---
 

@@ -2,8 +2,6 @@
 
 > paper: [Conan-embedding: General Text Embedding with More and Better Negative Samples](https://arxiv.org/abs/2408.15710)（arXiv:2408.15710）  
 > authors: Shiyu Li（北大 / 腾讯 PCG 实习）, Yang Tang, Shi-Zhe Chen, Xi Chen（腾讯 PCG）  
-> local PDF: `docs/papers/embedding/Conan-embedding-v1_2408.15710.pdf`
-> 中译: `docs/papers/embedding/Conan-embedding-v1_2408.15710_zh.md`  
 > HF: [Conan-embedding-v1](https://huggingface.co/)（文中声明已上传）  
 > backbone: BERT-large + 线性扩维 1024→1792（约 **326M**）  
 > date: 2024-08  
@@ -222,7 +220,7 @@ Retrieval / Rerank 提升最明显——与「更多更难负例」叙事一致�
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | Dynamic 替换在工业菜单中的位置 |
 | [NV-Retriever详解.md](NV-Retriever详解.md) | 假负过滤；可与 DHNM 叠加 |
 | [ANCE详解.md](ANCE详解.md) | 异步全库难负例另一极 |
-| [E5详解.md](E5详解.md) / [gte-Qwen2详解.md](gte-Qwen2详解.md) | 两阶段对比公共祖先 |
+| [E5详解.md](E5详解.md) / [GTE系列详解.md](GTE系列详解.md) | 两阶段对比公共祖先 |
 | [LLM-DA文本行人检索数据增强详解.md](LLM-DA文本行人检索数据增强详解.md) | 另一路「LLM 数据」 |
 
 ---

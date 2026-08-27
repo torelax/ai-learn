@@ -21,20 +21,25 @@
 研究某篇论文时，**必须**在本地保留 PDF：
 
 ```
-docs/papers/<topic>/<短名>_<arxiv_id或venue>.pdf
+docs/papers/<topic>/<Name>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}
+docs/papers/<topic>/<Series>/<Paper>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}
 ```
+
+- **文件夹**以方法名（若很知名）或文章名命名，**不要带 arXiv 编号**。同一方法/系列的多篇论文放在同一父文件夹下，每篇自含 PDF、中译、图片集。
+- **PDF 文件名**用论文英文全名，有 arXiv 则在后缀加编号（如 `_2308.03281.pdf`）；**禁止**命名为 `paper.pdf`。无 arXiv 时只用全名。
 
 示例：
 
-- `docs/papers/embedding/LLM2Vec_2404.05961.pdf`
-- `docs/papers/embedding/Token-Prepending_ACL2025.pdf`
+- `docs/papers/embedding/LLM2Vec/LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders_2404.05961.pdf`
+- `docs/papers/embedding/GTE/GTE/Towards General Text Embeddings with Multi-stage Contrastive Learning_2308.03281.pdf`
+- `docs/papers/embedding/GTE/mGTE/mGTE: Generalized Long-Context Text Representation and Reranking Models for Multilingual Text Retrieval_2407.19669.pdf`
 
 规则：
 
 - 目录按报告专题分；不存在则创建
 - **整树 `docs/papers/` 已在 `.gitignore`，禁止 `git add` PDF**
-- 报告 MD 文首元信息**不要**写 `local PDF` / 本地路径；用 arXiv / ACL / 官方链接即可（存量报告不必清理）
-- 配图优先从 **arXiv HTML / ar5iv** 下载原图到 `docs/papers/<topic>/<短名>_<id>_figs/`；无 HTML 原图时再 PDF 裁切兜底（见 `docs/papers/embedding/_fetch_html_figures.py`）
+- 报告 MD **不要**写 `local PDF`、本地 PDF 路径、中译落盘路径；用 arXiv / ACL / 官方链接即可
+- 配图优先从 **arXiv HTML / ar5iv** 下载原图到对应 `figs/`；无 HTML 原图时再 PDF 裁切兜底（见 `docs/papers/embedding/_fetch_html_figures.py`）
 
 ---
 
