@@ -362,9 +362,9 @@ Natural Questions / TriviaQA 上同样与 RocketQA 打平，且**训练成本约
 ## 与本仓库既有报告的挂接
 
 - 训练课表全景：见主文《[Embedding 调研报告](Embedding调研报告.md)》第 5 章「训练与数据工程」与第 3 章「三种表示范式」。
-- BGE C-Pack / BGE-M3 是 Condenser + Contriever + SimCSE 的合成实现：见 [BGE-M3 三功能统一详解报告](BGE-M3三功能统一详解报告.md)。
-- E5 是 CCPairs（Contriever 风格弱监督）+ NLI + MS-MARCO（SimCSE 风格监督）：见 [E5 详解](E5详解.md)。
-- LLM 骨干上「Bi + MNTP + SimCSE」直接对应本三部曲的第 1、3 步：见 [LLM2Vec 详解](LLM2Vec详解.md)。
+- BGE C-Pack / BGE-M3 是 Condenser + Contriever + SimCSE 的合成实现：见 [BGE-M3 三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)。
+- E5 是 CCPairs（Contriever 风格弱监督）+ NLI + MS-MARCO（SimCSE 风格监督）：见 [E5 详解](E5/E5详解.md)。
+- LLM 骨干上「Bi + MNTP + SimCSE」直接对应本三部曲的第 1、3 步：见 [LLM2Vec 详解](LLM2Vec/LLM2Vec详解.md)。
 - 难负例的工业细节（假负、刷新、回归）：见 [难负例挖掘工业实践](难负例挖掘工业实践.md)。
 
 ---

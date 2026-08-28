@@ -1,6 +1,6 @@
 # LLM-Embedding 冲榜路线：E5-Mistral / NV-Embed-v2 / GritLM / SFR-2 / Arctic-Embed v2 / Stella
 
-> **paper（按讨论顺序）**：[E5-Mistral (Microsoft 2023)](https://arxiv.org/abs/2401.00368) · [GritLM (Contextual AI + MS 2024)](https://arxiv.org/abs/2402.09906) · [NV-Embed / NV-Embed-v2 (NVIDIA 2024, ICLR 2025)](https://arxiv.org/abs/2405.17428) · [SFR-Embedding blog (Salesforce 2024)](https://blog.salesforceairesearch.com/sfr-embedded-mistral/) · [SFR-Embedding-2R blog (2024)](https://huggingface.co/Salesforce/SFR-Embedding-2_R) · [Arctic-Embed v1 (Snowflake 2024)](https://arxiv.org/abs/2405.05374) · [Arctic-Embed 2.0 (Snowflake 2024)](https://arxiv.org/abs/2412.04506) · Stella / Jasper（同队；见 [Jasper 详解](Jasper-Token-Compression-600M详解.md)）
+> **paper（按讨论顺序）**：[E5-Mistral (Microsoft 2023)](https://arxiv.org/abs/2401.00368) · [GritLM (Contextual AI + MS 2024)](https://arxiv.org/abs/2402.09906) · [NV-Embed / NV-Embed-v2 (NVIDIA 2024, ICLR 2025)](https://arxiv.org/abs/2405.17428) · [SFR-Embedding blog (Salesforce 2024)](https://blog.salesforceairesearch.com/sfr-embedded-mistral/) · [SFR-Embedding-2R blog (2024)](https://huggingface.co/Salesforce/SFR-Embedding-2_R) · [Arctic-Embed v1 (Snowflake 2024)](https://arxiv.org/abs/2405.05374) · [Arctic-Embed 2.0 (Snowflake 2024)](https://arxiv.org/abs/2412.04506) · Stella / Jasper（同队；见 [Jasper 详解](Jasper/Jasper-Token-Compression-600M详解.md)）
 > **code / weights**：[intfloat/e5-mistral-7b-instruct](https://huggingface.co/intfloat/e5-mistral-7b-instruct) · [ContextualAI/gritlm](https://github.com/ContextualAI/gritlm) · [nvidia/NV-Embed-v2](https://huggingface.co/nvidia/NV-Embed-v2) · [Salesforce/SFR-Embedding-2_R](https://huggingface.co/Salesforce/SFR-Embedding-2_R) · [Snowflake/snowflake-arctic-embed-l-v2.0](https://huggingface.co/Snowflake/snowflake-arctic-embed-l-v2.0) · [dunzhang/stella_en_1.5B_v5](https://huggingface.co/dunzhang/stella_en_1.5B_v5)
 > **refs**：[E5 (Wang 2022)](https://arxiv.org/abs/2212.03533) · [INSTRUCTOR (Su 2022)](https://arxiv.org/abs/2212.09741) · [LLM2Vec (BehnamGhader 2024)](https://arxiv.org/abs/2404.05961) · [Perceiver (Jaegle 2021)](https://arxiv.org/abs/2103.03206) · [NV-Retriever (Moreira 2024)](https://arxiv.org/abs/2407.15831) · [Matryoshka Representation Learning (Kusupati 2022)](https://arxiv.org/abs/2205.13147)
 > **backbone**：几乎都是 **Mistral-7B / Mixtral 8×7B / gemma-2 / Qwen2 / XLM-R**（LLM 骨干为主，Arctic 家族保留 BERT-like 小尺寸）
@@ -260,7 +260,7 @@ $$
 GritLM 是 2024 年后**LLM-as-embedder 一体化**思路的起点：
 
 - **NV-Embed** 相对 GritLM 的定位是「更简单：直接去 causal mask，不用双 loss」。
-- **QZhou-Embedding**（本仓库有独立 [详解](QZhou-Embedding详解.md)）借鉴 Gen + Rep 思路做多任务混合。
+- **QZhou-Embedding**（本仓库有独立 [详解](QZhou-Embedding/QZhou-Embedding详解.md)）借鉴 Gen + Rep 思路做多任务混合。
 - **Qwen3-Embedding**（2025）内部也做了类似联合训练（本仓库 Batch 4 会补短深读）。
 
 ---
@@ -500,7 +500,7 @@ Stella-1.5B-v5（MTEB 71.19）与 Jasper-600M 出自同一队伍（dunzhang）�
 - **学生**：Qwen2-1.5B 或 xLSTM 变体，加入 **Token Compression**（把长序列压成固定几十个 token）。
 - **蒸馏信号**：logit KL + Vec 对齐 + Margin MSE，三头合训。
 
-Stella / Jasper 的详细机制见本仓库 [Jasper-Token-Compression-600M 详解](Jasper-Token-Compression-600M详解.md)。这里只强调它们相对 NV-Embed 的定位：**用 1/5 参数量追到 -1 分之内**，是「LLM-Embedding 落地小卡机」的第二条实证。
+Stella / Jasper 的详细机制见本仓库 [Jasper-Token-Compression-600M 详解](Jasper/Jasper-Token-Compression-600M详解.md)。这里只强调它们相对 NV-Embed 的定位：**用 1/5 参数量追到 -1 分之内**，是「LLM-Embedding 落地小卡机」的第二条实证。
 
 ---
 
@@ -574,9 +574,9 @@ Stella / Jasper 的详细机制见本仓库 [Jasper-Token-Compression-600M 详�
 
 ## 与本仓库既有报告的挂接
 
-- 前置基础：[E5 详解](E5详解.md)（BERT 骨干版）· [LLM2Vec 详解](LLM2Vec详解.md)（Bi + MNTP + SimCSE 三步）· [INSTRUCTOR 详解](INSTRUCTOR详解.md)（指令化嵌入开山）· [对比学习与 InfoNCE 精讲](对比学习与InfoNCE精讲.md)（损失演化）
-- 数据 & 负例：[NV-Retriever 详解](NV-Retriever详解.md) · [难负例挖掘工业实践](难负例挖掘工业实践.md) · [InternLM2 数据处理与过滤详解](InternLM2数据处理与过滤详解.md)
-- 蒸馏与小模型：[Jasper-Token-Compression-600M 详解](Jasper-Token-Compression-600M详解.md)（Stella 系）· [Embedding 蒸馏技术详解](Embedding蒸馏技术详解.md)
+- 前置基础：[E5 详解](E5/E5详解.md)（BERT 骨干版）· [LLM2Vec 详解](LLM2Vec/LLM2Vec详解.md)（Bi + MNTP + SimCSE 三步）· [INSTRUCTOR 详解](INSTRUCTOR/INSTRUCTOR详解.md)（指令化嵌入开山）· [对比学习与 InfoNCE 精讲](对比学习与InfoNCE精讲.md)（损失演化）
+- 数据 & 负例：[NV-Retriever 详解](NV-Retriever/NV-Retriever详解.md) · [难负例挖掘工业实践](难负例挖掘工业实践.md) · [InternLM2 数据处理与过滤详解](InternLM2/InternLM2数据处理与过滤详解.md)
+- 蒸馏与小模型：[Jasper-Token-Compression-600M 详解](Jasper/Jasper-Token-Compression-600M详解.md)（Stella 系）· [Embedding 蒸馏技术详解](Embedding蒸馏技术详解.md)
 - 后续（Batch 3 / Batch 4 会补）：BGE C-Pack、BGE-EN-ICL、BGE-multilingual-gemma2、Qwen3-Embedding、Seed1.5-Embedding
 - 主文对应：[Embedding 调研报告](Embedding调研报告.md) §9.3「Decoder LLM 作 Bi-Encoder」与 §11「Embedding 蒸馏与压缩」
 

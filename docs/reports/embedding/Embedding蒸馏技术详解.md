@@ -220,7 +220,7 @@ Qwen3-Emb **8B/4B/0.6B** 主要是 **合成数据 + 对比课表 + SLERP 合并*
 
 ## 6. 自蒸馏与集成教师（BGE-M3）
 
-外部 Teacher 成本过高时，用 **模型自身多路输出** 作教师（详见《[BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)》§8）。
+外部 Teacher 成本过高时，用 **模型自身多路输出** 作教师（详见《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》§8）。
 
 ### 6.1 机制
 
@@ -422,7 +422,7 @@ Stage 4 (可选): MRL 截断维 / INT8 量化 — 部署压缩（非 KD）
 3. Karpukhin et al. (2020). DPR. *EMNLP*. [arXiv:2004.04906](https://arxiv.org/abs/2004.04906)  
 4. Khattab & Zaharia (2020). ColBERT. *SIGIR*. [arXiv:2004.12832](https://arxiv.org/abs/2004.12832)  
 5. Santhanam et al. (2022). ColBERTv2. *NAACL*. [arXiv:2112.01488](https://arxiv.org/abs/2112.01488)  
-6. Xiao et al. (2024). BGE-M3. [arXiv:2402.03216](https://arxiv.org/abs/2402.03216) — Self-KD 见本仓库 [BGE-M3 专题](BGE-M3三功能统一详解报告.md) §8  
+6. Xiao et al. (2024). BGE-M3. [arXiv:2402.03216](https://arxiv.org/abs/2402.03216) — Self-KD 见本仓库 [BGE-M3 专题](BGE/M3/BGE-M3三功能统一详解报告.md) §8  
 7. Lee et al. (2024). NV-Embed. [arXiv:2405.17400](https://arxiv.org/abs/2405.17400)  
 8. Zhang et al. (2024). NV-Retriever: Hard-negative Mining. [arXiv:2407.15831](https://arxiv.org/abs/2407.15831)  
 9. Zhang et al. (2024). Jasper & Stella: Distillation of SOTA Embedding Models. [arXiv:2412.19048](https://arxiv.org/abs/2412.19048)  
@@ -440,7 +440,7 @@ Stage 4 (可选): MRL 截断维 / INT8 量化 — 部署压缩（非 KD）
 |------|------|
 | [主文 §11](Embedding调研报告.md) | 蒸馏版图导读 |
 | [知识蒸馏总报告 §7](../distillation/知识蒸馏技术深度调研报告.md) | 索引与案例表 |
-| [BGE-M3 专题 §8](BGE-M3三功能统一详解报告.md) | Self-KD 公式 |
+| [BGE-M3 专题 §8](BGE/M3/BGE-M3三功能统一详解报告.md) | Self-KD 公式 |
 | [难负例专题](难负例挖掘工业实践.md) | CE→Bi 候选与刷新 |
 | [资料清单_论文与博客.md](资料清单_论文与博客.md) | 延伸阅读 |
 

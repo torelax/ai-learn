@@ -519,13 +519,13 @@ ViDoRe v1（[Faysse 2024](https://arxiv.org/abs/2407.01449)）2024 年发布，�
 
 ## 与本仓库既有报告的挂接
 
-- **Late Chunking** ↔ [Jina-embeddings-v3 详解](Jina-embeddings-v3详解.md) · [BGE-M3 详解](BGE-M3三功能统一详解报告.md)（都是长上下文 embedder）
+- **Late Chunking** ↔ [Jina-embeddings-v3 详解](Jina/v3/Jina-embeddings-v3详解.md) · [BGE-M3 详解](BGE/M3/BGE-M3三功能统一详解报告.md)（都是长上下文 embedder）
 - **Vec2Vec** ↔ [对比学习与 InfoNCE 精讲](对比学习与InfoNCE精讲.md)（GAN + cycle consistency 是对比学习的对偶思路）
-- **ModernBERT** ↔ [BGE-CPack 详解](BGE-CPack详解.md) · [E5 详解](E5详解.md)（下一代 BERT 系嵌入骨干）
-- **DINOv2 / DINOv3** ↔ [CLIP 详解](CLIP详解.md) · [SigLIP 与 SigLIP 2 详解](SigLIP与SigLIP2详解.md)（SigLIP 2 用 DINO-style 自蒸馏）· [0.6B 图搜图文搜图自训学习行动路线](0.6B图搜图文搜图自训学习行动路线.md)
-- **Qwen3-Embedding** ↔ [GTE 系列详解](GTE系列详解.md)（gte-Qwen2 前身）· [LLM-Embedding 冲榜路线](LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md)
+- **ModernBERT** ↔ [BGE-CPack 详解](BGE/C-Pack/BGE-CPack详解.md) · [E5 详解](E5/E5详解.md)（下一代 BERT 系嵌入骨干）
+- **DINOv2 / DINOv3** ↔ [CLIP 详解](CLIP/CLIP详解.md) · [SigLIP 与 SigLIP 2 详解](SigLIP/SigLIP与SigLIP2详解.md)（SigLIP 2 用 DINO-style 自蒸馏）· [0.6B 图搜图文搜图自训学习行动路线](0.6B图搜图文搜图自训学习行动路线.md)
+- **Qwen3-Embedding** ↔ [GTE 系列详解](GTE/GTE系列详解.md)（gte-Qwen2 前身）· [LLM-Embedding 冲榜路线](LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md)
 - **Seed1.5-Embedding** ↔ [LLM-Embedding 冲榜路线](LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md)
-- **ViDoRe v2** ↔ [ColPali 详解](ColPali详解.md) · [ColQwen 系列详解](ColQwen系列详解.md) · [MLLM 通用多模态嵌入](MLLM通用多模态嵌入_GME-VLM2Vec-BGEVL.md)
+- **ViDoRe v2** ↔ [ColPali 详解](ColPali/ColPali详解.md) · [ColQwen 系列详解](ColQwen/ColQwen系列详解.md) · [MLLM 通用多模态嵌入](MLLM通用多模态嵌入_GME-VLM2Vec-BGEVL.md)
 - 主文：[Embedding 调研报告](Embedding调研报告.md) §12「向量数据库与部署」、§13「前沿与开放问题」
 
 ---

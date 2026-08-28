@@ -8,37 +8,41 @@
 
 | 路径 | 职责 |
 |------|------|
-| `docs/reports/<topic>/` | 研究报告 Markdown（**权威正文**，入库） |
-| `docs/papers/<topic>/` | 论文 PDF / 中译 / 配图本地副本（入库） |
+| `docs/reports/<topic>/` | 研究报告 Markdown（**权威正文**）与论文 PDF / 中译 / 配图，同一专题目录入库 |
 | `embedding/`、`torch/`、`refs/` | 练习笔记 / 代码参考 |
 
-专题目录与报告对齐：`embedding`、`lora`、`distillation`、`Qwen` 等。
+专题：`embedding`、`lora`、`distillation`、`Qwen` 等。
 
 ---
 
-## 2. 论文 PDF 副本
+## 2. 专题目录布局
+
+每个专题一份目录，深读 MD 与论文副本放在一起：
+
+```
+docs/reports/<topic>/
+  README.md / 总览 / 合写 / 索引                # 跨多篇的总览仍在专题根
+  figures/<短名>/                               # 报告嵌入图（Notion 上传用）
+  <Name>/{详解.md, <Full Title>_<arxiv>.pdf, zh.md, figs/}
+  <Series>/{系列详解.md, <Paper>/{PDF, zh.md, figs/}}
+```
 
 研究某篇论文时，**必须**在本地保留 PDF：
-
-```
-docs/papers/<topic>/<Name>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}
-docs/papers/<topic>/<Series>/<Paper>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}
-```
 
 - **文件夹**以方法名（若很知名）或文章名命名，**不要带 arXiv 编号**。同一方法/系列的多篇论文放在同一父文件夹下，每篇自含 PDF、中译、图片集。
 - **PDF 文件名**用论文英文全名，有 arXiv 则在后缀加编号（如 `_2308.03281.pdf`）；**禁止**命名为 `paper.pdf`。无 arXiv 时只用全名。
 
 示例：
 
-- `docs/papers/embedding/LLM2Vec/LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders_2404.05961.pdf`
-- `docs/papers/embedding/GTE/GTE/Towards General Text Embeddings with Multi-stage Contrastive Learning_2308.03281.pdf`
-- `docs/papers/embedding/GTE/mGTE/mGTE: Generalized Long-Context Text Representation and Reranking Models for Multilingual Text Retrieval_2407.19669.pdf`
+- `docs/reports/embedding/LLM2Vec/LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders_2404.05961.pdf`
+- `docs/reports/embedding/GTE/GTE/Towards General Text Embeddings with Multi-stage Contrastive Learning_2308.03281.pdf`
+- `docs/reports/embedding/GTE/mGTE/mGTE: Generalized Long-Context Text Representation and Reranking Models for Multilingual Text Retrieval_2407.19669.pdf`
 
 规则：
 
-- 目录按报告专题分；不存在则创建
+- 目录按专题分；不存在则创建
 - 报告 MD **不要**写 `local PDF`、本地 PDF 路径、中译落盘路径；用 arXiv / ACL / 官方链接即可
-- 配图优先从 **arXiv HTML / ar5iv** 下载原图到对应 `figs/`；无 HTML 原图时再 PDF 裁切兜底（见 `docs/papers/embedding/_fetch_html_figures.py`）
+- 配图优先从 **arXiv HTML / ar5iv** 下载原图到对应 `figs/`；无 HTML 原图时再 PDF 裁切兜底（见 `docs/reports/embedding/_fetch_html_figures.py`）
 
 ---
 
@@ -80,7 +84,7 @@ docs/papers/<topic>/<Series>/<Paper>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}
 docs/reports/<topic>/figures/<短名>/fig01.png
 ```
 
-从 `docs/papers/..._figs/` 拷贝关键图到上述目录后嵌入报告；同步 Notion 时**上传同一批图**，保持 MD ↔ Notion 图文一致。
+从该篇 `figs/` 拷贝关键图到上述目录后嵌入报告；同步 Notion 时**上传同一批图**，保持 MD ↔ Notion 图文一致。
 
 ### 4.2 文首 Callout（精简）
 
@@ -127,7 +131,7 @@ docs/reports/<topic>/figures/<短名>/fig01.png
 
 | 操作 | 默认 |
 |------|------|
-| 读报告 / 写报告 MD / 下载 PDF 到 `docs/papers/` | ✅ |
+| 读报告 / 写报告 MD / 下载 PDF 到 `docs/reports/<topic>/` | ✅ |
 | 导入 / 更新 Notion（按 §3） | ✅ |
 | 询问非 Embedding 的 Notion 落点 | ✅（必须先问） |
 | 删除 Notion 页面或内容 | ❌ 除非用户明确同意 |

@@ -7,7 +7,7 @@ alwaysApply: true
 
 ## PDF（必做）
 
-- 路径：`docs/papers/<topic>/<Name>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}`；系列则为 `docs/papers/<topic>/<Series>/<Paper>/`（topic 与 `docs/reports/<topic>/` 对齐）。文件夹用方法名或文章名，**不要带 arXiv 编号**
+- 路径：`docs/reports/<topic>/<Name>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}`；系列则为 `docs/reports/<topic>/<Series>/<Paper>/`。文件夹用方法名或文章名，**不要带 arXiv 编号**
 - PDF **禁止** `paper.pdf`：文件名用论文英文全名，有 arXiv 则后缀 `_YYMM.NNNNN.pdf`
 - 研究时主动下载/保存 PDF；目录不存在则创建
 - 报告元信息**不要**写 `local PDF`、本地 PDF 路径或中译落盘路径
@@ -15,7 +15,7 @@ alwaysApply: true
 
 ## 报告 MD = 权威源
 
-- 深读写在 `docs/reports/<topic>/`
+- 深读写在 `docs/reports/<topic>/`；单篇/系列精读与该篇 PDF / 中译 / `figs/` 放在同一方法文件夹，总览与跨多篇合写留在专题根目录
 - 算法类文首用精简元信息（对应 Notion callout）：paper URL、project/code、关键 refs、backbone、date、modality、languages（不含 local PDF / 本地路径）
 - Embedding 正文必含：训练数据、评测 benchmark、对比方法、关键数据集简介
 - **之后**新建/大改：章节标题**不加** `1.` / `6.` 等数字序号（语义标题即可）；存量带序号页不必为去序号而整页重排

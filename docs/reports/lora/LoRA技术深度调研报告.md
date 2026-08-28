@@ -4,7 +4,7 @@
 > **版本**: v1.0  
 > **日期**: 2026-07-29  
 > **范围**: 参数高效微调（PEFT），以 LoRA 为主线，覆盖 Adapter→Prefix/Prompt→LoRA→AdaLoRA→QLoRA→VeRA→rsLoRA→LoRA+→DoRA 等；量化、推理 serving、与本仓库训练实践  
-> **关联专题**: [VeRA详解.md](VeRA详解.md) · [LoRA+详解.md](LoRA+详解.md) · [资料清单_论文与博客.md](资料清单_论文与博客.md)
+> **关联专题**: [VeRA详解.md](VeRA/VeRA详解.md) · [LoRA+详解.md](LoRA+/LoRA+详解.md) · [资料清单_论文与博客.md](资料清单_论文与博客.md)
 
 ---
 
@@ -420,7 +420,7 @@ $$
 ### 8.3 LoRA+
 
 - $\eta_B = \lambda \eta_A$，**λ≈16**
-- 零额外参数；详见 [LoRA+详解.md](LoRA+详解.md)
+- 零额外参数；详见 [LoRA+详解.md](LoRA+/LoRA+详解.md)
 
 ### 8.4 AdaLoRA：参数预算分配
 
@@ -820,5 +820,5 @@ VeRA 单层约 $2d$，共享 $A_0,B_0$ 不计入每租户存储。
 
 ---
 
-> **专题深读**: [VeRA详解.md](VeRA详解.md) · [LoRA+详解.md](LoRA+详解.md)  
+> **专题深读**: [VeRA详解.md](VeRA/VeRA详解.md) · [LoRA+详解.md](LoRA+/LoRA+详解.md)  
 > **资料索引**: [资料清单_论文与博客.md](资料清单_论文与博客.md)

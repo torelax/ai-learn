@@ -47,7 +47,7 @@
 ### 1.2 2026 年关键结论
 
 1. **LLM 作 Embedding 骨干已成主流**：Qwen3-Embedding-8B（MTEB 70.6）、NV-Embed-v2（72.31）超越多数 API 模型
-2. **生产 RAG 不只看 MTEB**：BGE-M3 以 568M 参数 + 三功能统一（Dense/Sparse/ColBERT）成为工程首选（机制深读见专题报告《[BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)》）
+2. **生产 RAG 不只看 MTEB**：BGE-M3 以 568M 参数 + 三功能统一（Dense/Sparse/ColBERT）成为工程首选（机制深读见专题报告《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》）
 3. **Hybrid 检索是标配**：Dense + BM25/Sparse + Reranker 三段式 Pipeline
 4. **MRL 维度自适应**：OpenAI v3、Nomic、Jasper 均支持推理时截断维度
 5. **多模态 Embedding 爆发**：ColPali 绕过 OCR，Cohere Embed v4 原生图文统一
@@ -269,7 +269,7 @@ BGE（BAAI General Embedding / FlagEmbedding）是**系列化**产品：中英�
 | ------------------------------------------ | ------- | -------------------------- | ------------- | ----------------- | ------------ | ------------ | -------------------- | ----------------------------------------------------------------------------------------------------- |
 | **bge-small/base/large-zh-v1.5**     | 2023    | BERT/RoBERTa 中文          | 文本-中       | 24M / 102M / 326M | 512/768/1024 | 512          | Bi                   | 中文检索工程默认档之一                                                                                |
 | **bge-small/base/large-en-v1.5**     | 2023    | BERT 英                    | 文本-英       | 33M / 109M / 335M | 384/768/1024 | 512          | Bi                   | 相似度分布校准；HF 高下载                                                                             |
-| **bge-m3**                           | 2024.01 | XLM-R 扩展                 | 文本·100+ 语 | **568M**    | 1024         | **8K** | Dense+Sparse+ColBERT | ★ Multi-Function / Lingual / Granularity；详见《[BGE-M3三功能统一详解](BGE-M3三功能统一详解报告.md)》 |
+| **bge-m3**                           | 2024.01 | XLM-R 扩展                 | 文本·100+ 语 | **568M**    | 1024         | **8K** | Dense+Sparse+ColBERT | ★ Multi-Function / Lingual / Granularity；详见《[BGE-M3三功能统一详解](BGE/M3/BGE-M3三功能统一详解报告.md)》 |
 | **bge-m3-retromae / unsupervised**   | 2024    | 同系中间 ckpt              | 文本          | —                | —           | 8K           | 预训练/对比中间态    | 复现与二阶段训练用                                                                                    |
 | **bge-multilingual-gemma2**          | 2024.06 | Gemma-2-9B                 | 文本·多语    | ~9B               | 3584         | 4K+          | Bi（LLM）            | 大参数多语开源档                                                                                      |
 | **bge-en-icl**                       | 2024    | LLM + few-shot 示例        | 文本-英       | LLM 级            | 高维         | 长           | Bi + ICL             | 提示中塞示例提升检索                                                                                  |
@@ -280,7 +280,7 @@ BGE（BAAI General Embedding / FlagEmbedding）是**系列化**产品：中英�
 
 > **选型提示**：短中文句对优先 `bge-*-zh-v1.5`；多语长文 + Hybrid → `bge-m3`；要 ICL/指令 → `bge-en-icl` / LLM 档；图文 → `BGE-VL`，不要用纯文本 M3 硬撑跨模态。
 >
-> **专题深读**：若只熟悉 BERT / 稠密句向量、尚未建立 Sparse 直觉，请先读仓库专题《[BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)》（含 Sparse 从零讲解、三 Head 公式、自知识蒸馏与 Hybrid 工程用法）。
+> **专题深读**：若只熟悉 BERT / 稠密句向量、尚未建立 Sparse 直觉，请先读仓库专题《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》（含 Sparse 从零讲解、三 Head 公式、自知识蒸馏与 Hybrid 工程用法）。
 
 #### 2.1.7 Jina Embeddings 迭代链（v2 → v5，含 CLIP / Omni）
 
@@ -533,7 +533,7 @@ $$
 s_{\text{lex}}(q,d)=\sum_{t\in V} w_t(q)\,w_t(d).
 $$
 
-可进倒排，可解释（看哪些词项权重大）。BGE-M3 Sparse 同属此路，但与 Dense/ColBERT 头共享 Encoder——细节见《[BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)》§3–§7。
+可进倒排，可解释（看哪些词项权重大）。BGE-M3 Sparse 同属此路，但与 Dense/ColBERT 头共享 Encoder——细节见《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》§3–§7。
 
 **不是**「另一种 1024 维 Dense」。**错误用法**：把 $|V|$ 维稀疏向量丢进 FAISS 做 L2。
 
@@ -960,7 +960,7 @@ $$
 
 权重必须在**自有验证集**上网格搜索或学习排序；论文示例权重不可直接抄。Lexical 与 Dense 分数需各自归一化或校准后再加。
 
-**工程路径**（BGE-M3 常见）：Dense ∪ Sparse 并集召回 → RRF 或加权 → 可选 ColBERT 头 / Cross-Encoder 精排。细节见《[BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)》§10。
+**工程路径**（BGE-M3 常见）：Dense ∪ Sparse 并集召回 → RRF 或加权 → 可选 ColBERT 头 / Cross-Encoder 精排。细节见《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》§10。
 
 #### 8.2.3 何时 Hybrid 仍不够
 
@@ -1263,7 +1263,7 @@ Client → Gateway → [Embed query] → Vector DB (ANN ± BM25)
 
 8. Gao et al. (2021). SimCSE: Simple Contrastive Learning of Sentence Embeddings. *EMNLP*.
 9. Kusupati et al. (2022). Matryoshka Representation Learning. *NeurIPS*.
-10. Xiao / Chen et al. (2024). M3-Embedding (BGE-M3). *arXiv:2402.03216*.（本仓库专题解读：《[BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)》）
+10. Xiao / Chen et al. (2024). M3-Embedding (BGE-M3). *arXiv:2402.03216*.（本仓库专题解读：《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》）
 11. Lee et al. (2024). NV-Embed: Improved Techniques for Training LLMs as Generalist Embedding Models. *arXiv:2405.17400*.
 12. Zhang et al. (2024). NV-Retriever: Hard-negative Mining. *arXiv:2407.15831*.
 13. Conan-Embedding (2024). Dynamic Hard Negative Mining. *arXiv:2408.15710*.
@@ -1313,19 +1313,19 @@ Client → Gateway → [Embed query] → Vector DB (ANN ± BM25)
 
 **BGE 全家桶**（RetroMAE → C-Pack → M3 → EN-ICL → gemma2 → Reranker）
 
-- [BGE-CPack详解](BGE-CPack详解.md)：C-Pack / BGE 全家桶起点，C-MTEB + C-MTP + 三阶段训练
-- [BGE-M3三功能统一详解报告](BGE-M3三功能统一详解报告.md)：Dense + Sparse + Multi-vec 三头联合 + Self-KD
-- [BGE-EN-ICL详解](BGE-EN-ICL详解.md)：Mistral-7B + causal + ICL few-shot 训练；MTEB 71.24
-- [BGE-multilingual-gemma2详解](BGE-multilingual-gemma2详解.md)：Gemma-2-9B 骨干；MIRACL 74.1 SOTA
-- [BGE-Reranker详解](BGE-Reranker详解.md)：v2-m3 / v2-gemma / v2.5-gemma2-lightweight（深度+宽度双压缩）
+- [BGE-CPack详解](BGE/C-Pack/BGE-CPack详解.md)：C-Pack / BGE 全家桶起点，C-MTEB + C-MTP + 三阶段训练
+- [BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)：Dense + Sparse + Multi-vec 三头联合 + Self-KD
+- [BGE-EN-ICL详解](BGE/EN-ICL/BGE-EN-ICL详解.md)：Mistral-7B + causal + ICL few-shot 训练；MTEB 71.24
+- [BGE-multilingual-gemma2详解](BGE/BGE-multilingual-gemma2详解.md)：Gemma-2-9B 骨干；MIRACL 74.1 SOTA
+- [BGE-Reranker详解](BGE/BGE-Reranker详解.md)：v2-m3 / v2-gemma / v2.5-gemma2-lightweight（深度+宽度双压缩）
 
 **基石短深读**
 
 - [无监督对比检索三部曲](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md)：SimCSE / Contriever / Condenser + coCondenser
-- [RetroMAE与DupMAE详解](RetroMAE与DupMAE详解.md)：非对称 MAE + BoW 头
-- [INSTRUCTOR详解](INSTRUCTOR详解.md)：指令化嵌入开山
-- [CLIP详解](CLIP详解.md)：图文双塔基石，对称 InfoNCE + WIT 4 亿对
-- [SigLIP与SigLIP2详解](SigLIP与SigLIP2详解.md)：sigmoid loss + LocCa + SILC/TIPS + NaFlex
+- [RetroMAE与DupMAE详解](RetroMAE/RetroMAE与DupMAE详解.md)：非对称 MAE + BoW 头
+- [INSTRUCTOR详解](INSTRUCTOR/INSTRUCTOR详解.md)：指令化嵌入开山
+- [CLIP详解](CLIP/CLIP详解.md)：图文双塔基石，对称 InfoNCE + WIT 4 亿对
+- [SigLIP与SigLIP2详解](SigLIP/SigLIP与SigLIP2详解.md)：sigmoid loss + LocCa + SILC/TIPS + NaFlex
 
 **训练与损失**
 
@@ -1344,19 +1344,19 @@ Client → Gateway → [Embed query] → Vector DB (ANN ± BM25)
 
 **Late Interaction 族**
 
-- [ColBERT详解](ColBERT详解.md) · [ColBERTv2详解](ColBERTv2详解.md) · [ColPali详解](ColPali详解.md) · [ColQwen系列详解](ColQwen系列详解.md)
+- [ColBERT详解](ColBERT/ColBERT详解.md) · [ColBERTv2详解](ColBERTv2/ColBERTv2详解.md) · [ColPali详解](ColPali/ColPali详解.md) · [ColQwen系列详解](ColQwen/ColQwen系列详解.md)
 
 **稠密文本 Embedding**
 
-- [E5详解](E5详解.md) · [GTE系列详解](GTE系列详解.md) · [Nomic-Embed详解](Nomic-Embed详解.md) · [LLM2Vec详解](LLM2Vec详解.md) · [Conan-embedding详解](Conan-embedding详解.md) · [Conan-embedding-v2详解](Conan-embedding-v2详解.md) · [QZhou-Embedding详解](QZhou-Embedding详解.md) · [Token-Prepending详解](Token-Prepending详解.md) · [Jasper-Token-Compression-600M详解](Jasper-Token-Compression-600M详解.md)
+- [E5详解](E5/E5详解.md) · [GTE系列详解](GTE/GTE系列详解.md) · [Nomic-Embed详解](Nomic-Embed/Nomic-Embed详解.md) · [LLM2Vec详解](LLM2Vec/LLM2Vec详解.md) · [Conan-embedding详解](Conan-embedding/v1/Conan-embedding详解.md) · [Conan-embedding-v2详解](Conan-embedding/v2/Conan-embedding-v2详解.md) · [QZhou-Embedding详解](QZhou-Embedding/QZhou-Embedding详解.md) · [Token-Prepending详解](Token-Prepending/Token-Prepending详解.md) · [Jasper-Token-Compression-600M详解](Jasper/Jasper-Token-Compression-600M详解.md)
 
 **Jina 系列**
 
-- [Jina系列总览](Jina系列总览.md) · [v2](Jina-embeddings-v2详解.md) · [v3](Jina-embeddings-v3详解.md) · [jina-clip](jina-clip系列详解.md) · [v4](Jina-embeddings-v4详解.md) · [v5-text](Jina-embeddings-v5-text详解.md) · [v5-omni](Jina-embeddings-v5-omni详解.md)
+- [Jina系列总览](Jina/Jina系列总览.md) · [v2](Jina/v2/Jina-embeddings-v2详解.md) · [v3](Jina/v3/Jina-embeddings-v3详解.md) · [jina-clip](Jina/clip/jina-clip系列详解.md) · [v4](Jina/v4/Jina-embeddings-v4详解.md) · [v5-text](Jina/v5-text/Jina-embeddings-v5-text详解.md) · [v5-omni](Jina/v5-omni/Jina-embeddings-v5-omni详解.md)
 
 **难负例算法与数据**
 
-- [ANCE详解](ANCE详解.md) · [RocketQA详解](RocketQA详解.md) · [NV-Retriever详解](NV-Retriever详解.md) · [LLM-DA文本行人检索数据增强详解](LLM-DA文本行人检索数据增强详解.md) · [DeVE-QA稠密视频事件问答详解](DeVE-QA稠密视频事件问答详解.md) · [InternLM2数据处理与过滤详解](InternLM2数据处理与过滤详解.md)
+- [ANCE详解](ANCE/ANCE详解.md) · [RocketQA详解](RocketQA/RocketQA详解.md) · [NV-Retriever详解](NV-Retriever/NV-Retriever详解.md) · [LLM-DA文本行人检索数据增强详解](LLM-DA-TPR/LLM-DA文本行人检索数据增强详解.md) · [DeVE-QA稠密视频事件问答详解](DeVE-QA/DeVE-QA稠密视频事件问答详解.md) · [InternLM2数据处理与过滤详解](InternLM2/InternLM2数据处理与过滤详解.md)
 
 ### 外部资源
 

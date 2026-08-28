@@ -394,10 +394,10 @@ MMRet 同时提供两种骨干：
 ## 与本仓库既有报告的挂接
 
 - 图文四类路线全景：[图文 Embedding 模型技术综述](图文Embedding模型技术综述.md)（① 双塔 CLIP / SigLIP → ③ MLLM-Emb ← 本节；④ Late Interaction 见下）。
-- Late Interaction 视觉文档派对比：[ColPali 详解](ColPali详解.md) · [ColQwen 系列详解](ColQwen系列详解.md)（同解决 T→VD，但用多向量后交互；单向量 GME 是另一条路）。
-- CLIP/SigLIP 基础：[CLIP 详解](CLIP详解.md) · [SigLIP 与 SigLIP 2 详解](SigLIP与SigLIP2详解.md)。
-- Jina-CLIP 系（双塔中的现代版）：[jina-clip 系列详解](jina-clip系列详解.md)。
-- 数据合成血脉：[LLM-DA 文本行人检索数据增强详解](LLM-DA文本行人检索数据增强详解.md)（专场 domain 的合成）· [DeVE-QA 稠密视频事件问答详解](DeVE-QA稠密视频事件问答详解.md)（视频 QA 数据）。
+- Late Interaction 视觉文档派对比：[ColPali 详解](ColPali/ColPali详解.md) · [ColQwen 系列详解](ColQwen/ColQwen系列详解.md)（同解决 T→VD，但用多向量后交互；单向量 GME 是另一条路）。
+- CLIP/SigLIP 基础：[CLIP 详解](CLIP/CLIP详解.md) · [SigLIP 与 SigLIP 2 详解](SigLIP/SigLIP与SigLIP2详解.md)。
+- Jina-CLIP 系（双塔中的现代版）：[jina-clip 系列详解](Jina/clip/jina-clip系列详解.md)。
+- 数据合成血脉：[LLM-DA 文本行人检索数据增强详解](LLM-DA-TPR/LLM-DA文本行人检索数据增强详解.md)（专场 domain 的合成）· [DeVE-QA 稠密视频事件问答详解](DeVE-QA/DeVE-QA稠密视频事件问答详解.md)（视频 QA 数据）。
 - 主文对应章节：[Embedding 调研报告](Embedding调研报告.md) §10 「多模态与专用 Embedding」及 §7.4「多模态检索在应用层的分叉」。
 
 ---

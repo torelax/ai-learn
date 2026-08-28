@@ -1,6 +1,6 @@
 # LoRA / PEFT 调研报告
 
-学习/调研文档，与 [distillation](../distillation/)、[embedding](../embedding/) 报告体例对齐。**Markdown 为源文件**。
+学习/调研文档，与 [distillation](../distillation)、[embedding](../embedding) 报告体例对齐。**Markdown 为源文件**。
 
 > **版本**: v1.1 · **日期**: 2026-07-30
 
@@ -19,14 +19,14 @@
 
 | 文档 | 论文 / 来源 |
 |------|-------------|
-| [LoRA详解.md](LoRA详解.md) | [arXiv:2106.09685](https://arxiv.org/abs/2106.09685) — LoRA 原文深读 |
-| [QLoRA详解.md](QLoRA详解.md) | [arXiv:2305.14314](https://arxiv.org/abs/2305.14314) — NF4/DQ/Paged Optimizers；单卡 65B |
-| [rsLoRA详解.md](rsLoRA详解.md) | [arXiv:2312.03732](https://arxiv.org/abs/2312.03732) — 缩放 α/√r，解锁高 rank |
-| [Adapter与PEFT范式详解.md](Adapter与PEFT范式详解.md) | Adapter / Prefix / Prompt 等 PEFT 范式 |
-| [AdaLoRA详解.md](AdaLoRA详解.md) | [arXiv:2303.10512](https://arxiv.org/abs/2303.10512) — 自适应 rank 预算 |
-| [VeRA详解.md](VeRA详解.md) | [arXiv:2310.11454](https://arxiv.org/abs/2310.11454) — 共享随机基 + 向量缩放；multi-tenant |
-| [LoRA+详解.md](LoRA+详解.md) | [arXiv:2402.12354](https://arxiv.org/abs/2402.12354) — A/B 异学习率，λ≈16 |
-| [DoRA详解.md](DoRA详解.md) | [arXiv:2402.09353](https://arxiv.org/abs/2402.09353) — 幅度-方向分解 |
+| [LoRA详解.md](LoRA/LoRA详解.md) | [arXiv:2106.09685](https://arxiv.org/abs/2106.09685) — LoRA 原文深读 |
+| [QLoRA详解.md](QLoRA/QLoRA详解.md) | [arXiv:2305.14314](https://arxiv.org/abs/2305.14314) — NF4/DQ/Paged Optimizers；单卡 65B |
+| [rsLoRA详解.md](rsLoRA/rsLoRA详解.md) | [arXiv:2312.03732](https://arxiv.org/abs/2312.03732) — 缩放 α/√r，解锁高 rank |
+| [Adapter与PEFT范式详解.md](Adapter/Adapter与PEFT范式详解.md) | Adapter / Prefix / Prompt 等 PEFT 范式 |
+| [AdaLoRA详解.md](AdaLoRA/AdaLoRA详解.md) | [arXiv:2303.10512](https://arxiv.org/abs/2303.10512) — 自适应 rank 预算 |
+| [VeRA详解.md](VeRA/VeRA详解.md) | [arXiv:2310.11454](https://arxiv.org/abs/2310.11454) — 共享随机基 + 向量缩放；multi-tenant |
+| [LoRA+详解.md](LoRA+/LoRA+详解.md) | [arXiv:2402.12354](https://arxiv.org/abs/2402.12354) — A/B 异学习率，λ≈16 |
+| [DoRA详解.md](DoRA/DoRA详解.md) | [arXiv:2402.09353](https://arxiv.org/abs/2402.09353) — 幅度-方向分解 |
 
 ---
 

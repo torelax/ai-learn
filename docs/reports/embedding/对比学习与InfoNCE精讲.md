@@ -4,7 +4,7 @@
 >
 > **本文定位**：把「向量检索/嵌入」用的损失函数按**信号演化路径**一次讲透 —— 从 CPC 定义 InfoNCE，到 SBERT/SimCSE 把它落到句向量，到 CLIP 跨模态对称化，到 SigLIP 把 softmax 换成 sigmoid，到 BGE-M3 把 dense/sparse/multi-vec 三头拼接、Conan/RocketQA 把 CE 蒸馏到 BE。每一段都写清楚**动机 → 数学式 → 什么时候会崩 → 后续如何被替代**。
 >
-> **配套**：机制层面的模型深读在同目录的《[无监督对比检索三部曲：SimCSE / Contriever / Condenser+coCondenser](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md)》《[CLIP 详解](CLIP详解.md)》《[SigLIP 与 SigLIP 2 详解](SigLIP与SigLIP2详解.md)》《[E5 详解](E5详解.md)》《[BGE-M3 三功能统一详解报告](BGE-M3三功能统一详解报告.md)》。
+> **配套**：机制层面的模型深读在同目录的《[无监督对比检索三部曲：SimCSE / Contriever / Condenser+coCondenser](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md)》《[CLIP 详解](CLIP/CLIP详解.md)》《[SigLIP 与 SigLIP 2 详解](SigLIP/SigLIP与SigLIP2详解.md)》《[E5 详解](E5/E5详解.md)》《[BGE-M3 三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》。
 
 ---
 
@@ -234,7 +234,7 @@ Xiong 2020：训到某个 checkpoint，用当前 encoder + FAISS 全库 ANN 挖 
 
 - 好处：hard neg 与当前模型能力对齐，训到后期还有梯度。
 - 坏处：全库 ANN 刷新开销大、需要一套调度。
-- 后续 [ANCE 详解](ANCE详解.md) 有详细工业实现。
+- 后续 [ANCE 详解](ANCE/ANCE详解.md) 有详细工业实现。
 
 ### RocketQA：CE 去噪 + hard neg + 数据合成
 
@@ -243,7 +243,7 @@ Qu 2021：ANCE 的下一步。用 cross-encoder 给 ANN 挖出来的 hard neg �
 - 引入了「假负例治理」的工程范式。
 - v2 进一步把 KD 变成 listwise loss。
 
-见本仓库 [RocketQA 详解](RocketQA详解.md)。
+见本仓库 [RocketQA 详解](RocketQA/RocketQA详解.md)。
 
 ### NV-Retriever：Positive-aware hard neg
 
@@ -252,7 +252,7 @@ Moreira 2024：观察到 ANN top-K 里有很多是「与正例相似度接近但
 - 挖 hard neg 时，先算 anchor 与正例的相似度 $s^+$，**再挖那些相似度**在 $[\alpha \cdot s^+, \beta \cdot s^+]$ 区间**的样本作 hard neg**（MarginPos）。
 - 或者用**百分位分层**（PercPos），保证 hard neg 分布多样。
 
-见 [NV-Retriever 详解](NV-Retriever详解.md)。
+见 [NV-Retriever 详解](NV-Retriever/NV-Retriever详解.md)。
 
 ### 三者的负例挖掘对比
 
@@ -293,7 +293,7 @@ CLIP 的三处工程细节被后续所有跨模态 embedding 直接继承：
 2. **温度 $\tau$ 可学**，初始化 $\log(1/0.07)$，上界 clip
 3. **相似度矩阵分片计算**（超大 batch 32k 才能训）
 
-详见 [CLIP 详解](CLIP详解.md)。
+详见 [CLIP 详解](CLIP/CLIP详解.md)。
 
 ### 「双向 InfoNCE」不止用于图文
 
@@ -357,7 +357,7 @@ $$
 - 大规模、多卡、需要极大 batch → **sigmoid**（SigLIP / SigLIP 2）。
 - 中规模、想省算力 → **sigmoid 也可尝试**，但如果依赖 hard neg 主导性能（如 MS MARCO 精调），softmax 更保险。
 
-详见 [SigLIP 与 SigLIP 2 详解](SigLIP与SigLIP2详解.md)。
+详见 [SigLIP 与 SigLIP 2 详解](SigLIP/SigLIP与SigLIP2详解.md)。
 
 ---
 
@@ -402,7 +402,7 @@ $$
 $$
 
 - 强制学生的 embedding 空间与教师完全对齐。
-- Jasper 600M（[Jasper 详解](Jasper-Token-Compression-600M详解.md)）用这个 + logit KL 做双教师蒸馏。
+- Jasper 600M（[Jasper 详解](Jasper/Jasper-Token-Compression-600M详解.md)）用这个 + logit KL 做双教师蒸馏。
 
 ### 蒸 logit 分数
 
@@ -435,7 +435,7 @@ $$
 
 - 三头分别学，但同一 backbone 共享；
 - Self-KD：把 **Dense + Sparse + Multi-vec 三头的分数**做 ensemble 教师，反向蒸馏每一头。
-- 见 [BGE-M3 三功能统一详解报告](BGE-M3三功能统一详解报告.md)。
+- 见 [BGE-M3 三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)。
 
 ### Conan-CBB：Cross-GPU Batch Balance
 
@@ -446,7 +446,7 @@ CBB 做两件事：
 1. **同 iteration 内跨卡分摊负例**：GPU 0 存 query、GPU 1 存正例、GPU 2..N 存负例，广播相似度做统一 InfoNCE。
 2. **多任务同步更新**：同 iteration 里 STS 与 Retrieval 都算 loss，加权合并。
 
-数学上仍是 InfoNCE，但**负例池扩大到跨 GPU 全 batch**，同时不同任务的梯度**同步**。见 [Conan-embedding 详解](Conan-embedding详解.md)。
+数学上仍是 InfoNCE，但**负例池扩大到跨 GPU 全 batch**，同时不同任务的梯度**同步**。见 [Conan-embedding 详解](Conan-embedding/v1/Conan-embedding详解.md)。
 
 ### GritLM：Generative + Representational 联合
 
@@ -513,7 +513,7 @@ InfoNCE 与 sigmoid loss 都需要大 batch。分布式实现有几种：
 - 每 device 只算本地 $b \times b$ 相似度块。
 - 用 `collective_permute` 逐轮交换 text（或 image），累计所有 pair 的 loss。
 - **通信量 $O(N \cdot d)$**（与 all-gather 相当），**显存 $O(b^2)$**。
-- 详见 [SigLIP 与 SigLIP 2 详解](SigLIP与SigLIP2详解.md) 的分布式图。
+- 详见 [SigLIP 与 SigLIP 2 详解](SigLIP/SigLIP与SigLIP2详解.md) 的分布式图。
 
 ### Gradient Cache（coCondenser / GRIT-Cache）
 
@@ -599,9 +599,9 @@ InfoNCE 与 sigmoid loss 都需要大 batch。分布式实现有几种：
 
 ## 与本仓库既有报告的挂接
 
-- 模型深读：[无监督对比检索三部曲：SimCSE / Contriever / Condenser+coCondenser](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md) · [CLIP 详解](CLIP详解.md) · [SigLIP 与 SigLIP 2 详解](SigLIP与SigLIP2详解.md) · [E5 详解](E5详解.md) · [BGE-M3 三功能统一详解报告](BGE-M3三功能统一详解报告.md) · [INSTRUCTOR 详解](INSTRUCTOR详解.md) · [LLM2Vec 详解](LLM2Vec详解.md)
-- 负例工业实践：[难负例挖掘工业实践](难负例挖掘工业实践.md) · [ANCE 详解](ANCE详解.md) · [RocketQA 详解](RocketQA详解.md) · [NV-Retriever 详解](NV-Retriever详解.md) · [Conan-embedding 详解](Conan-embedding详解.md)
-- 蒸馏损失：[Embedding 蒸馏技术详解](Embedding蒸馏技术详解.md) · [Jasper 详解](Jasper-Token-Compression-600M详解.md)
+- 模型深读：[无监督对比检索三部曲：SimCSE / Contriever / Condenser+coCondenser](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md) · [CLIP 详解](CLIP/CLIP详解.md) · [SigLIP 与 SigLIP 2 详解](SigLIP/SigLIP与SigLIP2详解.md) · [E5 详解](E5/E5详解.md) · [BGE-M3 三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md) · [INSTRUCTOR 详解](INSTRUCTOR/INSTRUCTOR详解.md) · [LLM2Vec 详解](LLM2Vec/LLM2Vec详解.md)
+- 负例工业实践：[难负例挖掘工业实践](难负例挖掘工业实践.md) · [ANCE 详解](ANCE/ANCE详解.md) · [RocketQA 详解](RocketQA/RocketQA详解.md) · [NV-Retriever 详解](NV-Retriever/NV-Retriever详解.md) · [Conan-embedding 详解](Conan-embedding/v1/Conan-embedding详解.md)
+- 蒸馏损失：[Embedding 蒸馏技术详解](Embedding蒸馏技术详解.md) · [Jasper 详解](Jasper/Jasper-Token-Compression-600M详解.md)
 - 主文对应章节：见 [Embedding 调研报告](Embedding调研报告.md) §3.2「三种表示范式」、§5.2「核心损失函数」、§11「蒸馏与压缩」
 
 ---
