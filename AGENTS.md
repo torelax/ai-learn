@@ -10,6 +10,7 @@
 |------|------|
 | `docs/reports/<topic>/` | 研究报告 Markdown（**权威正文**）与论文 PDF / 中译 / 配图，同一专题目录入库 |
 | `embedding/`、`torch/`、`refs/` | 练习笔记 / 代码参考 |
+| `agent/` | Agent 练习代码；`agent/phistory/` 为独立 GitHub 仓库，本仓库 `.gitignore` 不追踪 |
 
 专题：`embedding`、`lora`、`distillation`、`Qwen` 等。
 

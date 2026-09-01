@@ -30,6 +30,7 @@ ai-learn/
 ├── AGENTS.md                    # Agent / 论文研究与 Notion 同步规范
 ├── docs/reports/<topic>/        # 调研报告 + 论文 PDF / 中译 / 配图
 ├── embedding/                   # 笔记与练习
+├── agent/                       # Agent 练习；`agent/phistory/` 是独立 git 仓库（本仓库不追踪）
 ├── torch/                       # PyTorch 练习
 ├── ...
 ```

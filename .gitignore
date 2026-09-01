@@ -10,3 +10,6 @@ tmp
 
 # 还没整理好，暂时不传
 model_train
+
+# 独立 GitHub 仓库，勿纳入本仓库追踪
+agent/phistory/
