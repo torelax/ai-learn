@@ -46,6 +46,19 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 | [CLIP详解.md](CLIP/CLIP详解.md) | [arXiv:2103.00020](https://arxiv.org/abs/2103.00020)（图文双塔基石；对称 InfoNCE + WIT 4 亿对 + zero-shot 分类） |
 | [SigLIP与SigLIP2详解.md](SigLIP/SigLIP与SigLIP2详解.md) | SigLIP [2303.15343](https://arxiv.org/abs/2303.15343) + SigLIP 2 [2502.14786](https://arxiv.org/abs/2502.14786)（sigmoid loss + 100 语 + LocCa + SILC/TIPS + NaFlex） |
 
+## 领域专用 Embedding（2026-08 补齐）
+
+面向文搜图等垂直场景：先读实践综述，再按领域看案例。主文 §10.4 只保留索引。
+
+| 文档 | 说明 |
+|------|------|
+| [领域专用Embedding适配实践.md](领域专用Embedding适配实践.md) | Stage 2/4 课表 + 各领域正负例对照 + **对齐文搜图清单** |
+| [SPECTER系列详解.md](SPECTER/SPECTER系列详解.md) | 引用图对比；SPECTER2 adapter / SciRepEval；[Ai2 博文](https://allenai.org/blog/specter2-adapting-scientific-document-embeddings-to-multiple-fields-and-task-formats-c95686c06567) |
+| [MedCPT详解.md](MedCPT/MedCPT详解.md) | PubMed 点击 255M + 双塔/交叉编码器；生物医学零样本 |
+| [代码检索Embedding合写.md](Code-IR/代码检索Embedding合写.md) | CodeBERT / UniXcoder / CoIR / BGE-Code（CodeR 合成） |
+| [法律检索Embedding合写.md](Legal/法律检索Embedding合写.md) | LEGAL-BERT 领域 MLM + SAILER 结构感知；Hybrid 保条号 |
+| [YouTube-DNN双塔详解.md](YouTube-DNN/YouTube-DNN双塔详解.md) | RecSys 2016 候选生成 = Two-Tower；负采样与精排分家 |
+
 ## 合写型专题（2026 补齐）
 
 | 文档 | 覆盖内容 |

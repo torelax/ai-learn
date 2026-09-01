@@ -766,7 +766,7 @@ Document: {document_text}
 | lr         | Encoder ~1e-5；LLM 更小/LoRA | 冲掉预训练则降               |
 | 阶段切换   | 领域验证平台期               | 不要死磕固定 epoch           |
 
-**最小可行**：开源 Embedding 续训 → 领域弱配对 → 正对 + 过滤难负例至验证饱和 → 可选 MRL/蒸馏。
+**最小可行**：开源 Embedding 续训 → 领域弱配对 → 正对 + 过滤难负例至验证饱和 → 可选 MRL/蒸馏。垂直域案例与文搜图清单见《[领域专用 Embedding 适配实践](领域专用Embedding适配实践.md)》。
 
 **训练中看什么**：检索看 Recall@K / nDCG；只有 STS 标签才用相似度 Spearman。两者不能互相代替当「成功」判据。
 
@@ -1099,13 +1099,17 @@ ColPali / ColQwen：**页面渲染图 → patch 多向量**，query 侧 text tok
 
 ### 10.4 代码与领域专用
 
-| 类型                | 机制要点                    | 与通用文本差异                                                    |
-| ------------------- | --------------------------- | ----------------------------------------------------------------- |
-| **代码**      | 标识符、语法树、repo 上下文 | 通用文本 Embedding 对 API 名 OOV；用 code 预训练或 Voyage-code 类 |
-| **法律/医疗** | 术语密度高、要精确引用      | 通用模型 + 领域微调 +**Hybrid 词面**；判例号靠 Sparse       |
-| **科学文献**  | 长摘要、引用关系            | SPECTER 类引用图对比；可与 Dense 并用                             |
+独立深读与文搜图对照见《[领域专用 Embedding 适配实践](领域专用Embedding适配实践.md)》。课表仍是 §5：**领域适配放 Stage 2/4，不要用小领域数据从头训**。
 
-专用域**优先**领域数据微调 + 难负例，而不是换更大的通用 8B。
+| 类型 | 机制要点 | 与通用文本差异 | 深读 |
+| --- | --- | --- | --- |
+| **代码** | 标识符、AST、合成多任务三元组 | 通用文本对 API 名 OOV；CSN 会虚高 | [代码IR合写](Code-IR/代码检索Embedding合写.md) |
+| **法律** | 领域 MLM + 文书结构；条号 Sparse | 「事实像」≠ 判例相关 | [法律合写](Legal/法律检索Embedding合写.md) |
+| **医疗** | PubMed 点击对比 + PubMedBERT | 通用大双塔仍会域偏移 | [MedCPT](MedCPT/MedCPT详解.md) |
+| **科学文献** | 引用图三元组；SPECTER2 按任务 adapter | 一篇论文一个向量不够打所有格式 | [SPECTER系列](SPECTER/SPECTER系列详解.md) |
+| **推荐召回** | Two-Tower + 全库采样 softmax | 与 Bi-Encoder 同构，负例/曝光不同 | [YouTube DNN](YouTube-DNN/YouTube-DNN双塔详解.md) |
+
+专用域**优先**领域数据微调 + 难负例，而不是换更大的通用 8B。文搜图把上表的「边 / 点击 / 结构 / Hybrid」换成标题–主图、同款不同色、SKU 倒排即可。
 
 ---
 
