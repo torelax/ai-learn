@@ -345,7 +345,7 @@ Stage 4 (可选): MRL 截断维 / INT8 量化 — 部署压缩（非 KD）
 ### 10.3 与 MRL / 量化的顺序
 
 - **MRL**：可与 Stage 2 同时（$\mathcal{L}_{\text{MRL}}$ 加在 Student 向量上）。  
-- **量化**：**训练后** PTQ/QAT；在蒸馏收敛后再做，避免量化噪声干扰 KD。
+- **量化**：**训练后** PTQ/QAT；在蒸馏收敛后再做，避免量化噪声干扰 KD。向量 QAT（LSQ）与 Jina GOR 的差别见《[量化感知训练QAT详解](QAT/量化感知训练QAT详解.md)》。
 
 ---
 

@@ -26,6 +26,7 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 | [BGE-multilingual-gemma2详解.md](BGE/BGE-multilingual-gemma2详解.md) | Gemma-2-9B 骨干（附录 C of BGE-EN-ICL 论文）；MIRACL 74.1 SOTA / FR-MTEB / PL-MTEB SOTA |
 | [BGE-Reranker详解.md](BGE/BGE-Reranker详解.md) | v2-m3 / v2-gemma / v2-minicpm-layerwise / **v2.5-gemma2-lightweight**（附录 D of BGE-EN-ICL 论文；深度+宽度双压缩） |
 | [Embedding蒸馏技术详解.md](Embedding蒸馏技术详解.md) | Embedding 蒸馏专题 |
+| [量化感知训练QAT详解.md](QAT/量化感知训练QAT详解.md) | QAT（Jacob/LSQ）vs 向量 QAT（Qwen3-VL）vs Jina v5 GOR；对齐文搜图索引 |
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例工业闭环 |
 | [对比学习与InfoNCE精讲.md](对比学习与InfoNCE精讲.md) | 损失演化专题：Metric learning → InfoNCE → SimCSE/DPR/CLIP/SigLIP/蒸馏/BGE-M3/GritLM |
 | [InternLM2数据处理与过滤详解.md](InternLM2/InternLM2数据处理与过滤详解.md) | [arXiv:2403.17297](https://arxiv.org/abs/2403.17297)：LLM 预训练数据清洗流水线（Conan-v1 预训练引用的数据过滤方法） |

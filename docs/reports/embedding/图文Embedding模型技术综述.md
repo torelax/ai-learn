@@ -145,7 +145,7 @@
 
 **量化感知训练（QAT）**
 
-训练中同时对全精度与低精度（int8/binary）嵌入计算损失，让模型学出"抗量化"的表征。 int8 几乎无损、可大幅压缩索引存储与算力。
+训练中同时对全精度与低精度（int8/binary）嵌入计算损失，让模型学出"抗量化"的表征。 int8 几乎无损、可大幅压缩索引存储与算力。出处是 **Qwen3-VL-Embedding**（LSQ + STE），不是 Jina v4/v5；Jina v5-text 用的是 **GOR** 抗二值化。机制对照见《[量化感知训练QAT详解](QAT/量化感知训练QAT详解.md)》。
 
 **后交互 / 多向量（Late Interaction / MaxSim）**
 

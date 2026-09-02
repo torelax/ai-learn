@@ -29,7 +29,7 @@ v3 (2409.10173)      jina-clip v1/v2
 v4 (2506.18902)          Qwen2.5-VL-3B；文/图/PDF；单向量 + 可选多向量
         │
         ▼
-v5-text (2602.15547)     蒸馏 Qwen3-Embedding；nano / small；任务适配
+v5-text (2602.15547)     蒸馏 Qwen3-Embedding；nano / small；任务适配；GOR 抗二值（≠ QAT）
         │
         ▼
 v5-omni (2605.08384)     GELATO：锁定 v5-text + 视听塔；文/图/视/音同空间
@@ -108,7 +108,7 @@ Jina 产品线 ────────┼── CLIP Dual-Tower ─── jina-
 | v3 | 任务 LoRA + MRL | 同一底座，按 task id 挂低秩适配；$d$ 可截断至 32 |
 | CLIP | 图文联合对比；文本侧不牺牲 MTEB | 同时优化 $I$–$T$ 与 $T$–$T$ |
 | v4 | MLLM 统一编码；可选 late interaction | 单向量或 token/patch 多向量 MaxSim |
-| v5-text | 任务靶向蒸馏 | 蒸馏 + 任务对比 $>$ 纯蒸馏 $>$ 纯对比 |
+| v5-text | 任务靶向蒸馏 | 蒸馏 + 任务对比 $>$ 纯蒸馏 $>$ 纯对比；**GOR ≠ QAT**（见 [QAT详解](../QAT/量化感知训练QAT详解.md)） |
 | v5-omni | GELATO 锁定塔 | 只训 projector；文本输出 $\equiv$ v5-text |
 
 蒸馏细节另见《[Embedding蒸馏技术详解](../Embedding蒸馏技术详解.md)》§7。
