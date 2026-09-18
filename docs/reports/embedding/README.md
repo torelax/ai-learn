@@ -101,6 +101,7 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 | [Jina-embeddings-v4详解.md](Jina/v4/Jina-embeddings-v4详解.md) | [arXiv:2506.18902](https://arxiv.org/abs/2506.18902) |
 | [Jina-embeddings-v5-text详解.md](Jina/v5-text/Jina-embeddings-v5-text详解.md) | [arXiv:2602.15547](https://arxiv.org/abs/2602.15547) |
 | [Jina-embeddings-v5-omni详解.md](Jina/v5-omni/Jina-embeddings-v5-omni详解.md) | [arXiv:2605.08384](https://arxiv.org/abs/2605.08384) |
+| [jina-reranker-v3.5详解.md](Jina/rerank-v3.5/jina-reranker-v3.5详解.md) | [arXiv:2607.18152](https://arxiv.org/abs/2607.18152)（LBNL + 3L2G 混合注意力 + 同尺寸自蒸馏） |
 
 ## 关联报告
 
