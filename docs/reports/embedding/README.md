@@ -68,6 +68,20 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 | [MLLM通用多模态嵌入_GME-VLM2Vec-BGEVL.md](MLLM通用多模态嵌入_GME-VLM2Vec-BGEVL.md) | GME [2412.16855](https://arxiv.org/abs/2412.16855) + VLM2Vec+MMEB [2410.05160](https://arxiv.org/abs/2410.05160) + BGE-VL/MegaPairs [2412.14475](https://arxiv.org/abs/2412.14475) 三篇合写 |
 | [前沿短深读_LateChunking-Vec2Vec-ModernBERT-DINOv2v3-Qwen3-Seed-ViDoRev2.md](前沿短深读_LateChunking-Vec2Vec-ModernBERT-DINOv2v3-Qwen3-Seed-ViDoRev2.md) | Late Chunking [2409.04701](https://arxiv.org/abs/2409.04701) / Vec2Vec [2505.12540](https://arxiv.org/abs/2505.12540) / ModernBERT [2412.13663](https://arxiv.org/abs/2412.13663) / DINOv2 [2304.07193](https://arxiv.org/abs/2304.07193)+DINOv3 [2508.10104](https://arxiv.org/abs/2508.10104) / Qwen3-Embedding [2506.05176](https://arxiv.org/abs/2506.05176) / Seed1.5-Embedding / ViDoRe v2 [2505.17166](https://arxiv.org/abs/2505.17166) 七个方向合写 |
 
+## 数据工程
+
+| 文档 | 论文 / 来源 |
+|------|-------------|
+| [Doc2Query详解.md](Doc2Query/Doc2Query详解.md) | [arXiv:1904.08375](https://arxiv.org/abs/1904.08375)（预测查询拼回文档，再 BM25） |
+| [Doc2Query++详解.md](Doc2Query++/Doc2Query++详解.md) | [arXiv:2510.09557](https://arxiv.org/abs/2510.09557)（主题覆盖；稠密双索引融合） |
+| [GPL详解.md](GPL/GPL详解.md) | [arXiv:2112.07577](https://arxiv.org/abs/2112.07577)（造查询 + cross-encoder margin 伪标签） |
+| [R-GPL详解.md](R-GPL/R-GPL详解.md) | [arXiv:2501.14434](https://arxiv.org/abs/2501.14434)（蒸馏中重挖难负例） |
+| [InPars详解.md](InPars/InPars详解.md) | [arXiv:2202.05144](https://arxiv.org/abs/2202.05144)（少样本 LLM 造查询，训 monoT5） |
+| [InPars-v2详解.md](InPars-v2/InPars-v2详解.md) | [arXiv:2301.01820](https://arxiv.org/abs/2301.01820)（GPT-J + monoT5 过滤） |
+| [Promptagator详解.md](Promptagator/Promptagator详解.md) | [arXiv:2209.11755](https://arxiv.org/abs/2209.11755)（≤8 例；一致性过滤后训双塔） |
+| [Longtail-Product-Retrieval详解.md](Longtail-Product-Retrieval/Longtail-Product-Retrieval详解.md) | [arXiv:2602.23620](https://arxiv.org/abs/2602.23620)（离线多奖励改写蒸馏进商品检索） |
+| [E5-Mistral合成数据详解.md](E5-Mistral/E5-Mistral合成数据详解.md) | [arXiv:2401.00368](https://arxiv.org/abs/2401.00368)（两步 prompt；全文中译见同目录 zh.md） |
+
 ## Late Interaction 族（文本 → 视觉文档）
 
 | 文档 | 论文 / 来源 |
@@ -101,6 +115,8 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 | [Jina-embeddings-v4详解.md](Jina/v4/Jina-embeddings-v4详解.md) | [arXiv:2506.18902](https://arxiv.org/abs/2506.18902) |
 | [Jina-embeddings-v5-text详解.md](Jina/v5-text/Jina-embeddings-v5-text详解.md) | [arXiv:2602.15547](https://arxiv.org/abs/2602.15547) |
 | [Jina-embeddings-v5-omni详解.md](Jina/v5-omni/Jina-embeddings-v5-omni详解.md) | [arXiv:2605.08384](https://arxiv.org/abs/2605.08384) |
+| [jina-reranker-v3详解.md](Jina/rerank-v3/jina-reranker-v3详解.md) | [arXiv:2509.25085](https://arxiv.org/abs/2509.25085)（LBNL 列表精排；共享因果上下文读出） |
+| [Jina-ColBERT-v2详解.md](Jina/colbert-v2/Jina-ColBERT-v2详解.md) | [arXiv:2408.16672](https://arxiv.org/abs/2408.16672)（多语迟交互；多线性头 MRL） |
 | [jina-reranker-v3.5详解.md](Jina/rerank-v3.5/jina-reranker-v3.5详解.md) | [arXiv:2607.18152](https://arxiv.org/abs/2607.18152)（LBNL + 3L2G 混合注意力 + 同尺寸自蒸馏） |
 
 ## 关联报告

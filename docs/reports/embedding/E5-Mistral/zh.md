@@ -129,6 +129,8 @@ $$
 
 ### 4.1 合成数据统计
 
+![图 2：合成数据的任务类型与语言分布。](figs/fig02.png)
+
 **图 2 统计**：任务类型分布 short-long 167k、long-short 122k、short-short 13k、long-long 17k、bitext 89k、STS 99k；语言分布 English 43.1%、Polish 3.0%、Japanese 2.9%、Italian 2.9%、Russian 2.9%、Indonesian 2.9%、German 2.9%、Persian 2.9%、Spanish 2.8%、Chinese 2.8%、French 2.8%、Portuguese 2.8%、Dutch 2.8%、Arabic 2.7%、Others 19.8%。
 
 **规模**：500k 样例、150k 独特指令；**25% 由 GPT-3.5-Turbo 生成、75% 由 GPT-4 生成**；**API 消耗 180M token**。为 93 种语言中最底部 75 种低资源语言平均生成 ~1k 条。
@@ -221,6 +223,8 @@ $$
 
 ### 5.1 是否需要对比预训练？
 
+![图 3：对比预训练对 XLM-R-large 与 E5-Mistral 的影响。](figs/fig03.png)
+
 **图 3**：对比预训练对 XLM-R-large 与 E5-mistral-7b 的影响：
 
 - **XLM-R-large**：检索 +8.2、分类 +4.3、MTEB +5.7 —— **对比预训练关键**；
@@ -230,12 +234,16 @@ $$
 
 ### 5.2 长文本嵌入（长文扩展）
 
+![图 4：个性化 passkey 检索任务示意。](figs/fig04.png)
+
 作者提出 **personalized passkey retrieval** 合成任务（图 4）：
 
 - 一批文档，每篇由重复填充文本（"The grass is green. The sky is blue..."）+ 一个人名 + 一个 6 位随机 passkey 组成，passkey 位置随机；
 - Query = "what is the pass key for {person name}?"；
 - 从 100 个候选文档中检索包含该人名 passkey 的文档；
 - 变化上下文长度：256, 512, 1k, 2k, 4k, 8k, 16k, 32k。
+
+![图 5：不同上下文长度下个性化 passkey 检索的准确率。](figs/fig05.png)
 
 **图 5** 结果：
 

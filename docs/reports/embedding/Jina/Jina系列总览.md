@@ -34,7 +34,8 @@ v5-text (2602.15547)     蒸馏 Qwen3-Embedding；nano / small；任务适配；
         ▼
 v5-omni (2605.08384)     GELATO：锁定 v5-text + 视听塔；文/图/视/音同空间
 
-并行精排线（不是 embedding）：
+并行线（不是单向量 embedding）：
+colbert-v2 (2408.16672)    多语迟交互召回；MaxSim；多线性头
 reranker-v3 (2509.25085)   LBNL 列表精排；query+候选同一段因果上下文
         │
         ▼
@@ -50,7 +51,8 @@ reranker-v3.5 (2607.18152) 3L2G 混合注意力 + 同尺寸自蒸馏；v3 的 dr
 | **v4** | jina-embeddings-v4 | [2506.18902](https://arxiv.org/abs/2506.18902) | **Qwen2.5-VL-3B**；任务 LoRA；单/多向量 | 文+图+PDF | **3.8B** | **32K** | 2048（多向量 128） |
 | **v5-text** | v5-text-nano / small | [2602.15547](https://arxiv.org/abs/2602.15547) | EuroBERT / Qwen3-0.6B；**任务靶向蒸馏** | 文本 | 239M / 677M | 8K / **32K** | 768|1024→32 |
 | **v5-omni** | v5-omni-nano / small | [2605.08384](https://arxiv.org/abs/2605.08384) | **GELATO** 锁定文本塔 + 视听投影 | 文/图/视/音 | ~1.0–1.7B 级 | 同 text | 与 text 对齐 |
-| **rerank-v3** | jina-reranker-v3 | [2509.25085](https://arxiv.org/abs/2509.25085) | **LBNL** 列表精排；Qwen3-0.6B | 文本精排 | **0.6B** | 长 | 512（投影后余弦） |
+| **colbert-v2** | jina-colbert-v2 | [2408.16672](https://arxiv.org/abs/2408.16672) | Jina-XLM-R；**MaxSim**；多线性头 | 文本检索 | 多向量 | 续训 8K | token 64–768 |
+| **rerank-v3** | jina-reranker-v3 | [2509.25085](https://arxiv.org/abs/2509.25085) | **LBNL** 列表精排；Qwen3-0.6B | 文本精排 | **0.6B** | 131K | 512（投影后余弦） |
 | **rerank-v3.5** | jina-reranker-v3.5 | [2607.18152](https://arxiv.org/abs/2607.18152) | 3L2G + 钉死末层全局 + 同尺寸蒸馏 | 文本精排 | **0.6B** | 131K | 512（投影后余弦） |
 
 **关于 v1**：无单独深读文件；机制与对比训练脉络在本总览与 [Jina-embeddings-v2详解.md](v2/Jina-embeddings-v2详解.md) 中覆盖即可。论文：[arXiv:2307.11224](https://arxiv.org/abs/2307.11224)。
@@ -59,7 +61,7 @@ reranker-v3.5 (2607.18152) 3L2G 混合注意力 + 同尺寸自蒸馏；v3 的 dr
 
 ## 3. 架构类属对照
 
-四类交互范式（与《[图文Embedding模型技术综述](../图文Embedding模型技术综述.md)》一致）：
+交互范式（与《[图文Embedding模型技术综述](../图文Embedding模型技术综述.md)》的分类对齐，并单列迟交互与列表精排）：
 
 | 架构类 | 编码方式 | 打分 | Jina 代表 | 典型代价 |
 |--------|----------|------|-----------|----------|
@@ -67,6 +69,7 @@ reranker-v3.5 (2607.18152) 3L2G 混合注意力 + 同尺寸自蒸馏；v3 的 dr
 | **CLIP Dual-Tower** | 视觉塔 $f_I$、文本塔 $f_T$ 独立 | $\cos(f_I(I), f_T(T))$ | **jina-clip-v1/v2** | CPU/低成本图文检索友好 |
 | **MLLM Bi / Late** | VLM 统一吃文/图 token；可出单向量或多向量 | 单向量点积；或多向量 MaxSim | **v4** | 质量高；算力与许可证（Qwen Research）需评估 |
 | **Locked Aligned Towers** | **冻结**文本塔 + 冻结视听编码器；只训轻量 projector | 投影后与文本同空间 | **v5-omni（GELATO）** | 文本向量与 v5-text **bit-identical**；训练参数占比极低（论文约 $0.35\%$） |
+| **Late interaction** | query、doc 分别编码为 token 向量 | MaxSim | **jina-colbert-v2** | 文档可离线索引；索引按 token 计 |
 | **Listwise LBNL rerank** | query 与全部候选进同一因果序列；末层读出后余弦 | 列表分数 | **reranker-v3 / v3.5** | 一次前向对照整份短名单；不能离线索引文档 |
 
 ```text
@@ -74,6 +77,7 @@ reranker-v3.5 (2607.18152) 3L2G 混合注意力 + 同尺寸自蒸馏；v3 的 dr
 Jina 产品线 ────────┼── CLIP Dual-Tower ─── jina-clip-v1 / v2
                     ├── MLLM（可 late）──── v4
                     ├── Locked Towers ───── v5-omni
+                    ├── Late interaction ── jina-colbert-v2
                     └── Listwise LBNL ───── reranker-v3 / v3.5
 ```
 
@@ -121,6 +125,7 @@ Jina 产品线 ────────┼── CLIP Dual-Tower ─── jina-
 | v4 | MLLM 统一编码；可选 late interaction | 单向量或 token/patch 多向量 MaxSim |
 | v5-text | 任务靶向蒸馏 | 蒸馏 + 任务对比 $>$ 纯蒸馏 $>$ 纯对比；**GOR ≠ QAT**（见 [QAT详解](../QAT/量化感知训练QAT详解.md)） |
 | v5-omni | GELATO 锁定塔 | 只训 projector；文本输出 $\equiv$ v5-text |
+| colbert-v2 | 多语迟交互 | 分编码 + MaxSim；MRL 多线性头 |
 | rerank-v3 | LBNL 列表精排 | query∥docs 同一段；分隔符处投影后余弦 |
 | rerank-v3.5 | 3L2G + 同尺寸蒸馏 | 末层钉死全局；老师全注意力、学生滑窗 |
 
@@ -153,7 +158,9 @@ Jina 产品线 ────────┼── CLIP Dual-Tower ─── jina-
 | [Jina-embeddings-v4详解.md](v4/Jina-embeddings-v4详解.md) | [2506.18902](https://arxiv.org/abs/2506.18902) | 深读 |
 | [Jina-embeddings-v5-text详解.md](v5-text/Jina-embeddings-v5-text详解.md) | [2602.15547](https://arxiv.org/abs/2602.15547) | 深读 |
 | [Jina-embeddings-v5-omni详解.md](v5-omni/Jina-embeddings-v5-omni详解.md) | [2605.08384](https://arxiv.org/abs/2605.08384) | 深读 |
-| [jina-reranker-v3.5详解.md](rerank-v3.5/jina-reranker-v3.5详解.md) | [2607.18152](https://arxiv.org/abs/2607.18152)（前作 v3：[2509.25085](https://arxiv.org/abs/2509.25085)） | 深读 |
+| [Jina-ColBERT-v2详解.md](colbert-v2/Jina-ColBERT-v2详解.md) | [2408.16672](https://arxiv.org/abs/2408.16672) | 深读 |
+| [jina-reranker-v3详解.md](rerank-v3/jina-reranker-v3详解.md) | [2509.25085](https://arxiv.org/abs/2509.25085) | 深读 |
+| [jina-reranker-v3.5详解.md](rerank-v3.5/jina-reranker-v3.5详解.md) | [2607.18152](https://arxiv.org/abs/2607.18152) | 深读 |
 
 总调研时间线亦见《[Embedding调研报告](../Embedding调研报告.md)》§2.1.7。
 
@@ -169,5 +176,6 @@ Jina 产品线 ────────┼── CLIP Dual-Tower ─── jina-
 6. Günther / Jina et al. *jina-embeddings-v4*. [arXiv:2506.18902](https://arxiv.org/abs/2506.18902), 2025.  
 7. Akram et al. *jina-embeddings-v5-text*. [arXiv:2602.15547](https://arxiv.org/abs/2602.15547), 2026.  
 8. *jina-embeddings-v5-omni* (GELATO). [arXiv:2605.08384](https://arxiv.org/abs/2605.08384), 2026.  
-9. Wang et al. *jina-reranker-v3*. [arXiv:2509.25085](https://arxiv.org/abs/2509.25085), 2025.  
-10. Nasika / Wang / Krasakis / Xiao. *jina-reranker-v3.5*. [arXiv:2607.18152](https://arxiv.org/abs/2607.18152), 2026.  
+9. Jha et al. *Jina-ColBERT-v2*. [arXiv:2408.16672](https://arxiv.org/abs/2408.16672), 2024.  
+10. Wang et al. *jina-reranker-v3*. [arXiv:2509.25085](https://arxiv.org/abs/2509.25085), 2025.  
+11. Nasika / Wang / Krasakis / Xiao. *jina-reranker-v3.5*. [arXiv:2607.18152](https://arxiv.org/abs/2607.18152), 2026.  
