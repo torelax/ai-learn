@@ -117,13 +117,13 @@
 
 ### 3.1 Dense Passage Retrieval / 稠密段落检索
 
-**EN.** We follow the dense passage retrieval framework for generating embeddings for documents and queries, namely \(E(d)\) and \(E(q)\).
+**EN.** We follow the dense passage retrieval framework for generating embeddings for documents and queries, namely $E(d)$ and $E(q)$.
 
-**中.** 作者遵循稠密段落检索框架，为文档和查询生成嵌入，分别记为 \(E(d)\) 和 \(E(q)\)。
+**中.** 作者遵循稠密段落检索框架，为文档和查询生成嵌入，分别记为 $E(d)$ 和 $E(q)$。
 
-**EN.** Given an input passage<sup>1</sup> \(x = [\mathrm{CLS}], w_1, \ldots, w_l, [\mathrm{SEP}]\), we use the embedding model \(E(d)\), and \(E(q)\) to encode the input sequence into hidden states \(h = \{[\mathrm{CLS}], h_1, \ldots, h_l, [\mathrm{SEP}]\}\), where \(w_i\) is the \(i\)-th token; \([\mathrm{CLS}]\) and \([\mathrm{SEP}]\) are special tokens that mark the start and end of a sentence, respectively, and \(h_i\) is the \(i\)-th hidden state corresponding to the \(i\)-th word. We use mean pooling over hidden states to obtain a dense representation of the entire passage. We ignore \([\mathrm{CLS}]\) and \([\mathrm{SEP}]\) tokens while pooling. The maximum sequence length for every model is 350.
+**EN.** Given an input passage<sup>1</sup> $x = [\mathrm{CLS}], w_1, \ldots, w_l, [\mathrm{SEP}]$, we use the embedding model $E(d)$, and $E(q)$ to encode the input sequence into hidden states $h = \{[\mathrm{CLS}], h_1, \ldots, h_l, [\mathrm{SEP}]\}$, where $w_i$ is the $i$-th token; $[\mathrm{CLS}]$ and $[\mathrm{SEP}]$ are special tokens that mark the start and end of a sentence, respectively, and $h_i$ is the $i$-th hidden state corresponding to the $i$-th word. We use mean pooling over hidden states to obtain a dense representation of the entire passage. We ignore $[\mathrm{CLS}]$ and $[\mathrm{SEP}]$ tokens while pooling. The maximum sequence length for every model is 350.
 
-**中.** 给定输入段落<sup>1</sup> \(x = [\mathrm{CLS}], w_1, \ldots, w_l, [\mathrm{SEP}]\)，用嵌入模型 \(E(d)\) 和 \(E(q)\) 把输入序列编码成隐藏状态 \(h = \{[\mathrm{CLS}], h_1, \ldots, h_l, [\mathrm{SEP}]\}\)。其中 \(w_i\) 是第 \(i\) 个词元；\([\mathrm{CLS}]\) 和 \([\mathrm{SEP}]\) 是分别标记句子开始和结束的特殊词元；\(h_i\) 是对应第 \(i\) 个词的第 \(i\) 个隐藏状态。对隐藏状态做均值池化，得到整段段落的稠密表示。池化时忽略 \([\mathrm{CLS}]\) 和 \([\mathrm{SEP}]\) 词元。每个模型的最大序列长度都是 350。
+**中.** 给定输入段落<sup>1</sup> $x = [\mathrm{CLS}], w_1, \ldots, w_l, [\mathrm{SEP}]$，用嵌入模型 $E(d)$ 和 $E(q)$ 把输入序列编码成隐藏状态 $h = \{[\mathrm{CLS}], h_1, \ldots, h_l, [\mathrm{SEP}]\}$。其中 $w_i$ 是第 $i$ 个词元；$[\mathrm{CLS}]$ 和 $[\mathrm{SEP}]$ 是分别标记句子开始和结束的特殊词元；$h_i$ 是对应第 $i$ 个词的第 $i$ 个隐藏状态。对隐藏状态做均值池化，得到整段段落的稠密表示。池化时忽略 $[\mathrm{CLS}]$ 和 $[\mathrm{SEP}]$ 词元。每个模型的最大序列长度都是 350。
 
 **EN.** <sup>1</sup> We use passage here to refer to both query and documents.
 
@@ -131,13 +131,13 @@
 
 ### 3.2 MarginMSE Loss / MarginMSE 损失
 
-**EN.** In the following we describe the MarginMSE loss briefly. For each generated query (\(Q\)), we label the document used to generate the query as the “relevant” document (\(D^{+}\)). And the non-relevant document (\(D^{-}\)) is a mined hard negative. We use Margin Mean Squared Error (Margin-MSE) loss for training the models with the data triplet \((Q, D^{+}, D^{-})\) (Hofstätter et al., 2021).
+**EN.** In the following we describe the MarginMSE loss briefly. For each generated query ($Q$), we label the document used to generate the query as the “relevant” document ($D^{+}$). And the non-relevant document ($D^{-}$) is a mined hard negative. We use Margin Mean Squared Error (Margin-MSE) loss for training the models with the data triplet $(Q, D^{+}, D^{-})$ (Hofstätter et al., 2021).
 
-**中.** 下面简要描述 MarginMSE 损失。对每条生成的查询（\(Q\)），把用来生成该查询的文档标为「相关」文档（\(D^{+}\)）。不相关文档（\(D^{-}\)）是挖到的难负例。作者用间隔均方误差（Margin Mean Squared Error, Margin-MSE）损失，在数据三元组 \((Q, D^{+}, D^{-})\) 上训练模型（Hofstätter et al., 2021）。
+**中.** 下面简要描述 MarginMSE 损失。对每条生成的查询（$Q$），把用来生成该查询的文档标为「相关」文档（$D^{+}$）。不相关文档（$D^{-}$）是挖到的难负例。作者用间隔均方误差（Margin Mean Squared Error, Margin-MSE）损失，在数据三元组 $(Q, D^{+}, D^{-})$ 上训练模型（Hofstätter et al., 2021）。
 
-\[
+$$
 L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{-}),\ \mathrm{CE}(Q, D^{+}) - \mathrm{CE}(Q, D^{-})\big)
-\]
+$$
 
 **EN.** We calculate the margin from both the student model (DR) and the teacher model (CE). Later we use the formula below as our loss function.
 
@@ -159,9 +159,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 
 ### 3.4 R-GPL / R-GPL
 
-**EN.** The main idea of our approach is based on the observation that, while the base model undergoes domain adaptation, it incrementally improves at the task and language of the target domain. In our approach, we exploit this property and use the domain-adapted model to mine “better” hard negatives incrementally. To achieve this, we refresh the hard negatives with the model currently undergoing domain adaptation training every \(k\) steps. We call our new approach R-GPL: Remining hard negatives for Generative Pseudo Labeled domain adaptation.
+**EN.** The main idea of our approach is based on the observation that, while the base model undergoes domain adaptation, it incrementally improves at the task and language of the target domain. In our approach, we exploit this property and use the domain-adapted model to mine “better” hard negatives incrementally. To achieve this, we refresh the hard negatives with the model currently undergoing domain adaptation training every $k$ steps. We call our new approach R-GPL: Remining hard negatives for Generative Pseudo Labeled domain adaptation.
 
-**中.** 本方法的主要想法基于这一观察：基线模型在做域适应的过程中，会在目标域的任务和语言上逐步变好。作者利用这一性质，用域适应模型逐步挖掘「更好」的难负例。为此，每隔 \(k\) 步，用当前正在做域适应训练的模型刷新难负例。新方法称为 R-GPL：面向生成式伪标签域适应的难负例重挖掘（Remining hard negatives for Generative Pseudo Labeled domain adaptation）。
+**中.** 本方法的主要想法基于这一观察：基线模型在做域适应的过程中，会在目标域的任务和语言上逐步变好。作者利用这一性质，用域适应模型逐步挖掘「更好」的难负例。为此，每隔 $k$ 步，用当前正在做域适应训练的模型刷新难负例。新方法称为 R-GPL：面向生成式伪标签域适应的难负例重挖掘（Remining hard negatives for Generative Pseudo Labeled domain adaptation）。
 
 **EN.** In order to make our approach directly comparable to GPL, we closely follow their experimental setup and processing pipeline as described in Wang et al. (2022). This allows us to analyze the impact of our proposed hard negative remining approach directly to GPL’s performance to understand the effect.
 
@@ -195,9 +195,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 
 **中.** 为了与 GPL（Wang et al., 2022）公平比较，作者使用非常相似的设置和相同的模型。
 
-**EN.** BM25 For every dataset, we generate BM25 Scores using ElasticSearch engine with \(b = 0.75\), \(k_1 = 1.2\).
+**EN.** BM25 For every dataset, we generate BM25 Scores using ElasticSearch engine with $b = 0.75$, $k_1 = 1.2$.
 
-**中.** BM25：对每个数据集，用 ElasticSearch 引擎生成 BM25 分数，参数为 \(b = 0.75\)，\(k_1 = 1.2\)。
+**中.** BM25：对每个数据集，用 ElasticSearch 引擎生成 BM25 分数，参数为 $b = 0.75$，$k_1 = 1.2$。
 
 **EN.** Base We use the zero-shot performance of the unadapted model, specifically GPL/msmarco-distilbert-margin-mse.<sup>2</sup>
 
@@ -219,9 +219,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 
 **中.** <sup>4</sup> https://huggingface.co/sentence-transformers/msmarco-MiniLM-L-6-v3
 
-**EN.** R-GPL We include our new remining GPL model R-GPL described above. We run our new R-GPL model on the BEIR and LoTTE datasets, with hard-negative remining every \(k = 30{,}000\) steps. For initial hard negatives, we use Hard Negative Miner 1, and Hard Negative Miner 2.
+**EN.** R-GPL We include our new remining GPL model R-GPL described above. We run our new R-GPL model on the BEIR and LoTTE datasets, with hard-negative remining every $k = 30{,}000$ steps. For initial hard negatives, we use Hard Negative Miner 1, and Hard Negative Miner 2.
 
-**中.** R-GPL：纳入上文所述的新的重挖掘 GPL 模型 R-GPL。作者在 BEIR 和 LoTTE 数据集上运行这一新的 R-GPL 模型，难负例重挖掘间隔为每 \(k = 30{,}000\) 步。初始难负例使用难负例挖掘器 1 和难负例挖掘器 2。
+**中.** R-GPL：纳入上文所述的新的重挖掘 GPL 模型 R-GPL。作者在 BEIR 和 LoTTE 数据集上运行这一新的 R-GPL 模型，难负例重挖掘间隔为每 $k = 30{,}000$ 步。初始难负例使用难负例挖掘器 1 和难负例挖掘器 2。
 
 ---
 
@@ -264,9 +264,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 | SCIFACT | **69.1** | 57.1 | 66.4 | 67.8+1.4 |
 | Average | 41.1 | 41.8 | 46.4 | **47.7+1.3** |
 
-**Caption EN.** Table 1: Comparison of NDCG@10 results for BEIR test data. In this case MSMARCO was adapted by GPL. R-GPL updated after 30K steps. Bold Text indicates the best scoring model. The improvement points after domain adaptation are indicated. For CQADupstack, we report the mean performance of all the tasks. ⋆ indicates statistical significance (\(p < 0.05\)) of R-GPL over GPL.
+**Caption EN.** Table 1: Comparison of NDCG@10 results for BEIR test data. In this case MSMARCO was adapted by GPL. R-GPL updated after 30K steps. Bold Text indicates the best scoring model. The improvement points after domain adaptation are indicated. For CQADupstack, we report the mean performance of all the tasks. ⋆ indicates statistical significance ($p < 0.05$) of R-GPL over GPL.
 
-**Caption 中.** 表 1：BEIR 测试数据上 NDCG@10 的比较。此处由 GPL 对 MSMARCO 做域适应。R-GPL 在 30K 步之后更新。加粗表示得分最高的模型。域适应之后的提升点数一并标出。对 CQADupstack，报告的是全部子任务的平均性能。⋆ 表示 R-GPL 相对 GPL 的统计显著性（\(p < 0.05\)）。
+**Caption 中.** 表 1：BEIR 测试数据上 NDCG@10 的比较。此处由 GPL 对 MSMARCO 做域适应。R-GPL 在 30K 步之后更新。加粗表示得分最高的模型。域适应之后的提升点数一并标出。对 CQADupstack，报告的是全部子任务的平均性能。⋆ 表示 R-GPL 相对 GPL 的统计显著性（$p < 0.05$）。
 
 **EN.** Table 2 shows the results over the LoTTE datasets, which were not used in the earlier domain adaptation papers. We first observe that the GPL framework translates well to the LoTTE dataset, improving every dataset over the base model. Similar to the BEIR results, R-GPL remining hard negatives boosts GPL’s performance on model 9 out of 12 datasets, while only science forum performance degrades marginally.
 
@@ -290,9 +290,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 | Pooled⋆ | 48.3 | 52.4 | 54.3 | **56.7+2.4** |
 | Average | 53.0 | 58.4 | 64.5 | **65.2+0.6** |
 
-**Caption EN.** Table 2: Comparison of Success @5 results for LoTTE test data. In this case MSMARCO was adapted by GPL. Bold Text indicates the best scoring model. The improvement points after domain adaptation are indicated. ⋆ indicates statistical significance (\(p < 0.05\)) over GPL.
+**Caption EN.** Table 2: Comparison of Success @5 results for LoTTE test data. In this case MSMARCO was adapted by GPL. Bold Text indicates the best scoring model. The improvement points after domain adaptation are indicated. ⋆ indicates statistical significance ($p < 0.05$) over GPL.
 
-**Caption 中.** 表 2：LoTTE 测试数据上 Success@5 的比较。此处由 GPL 对 MSMARCO 做域适应。加粗表示得分最高的模型。域适应之后的提升点数一并标出。⋆ 表示相对 GPL 的统计显著性（\(p < 0.05\)）。
+**Caption 中.** 表 2：LoTTE 测试数据上 Success@5 的比较。此处由 GPL 对 MSMARCO 做域适应。加粗表示得分最高的模型。域适应之后的提升点数一并标出。⋆ 表示相对 GPL 的统计显著性（$p < 0.05$）。
 
 ---
 
@@ -328,13 +328,13 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 
 ### 6.2 Remining Frequency Analysis / 重挖掘频率分析
 
-**EN.** We alter the remining frequency value (\(k\)), and apply the R-GPL on the datasets analyzed in Figure 2. We also report the training loss and teacher margin during the training in Figures 3 and 4.
+**EN.** We alter the remining frequency value ($k$), and apply the R-GPL on the datasets analyzed in Figure 2. We also report the training loss and teacher margin during the training in Figures 3 and 4.
 
-**中.** 作者改变重挖掘频率的取值（\(k\)），并把 R-GPL 用到图 2 所分析的数据集上。图 3 和图 4 还报告训练期间的训练损失和教师间隔。
+**中.** 作者改变重挖掘频率的取值（$k$），并把 R-GPL 用到图 2 所分析的数据集上。图 3 和图 4 还报告训练期间的训练损失和教师间隔。
 
-**EN.** Table 3 depicts that hard-negative re-mining with 30,000 steps yields the best performance improvements. We observe improvements over the plain GPL model in all datasets regardless of the \(k\) value.
+**EN.** Table 3 depicts that hard-negative re-mining with 30,000 steps yields the best performance improvements. We observe improvements over the plain GPL model in all datasets regardless of the $k$ value.
 
-**中.** 表 3 表明，以 30,000 步做难负例重挖掘，带来最好的性能提升。无论 \(k\) 取何值，作者都观察到相对普通 GPL 模型的提升，覆盖全部这些数据集。
+**中.** 表 3 表明，以 30,000 步做难负例重挖掘，带来最好的性能提升。无论 $k$ 取何值，作者都观察到相对普通 GPL 模型的提升，覆盖全部这些数据集。
 
 | Corpus | GPL | 10k | 30k | 50k | 100k |
 | --- | ---: | ---: | ---: | ---: | ---: |
@@ -342,9 +342,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 | FIQA | 32.8 | **34.0** | 33.6 | 33.8 | 33.5 |
 | SCIFACT | 66.4 | 66.1 | **67.8** | 67.3 | 67.7 |
 
-**Caption EN.** Table 3: Comparison of NDCG@10 results for TREC-COVID, FIQA, and SCIFACT datasets. GPL \(X\)k depicts the model with hard negative remining every \(X\) step.
+**Caption EN.** Table 3: Comparison of NDCG@10 results for TREC-COVID, FIQA, and SCIFACT datasets. GPL $X$k depicts the model with hard negative remining every $X$ step.
 
-**Caption 中.** 表 3：TREC-COVID、FIQA 和 SCIFACT 数据集上 NDCG@10 的比较。GPL \(X\)k 表示每隔 \(X\) 步做一次难负例重挖掘的模型。
+**Caption 中.** 表 3：TREC-COVID、FIQA 和 SCIFACT 数据集上 NDCG@10 的比较。GPL $X$k 表示每隔 $X$ 步做一次难负例重挖掘的模型。
 
 **EN.** Figure 3a and Figure 3b show that distillation loss increases after mining with hard negatives and later settles down to previous values. However, this effect is only visible when we have remined the hard negatives for the first time. Later, we do not observe the increase in distillation loss. Furthermore, as the training continues, loss decreases, suggesting that the dense retriever model learns to mimic the margin of the cross-encoder.
 
@@ -365,9 +365,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 
 **中.** 图 4a 和图 4b 画出教师的预测间隔。这些图显示，挖掘难负例之后间隔下降。这一现象在第一次刷新之后尤其明显。分析表明，学生模型（本文的 R-GPL 模型）的蒸馏损失与教师间隔高度耦合。图 6a 和图 6b 画出难负例挖掘各步上的平均相关性分数。第一次重挖难负例之后，相关性急剧上升。之后，这些相关性随每一次重挖掘逐步上升。
 
-**Caption EN.** Figure 4: Predicted cross encoder (CE) relevance margin between query (\(Q\)), relevant document (\(D^{+}\)), and hard negative document (\(D^{-}\)). The margin is calculated using \(\mathrm{CE}(Q, D^{+}) - \mathrm{CE}(Q, D^{-})\). (a) FIQA. (b) TREC-COVID.
+**Caption EN.** Figure 4: Predicted cross encoder (CE) relevance margin between query ($Q$), relevant document ($D^{+}$), and hard negative document ($D^{-}$). The margin is calculated using $\mathrm{CE}(Q, D^{+}) - \mathrm{CE}(Q, D^{-})$. (a) FIQA. (b) TREC-COVID.
 
-**Caption 中.** 图 4：交叉编码器（CE）对查询（\(Q\)）、相关文档（\(D^{+}\)）和难负例文档（\(D^{-}\)）预测的相关性间隔。间隔按 \(\mathrm{CE}(Q, D^{+}) - \mathrm{CE}(Q, D^{-})\) 计算。(a) FIQA。(b) TREC-COVID。
+**Caption 中.** 图 4：交叉编码器（CE）对查询（$Q$）、相关文档（$D^{+}$）和难负例文档（$D^{-}$）预测的相关性间隔。间隔按 $\mathrm{CE}(Q, D^{+}) - \mathrm{CE}(Q, D^{-})$ 计算。(a) FIQA。(b) TREC-COVID。
 
 ![图 4a：FIQA 教师间隔。](figs/fig04a.png)
 ![图 4b：TREC-COVID 教师间隔。](figs/fig04b.png)
@@ -405,9 +405,9 @@ L(Q, D^{+}, D^{-}) = \mathrm{MSE}\big(\mathrm{DR}(Q, D^{+}) - \mathrm{DR}(Q, D^{
 
 **中.** 图 6a 和图 6b 表明，通过刷新难负例索引，相对静态训练方案，作者用更相关的难负例来训练稠密检索模型。这一训练方案在大多数测试集上优于不做难负例重挖掘的方案。一种说得通的解释是对排在前面的文档做了优化。当从模型得到新的难负例时，优化的是顶部文档的间隔。图 5a 和图 5b 展示了这一现象。难负例被刷新后，训练样本覆盖查询嵌入的邻近区域。此外，有了难负例刷新，模型有可能在更广的上下文上训练。静态难负例挖掘会把相同的文档 ID 留在训练集里；而有了刷新，这些文档 ID 会改变，从而覆盖更广的文档集合（Xiong et al., 2020）。表 3 的发现也支持这一点：无论频率如何，重挖难负例都会提升域适应性能。
 
-**Caption EN.** Figure 6: Mean relevancy of returned hard negatives for FIQA and TREC-COVID. Time step 0 indicates the initial hard negatives, each time step after 0 indicates the hard negative remining. Error bars indicate the standard deviation of relevancies at time point \(t\). 1,000 generated queries were randomly selected, and the hard negative relevancies were calculated using the teacher cross-encoder. For each query, top 50 hard negatives are used. (a) FIQA. (b) TREC-COVID.
+**Caption EN.** Figure 6: Mean relevancy of returned hard negatives for FIQA and TREC-COVID. Time step 0 indicates the initial hard negatives, each time step after 0 indicates the hard negative remining. Error bars indicate the standard deviation of relevancies at time point $t$. 1,000 generated queries were randomly selected, and the hard negative relevancies were calculated using the teacher cross-encoder. For each query, top 50 hard negatives are used. (a) FIQA. (b) TREC-COVID.
 
-**Caption 中.** 图 6：FIQA 和 TREC-COVID 上返回的难负例的平均相关性。时间步 0 表示初始难负例，0 之后的每个时间步表示一次难负例重挖掘。误差条表示时间点 \(t\) 上相关性的标准差。随机选取 1,000 条生成查询，难负例相关性用教师交叉编码器计算。每条查询使用前 50 个难负例。(a) FIQA。(b) TREC-COVID。
+**Caption 中.** 图 6：FIQA 和 TREC-COVID 上返回的难负例的平均相关性。时间步 0 表示初始难负例，0 之后的每个时间步表示一次难负例重挖掘。误差条表示时间点 $t$ 上相关性的标准差。随机选取 1,000 条生成查询，难负例相关性用教师交叉编码器计算。每条查询使用前 50 个难负例。(a) FIQA。(b) TREC-COVID。
 
 ![图 6a：FIQA 难负例平均相关性。](figs/fig06a.png)
 ![图 6b：TREC-COVID 难负例平均相关性。](figs/fig06b.png)

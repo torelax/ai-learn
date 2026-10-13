@@ -85,13 +85,13 @@
 
 ![图 2：改写模型的多奖励。每轮采样多份改写列表，按相关性、对齐和多样性打分后加权更新。](figs/fig02.png)
 
-- **EN.** Query Semantic Relevance (QSR). This measures how well the rewritten query preserves the intent of the original. To avoid reliance on costly human annotation, we reuse the human-labeled \<query, rewrite\> pairs (positive vs. negative) from the rewriting model’s SFT data to train an LLM-based binary classifier. During RL training, the confidence derived from the model’s output logits \(z\) is used as the reward signal as Equation 1,
+- **EN.** Query Semantic Relevance (QSR). This measures how well the rewritten query preserves the intent of the original. To avoid reliance on costly human annotation, we reuse the human-labeled \<query, rewrite\> pairs (positive vs. negative) from the rewriting model’s SFT data to train an LLM-based binary classifier. During RL training, the confidence derived from the model’s output logits $z$ is used as the reward signal as Equation 1,
 
 $$
 R_{\mathrm{QSR}} = p_{\mathrm{yes}} = \frac{\exp(z_{\mathrm{yes}})}{\exp(z_{\mathrm{yes}}) + \exp(z_{\mathrm{no}})} \tag{1}
 $$
 
-  **中.** 查询语义相关性（QSR）。衡量改写在多大程度上保住了原查询的意图。为避免依赖昂贵的人工标注，复用改写模型 SFT 数据里已有人工标注的 \<query, rewrite\> 正/负对，训练一个基于 LLM 的二分类器。RL 训练时，用模型输出 logits \(z\) 得到的置信度作为奖励信号，即式 (1)。
+  **中.** 查询语义相关性（QSR）。衡量改写在多大程度上保住了原查询的意图。为避免依赖昂贵的人工标注，复用改写模型 SFT 数据里已有人工标注的 \<query, rewrite\> 正/负对，训练一个基于 LLM 的二分类器。RL 训练时，用模型输出 logits $z$ 得到的置信度作为奖励信号，即式 (1)。
 
 - **EN.** Product-side Distribution Alignment (PDA). To encourage rewrites to align with actual product-side language (e.g., titles, tags), we perform continued pre-training (CPT) on a LLM using product-domain corpora to obtain a model of product expression distribution. For each rewritten query, we compute its perplexity (PPL) under this model; lower PPL indicates better alignment with real product language. In RL, we compute the alignment score using PPL as Equation 2,
 
@@ -107,9 +107,9 @@ $$
 R_{\mathrm{Diversity}} = \frac{1}{\binom{k}{2}} \sum_{i<j}\left(1 - \frac{|n_i \cap n_j|}{|n_i \cup n_j|}\right) \tag{3}
 $$
 
-  where \(n_i\) denotes the set of character \(n\)-grams in rewrite \(r_i\) with \(n = 2\), and \(k = 5\) denotes the number of rewrites considered.
+  where $n_i$ denotes the set of character $n$-grams in rewrite $r_i$ with $n = 2$, and $k = 5$ denotes the number of rewrites considered.
 
-  **中.** 多样性奖励（Diversity）。因为每条查询生成多条改写，要促进它们彼此不同，以覆盖原意图的不同侧面。用 n-gram 重叠计算生成改写之间的成对不相似度，多样性分数如式 (3)。其中 \(n_i\) 是改写 \(r_i\) 的字符 \(n\)-gram 集合，\(n = 2\)；\(k = 5\) 是参与计算的改写条数。
+  **中.** 多样性奖励（Diversity）。因为每条查询生成多条改写，要促进它们彼此不同，以覆盖原意图的不同侧面。用 n-gram 重叠计算生成改写之间的成对不相似度，多样性分数如式 (3)。其中 $n_i$ 是改写 $r_i$ 的字符 $n$-gram 集合，$n = 2$；$k = 5$ 是参与计算的改写条数。
 
 **EN.** Note that we employ a standard format reward commonly used in RL, and the multi-reward signal is activated only when the format is correct. Considering that all the three rewards are continuous rather than discrete, we optimize the model using the REINFORCE++ algorithm [3], a policy gradient method in reinforcement learning. The overall training objective is defined as Equation 4,
 
@@ -123,9 +123,9 @@ $$
 R_{\mathrm{total}} = \alpha R_{\mathrm{QSR}} + \beta R_{\mathrm{PDA}} + \gamma R_{\mathrm{Diversity}} \tag{5}
 $$
 
-and \(\alpha\), \(\beta\) and \(\gamma\) are hyper-parameters, heuristically set to 1.0, 0.5, and 0.1, respectively.
+and $\alpha$, $\beta$ and $\gamma$ are hyper-parameters, heuristically set to 1.0, 0.5, and 0.1, respectively.
 
-**中.** 另外使用 RL 里常见的标准格式奖励，只有格式正确时才激活上述多奖励信号。考虑到三路奖励都是连续值而不是离散值，用 REINFORCE++ [3] 优化模型，这是强化学习中的一种策略梯度方法。总训练目标为式 (4)，其中总奖励为式 (5)。\(\alpha\)、\(\beta\)、\(\gamma\) 为超参数，启发式取 1.0、0.5、0.1。
+**中.** 另外使用 RL 里常见的标准格式奖励，只有格式正确时才激活上述多奖励信号。考虑到三路奖励都是连续值而不是离散值，用 REINFORCE++ [3] 优化模型，这是强化学习中的一种策略梯度方法。总训练目标为式 (4)，其中总奖励为式 (5)。$\alpha$、$\beta$、$\gamma$ 为超参数，启发式取 1.0、0.5、0.1。
 
 ### Query-Rewrite Relevance Classifier / 查询–改写相关性分类器
 
@@ -173,13 +173,13 @@ and \(\alpha\), \(\beta\) and \(\gamma\) are hyper-parameters, heuristically set
 - 否定表达（Negative Expressions）：带否定约束的查询。
 - 一般知识类（General Knowledge Type）：不属于以上三类、但仍需要外部知识的其他知识密集型查询。
 
-**EN.** For offline evaluation, we sample 500 queries per query type from Taobao’s online search logs to reflect the real-world query distribution. For each query, we retrieve the top-200 products using the retrieval model and manually annotate query–item relevance. We evaluate retrieval quality using Item Goodrate and Query Goodrate@N. Item Goodrate measures item-level performance by averaging, across queries, the proportion of highly relevant items in the retrieved set. Query Goodrate@N is defined as the fraction of queries for which at least \(N\) relevant items are retrieved within the top-200 results, capturing per-query coverage of relevant content.
+**EN.** For offline evaluation, we sample 500 queries per query type from Taobao’s online search logs to reflect the real-world query distribution. For each query, we retrieve the top-200 products using the retrieval model and manually annotate query–item relevance. We evaluate retrieval quality using Item Goodrate and Query Goodrate@N. Item Goodrate measures item-level performance by averaging, across queries, the proportion of highly relevant items in the retrieved set. Query Goodrate@N is defined as the fraction of queries for which at least $N$ relevant items are retrieved within the top-200 results, capturing per-query coverage of relevant content.
 
-**中.** 离线评测从淘宝在线搜索日志里按查询类型各抽 500 条，以反映真实查询分布。对每条查询，用检索模型取 top-200 商品，并人工标注查询–商品相关性。用 Item Goodrate 和 Query Goodrate@N 评检索质量。Item Goodrate 衡量商品级表现：对每条查询算召回集合中高度相关商品的比例，再对查询取平均。Query Goodrate@N 定义为：在 top-200 结果里至少召回 \(N\) 个相关商品的查询所占比例，刻画每条查询对相关内容的覆盖。
+**中.** 离线评测从淘宝在线搜索日志里按查询类型各抽 500 条，以反映真实查询分布。对每条查询，用检索模型取 top-200 商品，并人工标注查询–商品相关性。用 Item Goodrate 和 Query Goodrate@N 评检索质量。Item Goodrate 衡量商品级表现：对每条查询算召回集合中高度相关商品的比例，再对查询取平均。Query Goodrate@N 定义为：在 top-200 结果里至少召回 $N$ 个相关商品的查询所占比例，刻画每条查询对相关内容的覆盖。
 
-**EN.** In online A/B testing, we similarly sample 500 queries per query type and evaluate the relevance of the top-10 results on the Taobao Search Results Page (SRP). We conduct a Side-By-Side (SBS) human evaluation: SRP results from the control and treatment buckets are displayed side by side, and annotators perform blinded evaluations. We evaluate the SRP results using three key metrics: Item Goodrate, Query Goodrate and GSB (Good/Same/Bad). Query Goodrate is a page-level relevance metric measuring the proportion of queries whose SRP results are rated "Good" or "Mid" based on the relevance of displayed items. GSB measures the relative quality of SRP results, with GSB \(+x\%\) indicating that \(x\%\) of the test results are preferred over the baseline, capturing the relative improvement.
+**EN.** In online A/B testing, we similarly sample 500 queries per query type and evaluate the relevance of the top-10 results on the Taobao Search Results Page (SRP). We conduct a Side-By-Side (SBS) human evaluation: SRP results from the control and treatment buckets are displayed side by side, and annotators perform blinded evaluations. We evaluate the SRP results using three key metrics: Item Goodrate, Query Goodrate and GSB (Good/Same/Bad). Query Goodrate is a page-level relevance metric measuring the proportion of queries whose SRP results are rated "Good" or "Mid" based on the relevance of displayed items. GSB measures the relative quality of SRP results, with GSB $+x\%$ indicating that $x\%$ of the test results are preferred over the baseline, capturing the relative improvement.
 
-**中.** 在线 A/B 同样按查询类型各抽 500 条，评淘宝搜索结果页（Search Results Page, SRP）上 top-10 结果的相关性。做 SBS 人工评估：对照桶与实验桶的 SRP 结果并排展示，标注员盲评。用三项指标评 SRP：Item Goodrate、Query Goodrate 和 GSB（Good/Same/Bad，好/相同/差）。这里的 Query Goodrate 是页面级相关性指标，衡量 SRP 结果按展示商品相关性被评为 “Good” 或 “Mid” 的查询所占比例。GSB 衡量 SRP 结果的相对质量，GSB \(+x\%\) 表示有 \(x\%\) 的测试结果被偏好于基线，用来刻画相对提升。
+**中.** 在线 A/B 同样按查询类型各抽 500 条，评淘宝搜索结果页（Search Results Page, SRP）上 top-10 结果的相关性。做 SBS 人工评估：对照桶与实验桶的 SRP 结果并排展示，标注员盲评。用三项指标评 SRP：Item Goodrate、Query Goodrate 和 GSB（Good/Same/Bad，好/相同/差）。这里的 Query Goodrate 是页面级相关性指标，衡量 SRP 结果按展示商品相关性被评为 “Good” 或 “Mid” 的查询所占比例。GSB 衡量 SRP 结果的相对质量，GSB $+x\%$ 表示有 $x\%$ 的测试结果被偏好于基线，用来刻画相对提升。
 
 ### 3.2 Offline Evaluation / 离线评测
 

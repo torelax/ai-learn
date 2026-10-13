@@ -61,11 +61,11 @@
 
 | 方法 | 生成查询 |
 | --- | --- |
-| Doc2Query | \(q_1\) can you pay out student loan with a job? / \(q_2\) can you borrow from student loan? / \(q_3\) do you have to pay student loan back? |
-| Doc2Query−− | \(q_1\) can i pay my student loan if i lose my job? / \(q_2\) do student loan have to be paid back if you lose your job? / \(q_3\) can you pay a student loan back? |
-| Doc2Query++ (Ours) | \(q_1\) How do income-based repayment plans affect student loan burdens for individuals earning over £15,000 a year? / \(q_2\) How do dividend payments impact debt repayment strategies for investors with fluctuating income streams? / \(q_3\) What are the key factors to consider when deciding whether to sell underperforming shares to pay off debts? |
+| Doc2Query | $q_1$ can you pay out student loan with a job? / $q_2$ can you borrow from student loan? / $q_3$ do you have to pay student loan back? |
+| Doc2Query−− | $q_1$ can i pay my student loan if i lose my job? / $q_2$ do student loan have to be paid back if you lose your job? / $q_3$ can you pay a student loan back? |
+| Doc2Query++ (Ours) | $q_1$ How do income-based repayment plans affect student loan burdens for individuals earning over £15,000 a year? / $q_2$ How do dividend payments impact debt repayment strategies for investors with fluctuating income streams? / $q_3$ What are the key factors to consider when deciding whether to sell underperforming shares to pay off debts? |
 
-Doc2Query++ 三条的中译。\(q_1\)：对年收入超过 15,000 英镑的人，基于收入的还款计划如何影响学生贷款负担？\(q_2\)：对收入波动的投资者，股息支付如何影响债务偿还策略？\(q_3\)：在决定是否卖掉表现不佳的股票来还债时，要考虑哪些关键因素？
+Doc2Query++ 三条的中译。$q_1$：对年收入超过 15,000 英镑的人，基于收入的还款计划如何影响学生贷款负担？$q_2$：对收入波动的投资者，股息支付如何影响债务偿还策略？$q_3$：在决定是否卖掉表现不佳的股票来还债时，要考虑哪些关键因素？
 
 **EN.** Our key contributions are as follows:
 
@@ -91,9 +91,9 @@ Doc2Query++ 三条的中译。\(q_1\)：对年收入超过 15,000 英镑的人�
 
 ### 2.1 Document Expansion / 文档扩展
 
-**EN.** Document expansion (DE) addresses vocabulary mismatch by enhancing documents with relevant terms before indexing. For a document collection \(D = \{d_1, d_2, \ldots, d_n\}\), an expansion method generates synthetic queries \(Q_i = \{q_{i1}, q_{i2}, \ldots, q_{im}\}\) for each document \(d_i\). These queries are appended to the original document, forming an expanded document \(d'_i = d_i \cup Q_i\). The resulting expanded corpus \(D' = \{d'_1, d'_2, \ldots, d'_n\}\) is then indexed and used for search.
+**EN.** Document expansion (DE) addresses vocabulary mismatch by enhancing documents with relevant terms before indexing. For a document collection $D = \{d_1, d_2, \ldots, d_n\}$, an expansion method generates synthetic queries $Q_i = \{q_{i1}, q_{i2}, \ldots, q_{im}\}$ for each document $d_i$. These queries are appended to the original document, forming an expanded document $d'_i = d_i \cup Q_i$. The resulting expanded corpus $D' = \{d'_1, d'_2, \ldots, d'_n\}$ is then indexed and used for search.
 
-**中.** 文档扩展（DE）在索引前用相关词项增强文档，以应对词汇不匹配。对文档集合 \(D = \{d_1, d_2, \ldots, d_n\}\)，扩展方法为每篇文档 \(d_i\) 生成合成查询 \(Q_i = \{q_{i1}, q_{i2}, \ldots, q_{im}\}\)。这些查询追加到原文上，形成扩展文档 \(d'_i = d_i \cup Q_i\)。得到的扩展语料 \(D' = \{d'_1, d'_2, \ldots, d'_n\}\) 再被索引并用于检索。
+**中.** 文档扩展（DE）在索引前用相关词项增强文档，以应对词汇不匹配。对文档集合 $D = \{d_1, d_2, \ldots, d_n\}$，扩展方法为每篇文档 $d_i$ 生成合成查询 $Q_i = \{q_{i1}, q_{i2}, \ldots, q_{im}\}$。这些查询追加到原文上，形成扩展文档 $d'_i = d_i \cup Q_i$。得到的扩展语料 $D' = \{d'_1, d'_2, \ldots, d'_n\}$ 再被索引并用于检索。
 
 #### 2.1.1 Early Approaches to Document Expansion / 早期文档扩展
 
@@ -155,29 +155,29 @@ Doc2Query++ 三条的中译。\(q_1\)：对年收入超过 15,000 英镑的人�
 
 **中.** 为在不手工调参的情况下抓住每篇文档的潜在语义结构，采用由 BERTopic 实现的、基于嵌入的聚类。与传统基于词面的主题模型 [4, 26, 39] 不同，BERTopic 直接在上下文化文本嵌入上工作，并按给定语料动态推断最优主题数。句子是表示连贯主题内容的自然最小单位，因此建模前先把每篇文档按句切开。分句使用 NLTK 的 sent_tokenize [3]。
 
-**EN.** Formally, we consider a corpus \(\mathcal{D} = \{d_1, \ldots, d_N\}\), where each document \(d\) is a set of sentences \(S_d\). We first encode every sentence \(s\) from the overall sentence set \(\mathcal{S} = \bigcup_{d \in \mathcal{D}} S_d\) into an \(m\)-dimensional embedding \(\mathbf{z}_s = f_{\mathrm{enc}}(s)\) using a pre-trained, domain-specific SBERT encoder \(f_{\mathrm{enc}}: \mathcal{S} \rightarrow \mathbb{R}^m\) [41]. Next, BERTopic clusters the sentence embeddings \(\{\mathbf{z}_s\}_{s \in \mathcal{S}}\) via HDBSCAN [35], a density-based algorithm that automatically determines the number of topic clusters, say \(C\). Each cluster \(j \in \{1, \ldots, C\}\) is represented by a centroid vector \(\boldsymbol{\mu}_j\). We then assign each sentence embedding \(\mathbf{z}_s\) to its nearest topic cluster \(\phi(\mathbf{z}_s)\) using L2 distance:
+**EN.** Formally, we consider a corpus $\mathcal{D} = \{d_1, \ldots, d_N\}$, where each document $d$ is a set of sentences $S_d$. We first encode every sentence $s$ from the overall sentence set $\mathcal{S} = \bigcup_{d \in \mathcal{D}} S_d$ into an $m$-dimensional embedding $\mathbf{z}_s = f_{\mathrm{enc}}(s)$ using a pre-trained, domain-specific SBERT encoder $f_{\mathrm{enc}}: \mathcal{S} \rightarrow \mathbb{R}^m$ [41]. Next, BERTopic clusters the sentence embeddings $\{\mathbf{z}_s\}_{s \in \mathcal{S}}$ via HDBSCAN [35], a density-based algorithm that automatically determines the number of topic clusters, say $C$. Each cluster $j \in \{1, \ldots, C\}$ is represented by a centroid vector $\boldsymbol{\mu}_j$. We then assign each sentence embedding $\mathbf{z}_s$ to its nearest topic cluster $\phi(\mathbf{z}_s)$ using L2 distance:
 
-\[
+$$
 \phi(\mathbf{z}_s) = \arg\min_{j=1,\ldots,C} \lVert \mathbf{z}_s - \boldsymbol{\mu}_j \rVert_2,
-\]
+$$
 
-excluding any outlier embeddings identified by HDBSCAN. Finally, the topic representation for a document \(d\) is the union of topics assigned to its sentences:
+excluding any outlier embeddings identified by HDBSCAN. Finally, the topic representation for a document $d$ is the union of topics assigned to its sentences:
 
-\[
+$$
 T(d) = \bigcup_{s \in S_d} \phi(\mathbf{z}_s).
-\]
+$$
 
-**中.** 形式上，语料 \(\mathcal{D} = \{d_1, \ldots, d_N\}\)，每篇文档 \(d\) 是句子集合 \(S_d\)。先用预训练的、领域专用的 SBERT 编码器 \(f_{\mathrm{enc}}: \mathcal{S} \rightarrow \mathbb{R}^m\) [41]，把全体句子集 \(\mathcal{S} = \bigcup_{d \in \mathcal{D}} S_d\) 中的每个句子 \(s\) 编成 \(m\) 维嵌入 \(\mathbf{z}_s = f_{\mathrm{enc}}(s)\)。接着 BERTopic 用 HDBSCAN [35] 对句向量 \(\{\mathbf{z}_s\}_{s \in \mathcal{S}}\) 聚类。HDBSCAN 是基于密度的算法，会自动决定主题簇个数，记为 \(C\)。每个簇 \(j \in \{1, \ldots, C\}\) 用质心向量 \(\boldsymbol{\mu}_j\) 表示。再按 L2 距离把每个句向量 \(\mathbf{z}_s\) 分到最近的主题簇 \(\phi(\mathbf{z}_s)\)：
+**中.** 形式上，语料 $\mathcal{D} = \{d_1, \ldots, d_N\}$，每篇文档 $d$ 是句子集合 $S_d$。先用预训练的、领域专用的 SBERT 编码器 $f_{\mathrm{enc}}: \mathcal{S} \rightarrow \mathbb{R}^m$ [41]，把全体句子集 $\mathcal{S} = \bigcup_{d \in \mathcal{D}} S_d$ 中的每个句子 $s$ 编成 $m$ 维嵌入 $\mathbf{z}_s = f_{\mathrm{enc}}(s)$。接着 BERTopic 用 HDBSCAN [35] 对句向量 $\{\mathbf{z}_s\}_{s \in \mathcal{S}}$ 聚类。HDBSCAN 是基于密度的算法，会自动决定主题簇个数，记为 $C$。每个簇 $j \in \{1, \ldots, C\}$ 用质心向量 $\boldsymbol{\mu}_j$ 表示。再按 L2 距离把每个句向量 $\mathbf{z}_s$ 分到最近的主题簇 $\phi(\mathbf{z}_s)$：
 
-\[
+$$
 \phi(\mathbf{z}_s) = \arg\min_{j=1,\ldots,C} \lVert \mathbf{z}_s - \boldsymbol{\mu}_j \rVert_2,
-\]
+$$
 
-HDBSCAN 标出的离群嵌入除外。最后，文档 \(d\) 的主题表示是其句子被分到的主题之并：
+HDBSCAN 标出的离群嵌入除外。最后，文档 $d$ 的主题表示是其句子被分到的主题之并：
 
-\[
+$$
 T(d) = \bigcup_{s \in S_d} \phi(\mathbf{z}_s).
-\]
+$$
 
 **EN.** This unsupervised approach allows us to model a document’s latent topics by leveraging contextual embeddings, ensuring generalizability across diverse domains.
 
@@ -185,9 +185,9 @@ T(d) = \bigcup_{s \in S_d} \phi(\mathbf{z}_s).
 
 #### 3.1.2 Fine-Tuning Topic Representations via LLM / 用 LLM 精调主题表示
 
-**EN.** Since unsupervised clustering yields topic clusters without explicit labels, we refine them into coherent, human-readable names to better guide the LLM in generating queries that span all specified topics. We achieve this using BERTopic’s class-based TF-IDF (c-TF-IDF) implementation [24], where sentences assigned to each cluster are concatenated into a pseudo-document. Term frequency is computed within each pseudo-document, with inverse document frequency measured across the cluster collection, producing weighted scores that highlight terms both representative of and distinctive to each topic. From these, we select the top-\(M\) keywords as provisional descriptors. Next, we identify the top-\(L\) representative sentences per topic—those whose embeddings are closest to the topic centroid—and feed them, along with the corresponding c-TF-IDF keywords, into the LLM via few-shot prompting (see Appendix A.1) to generate concise, natural-language topic names. In our experiments, we adopt BERTopic’s default settings (\(M = 10\), \(L = 3\)), which yield robust and coherent results.
+**EN.** Since unsupervised clustering yields topic clusters without explicit labels, we refine them into coherent, human-readable names to better guide the LLM in generating queries that span all specified topics. We achieve this using BERTopic’s class-based TF-IDF (c-TF-IDF) implementation [24], where sentences assigned to each cluster are concatenated into a pseudo-document. Term frequency is computed within each pseudo-document, with inverse document frequency measured across the cluster collection, producing weighted scores that highlight terms both representative of and distinctive to each topic. From these, we select the top-$M$ keywords as provisional descriptors. Next, we identify the top-$L$ representative sentences per topic—those whose embeddings are closest to the topic centroid—and feed them, along with the corresponding c-TF-IDF keywords, into the LLM via few-shot prompting (see Appendix A.1) to generate concise, natural-language topic names. In our experiments, we adopt BERTopic’s default settings ($M = 10$, $L = 3$), which yield robust and coherent results.
 
-**中.** 无监督聚类得到的主题簇没有显式标签。作者把它们精炼成连贯、人可读的名字，以便更好地引导 LLM 生成覆盖全部指定主题的查询。做法用 BERTopic 的基于类的 TF-IDF（c-TF-IDF）[24]：分到同一簇的句子拼成一篇伪文档。词频在每篇伪文档内计算，逆文档频率在簇集合上计算，得到的加权分数突出既代表该主题、又将该主题与其他主题区分开的词。从中取 top-\(M\) 关键词作为临时描述。然后为每个主题找出 top-\(L\) 代表句——嵌入离主题质心最近的句子——连同对应的 c-TF-IDF 关键词，经少样本提示送进 LLM（见附录 A.1），生成简短的自然语言主题名。实验采用 BERTopic 默认设置（\(M = 10\)，\(L = 3\)），结果稳健且连贯。
+**中.** 无监督聚类得到的主题簇没有显式标签。作者把它们精炼成连贯、人可读的名字，以便更好地引导 LLM 生成覆盖全部指定主题的查询。做法用 BERTopic 的基于类的 TF-IDF（c-TF-IDF）[24]：分到同一簇的句子拼成一篇伪文档。词频在每篇伪文档内计算，逆文档频率在簇集合上计算，得到的加权分数突出既代表该主题、又将该主题与其他主题区分开的词。从中取 top-$M$ 关键词作为临时描述。然后为每个主题找出 top-$L$ 代表句——嵌入离主题质心最近的句子——连同对应的 c-TF-IDF 关键词，经少样本提示送进 LLM（见附录 A.1），生成简短的自然语言主题名。实验采用 BERTopic 默认设置（$M = 10$，$L = 3$），结果稳健且连贯。
 
 ### 3.2 Keyword Extraction and Selection / 关键词抽取与选择
 
@@ -195,141 +195,141 @@ T(d) = \bigcup_{s \in S_d} \phi(\mathbf{z}_s).
 
 **中.** 最初的做法是直接用每篇文档推断主题集里的 top-10 个 c-TF-IDF 关键词来引导查询生成。这会引入大量噪声：许多簇级关键词在语料层面很显著，对单篇文档却无关。例如，一篇讲股票交易里简单移动平均交叉策略的文档，会和加密货币交易文档共享 “market”“trend”“volatility” 这类通用金融词，于是无监督聚类可能把它归进以加密货币为中心的主题。这篇文档就会得到 “blockchain”“bitcoin”“mining”“smart contract” 等无关关键词，它们和移动平均或股票市场都无关，从而把 LLM 带离文档的核心内容。
 
-**EN.** To address this, we complement topic-level keywords \(K_d^{\mathrm{topic}}\) with document-level extraction using KeyBERT [23], whose embedding-based mechanism aligns with BERTopic by leveraging SBERT representations to identify semantically meaningful phrases beyond raw token counts. Specifically, we apply KeyBERT to encode each document and its candidate n-grams, ranking them by cosine similarity to the document embedding and generating a top-20 n-grams (n=1–3) per document; to promote diversity and minimize redundancy, we then use Maximal Marginal Relevance (MMR, \(\lambda = 0.7\)), yielding our document-level keywords \(K_d^{\mathrm{doc}}\). Next, let \(K_d^{\mathrm{topic}}\) and \(K_d^{\mathrm{doc}}\) denote the topic- and document-level keywords for document \(d\), respectively. Here, \(K_d^{\mathrm{topic}}\) provides “new-term” signals for broader thematic novelty, while \(K_d^{\mathrm{doc}}\) emphasize salient in-text n-grams reflecting the document’s specific content. Inspired by Lin et al.’s Doc2Query analysis showing gains from both new and copied terms [31], we first form a unified candidate keyword pool:
+**EN.** To address this, we complement topic-level keywords $K_d^{\mathrm{topic}}$ with document-level extraction using KeyBERT [23], whose embedding-based mechanism aligns with BERTopic by leveraging SBERT representations to identify semantically meaningful phrases beyond raw token counts. Specifically, we apply KeyBERT to encode each document and its candidate n-grams, ranking them by cosine similarity to the document embedding and generating a top-20 n-grams (n=1–3) per document; to promote diversity and minimize redundancy, we then use Maximal Marginal Relevance (MMR, $\lambda = 0.7$), yielding our document-level keywords $K_d^{\mathrm{doc}}$. Next, let $K_d^{\mathrm{topic}}$ and $K_d^{\mathrm{doc}}$ denote the topic- and document-level keywords for document $d$, respectively. Here, $K_d^{\mathrm{topic}}$ provides “new-term” signals for broader thematic novelty, while $K_d^{\mathrm{doc}}$ emphasize salient in-text n-grams reflecting the document’s specific content. Inspired by Lin et al.’s Doc2Query analysis showing gains from both new and copied terms [31], we first form a unified candidate keyword pool:
 
-\[
+$$
 K_d = K_d^{\mathrm{topic}} \cup K_d^{\mathrm{doc}}.
-\]
+$$
 
-**中.** 为此，用 KeyBERT [23] 的文档级抽取补上主题级关键词 \(K_d^{\mathrm{topic}}\)。KeyBERT 基于嵌入，和 BERTopic 一样用 SBERT 表示，找出超出原始词频计数的、语义上有意义的短语。具体地，用 KeyBERT 编码每篇文档及其候选 n-gram，按与文档嵌入的余弦相似度排序，每篇文档取 top-20 个 n-gram（n=1–3）；为促进多样性、减少冗余，再用最大边际相关（Maximal Marginal Relevance, MMR，\(\lambda = 0.7\)），得到文档级关键词 \(K_d^{\mathrm{doc}}\)。\(K_d^{\mathrm{topic}}\) 与 \(K_d^{\mathrm{doc}}\) 分别是文档 \(d\) 的主题级和文档级关键词。前者提供「新词」信号，带来更广的主题新颖性；后者强调反映该文档具体内容的显著文内 n-gram。受 Lin 等人对 Doc2Query 的分析启发——新词和复制词都有增益 [31]——先形成统一的候选关键词池：
+**中.** 为此，用 KeyBERT [23] 的文档级抽取补上主题级关键词 $K_d^{\mathrm{topic}}$。KeyBERT 基于嵌入，和 BERTopic 一样用 SBERT 表示，找出超出原始词频计数的、语义上有意义的短语。具体地，用 KeyBERT 编码每篇文档及其候选 n-gram，按与文档嵌入的余弦相似度排序，每篇文档取 top-20 个 n-gram（n=1–3）；为促进多样性、减少冗余，再用最大边际相关（Maximal Marginal Relevance, MMR，$\lambda = 0.7$），得到文档级关键词 $K_d^{\mathrm{doc}}$。$K_d^{\mathrm{topic}}$ 与 $K_d^{\mathrm{doc}}$ 分别是文档 $d$ 的主题级和文档级关键词。前者提供「新词」信号，带来更广的主题新颖性；后者强调反映该文档具体内容的显著文内 n-gram。受 Lin 等人对 Doc2Query 的分析启发——新词和复制词都有增益 [31]——先形成统一的候选关键词池：
 
-\[
+$$
 K_d = K_d^{\mathrm{topic}} \cup K_d^{\mathrm{doc}}.
-\]
+$$
 
-**EN.** We then instruct an LLM to select a final subset \(\widehat{K}_d \subset K_d\) (with \(\lvert \widehat{K}_d \rvert = 10\)) by asking it to choose the keywords that best align with the document’s core theme (see Appendix A.2 for the prompt). To verify that topic-only, document-only, and hybrid keyword sources each contribute uniquely to retrieval effectiveness, we conduct an ablation study in Section 4.2.3, demonstrating that our LLM-guided fusion outperforms either source used in isolation.
+**EN.** We then instruct an LLM to select a final subset $\widehat{K}_d \subset K_d$ (with $\lvert \widehat{K}_d \rvert = 10$) by asking it to choose the keywords that best align with the document’s core theme (see Appendix A.2 for the prompt). To verify that topic-only, document-only, and hybrid keyword sources each contribute uniquely to retrieval effectiveness, we conduct an ablation study in Section 4.2.3, demonstrating that our LLM-guided fusion outperforms either source used in isolation.
 
-**中.** 然后指示 LLM 选出最终子集 \(\widehat{K}_d \subset K_d\)（\(\lvert \widehat{K}_d \rvert = 10\)），要求它选择最贴合文档核心主题的关键词（提示见附录 A.2）。为验证只用主题词、只用文档词、以及混合来源各自对检索效果有独特贡献，第 4.2.3 节做消融，表明由 LLM 引导的融合优于单独使用任一来源。
+**中.** 然后指示 LLM 选出最终子集 $\widehat{K}_d \subset K_d$（$\lvert \widehat{K}_d \rvert = 10$），要求它选择最贴合文档核心主题的关键词（提示见附录 A.2）。为验证只用主题词、只用文档词、以及混合来源各自对检索效果有独特贡献，第 4.2.3 节做消融，表明由 LLM 引导的融合优于单独使用任一来源。
 
 ### 3.3 Topic-Coverage based Query Generation / 基于主题覆盖的查询生成
 
-**EN.** Given a document \(d\) with its inferred topic set \(T_d\) and keyword list \(K_d\) obtained from above stages, our goal is to generate a set of \(M\) queries that collectively cover all topics in \(T_d\) and incorporate relevant keywords from \(K_d\) to enhance lexical diversity and relevance. Prior LLM-based QG methods [5, 14, 28] typically produce one query at a time without explicit mechanisms for topic coverage, while CCQGen [29] uses iterative classification to enforce coverage, which can be computationally intensive. In contrast, we leverage the LLM’s autoregressive capabilities and contextual understanding to generate queries in batches, ensuring coverage in an efficient manner.
+**EN.** Given a document $d$ with its inferred topic set $T_d$ and keyword list $K_d$ obtained from above stages, our goal is to generate a set of $M$ queries that collectively cover all topics in $T_d$ and incorporate relevant keywords from $K_d$ to enhance lexical diversity and relevance. Prior LLM-based QG methods [5, 14, 28] typically produce one query at a time without explicit mechanisms for topic coverage, while CCQGen [29] uses iterative classification to enforce coverage, which can be computationally intensive. In contrast, we leverage the LLM’s autoregressive capabilities and contextual understanding to generate queries in batches, ensuring coverage in an efficient manner.
 
-**中.** 给定文档 \(d\)、前面阶段得到的推断主题集 \(T_d\) 和关键词列表 \(K_d\)，目标是生成一组 \(M\) 条查询，合在一起覆盖 \(T_d\) 中的全部主题，并纳入 \(K_d\) 里的相关关键词，以提高词汇多样性和相关性。先前基于 LLM 的查询生成 [5, 14, 28] 通常一次只产一条查询，没有显式的主题覆盖机制；CCQGen [29] 用迭代分类来强制覆盖，计算可能很重。本文则利用 LLM 的自回归能力和上下文理解，按批生成查询，用更省的方式保证覆盖。
+**中.** 给定文档 $d$、前面阶段得到的推断主题集 $T_d$ 和关键词列表 $K_d$，目标是生成一组 $M$ 条查询，合在一起覆盖 $T_d$ 中的全部主题，并纳入 $K_d$ 里的相关关键词，以提高词汇多样性和相关性。先前基于 LLM 的查询生成 [5, 14, 28] 通常一次只产一条查询，没有显式的主题覆盖机制；CCQGen [29] 用迭代分类来强制覆盖，计算可能很重。本文则利用 LLM 的自回归能力和上下文理解，按批生成查询，用更省的方式保证覆盖。
 
-**EN.** Specifically, we prompt the LLM with the document text, \(T_d\), and \(K_d\), using a few-shot template that includes \(n\) exemplar (e.g., document-topic-keyword-multi-query tuples) demonstrating how to distribute queries across topics while weaving in keywords (see Appendix A.3 for the full prompt). To balance generation efficiency with coverage control, we generate queries in batches of size \(b = 3\) until reaching \(M\). In qualitative assessments, we observed that single-query generation often leads to incomplete coverage by overlooking remaining topics, whereas our multi-query approach consistently spans all facets, yielding a more faithful semantic representation without the overhead of post-generation filtering or classifiers.
+**EN.** Specifically, we prompt the LLM with the document text, $T_d$, and $K_d$, using a few-shot template that includes $n$ exemplar (e.g., document-topic-keyword-multi-query tuples) demonstrating how to distribute queries across topics while weaving in keywords (see Appendix A.3 for the full prompt). To balance generation efficiency with coverage control, we generate queries in batches of size $b = 3$ until reaching $M$. In qualitative assessments, we observed that single-query generation often leads to incomplete coverage by overlooking remaining topics, whereas our multi-query approach consistently spans all facets, yielding a more faithful semantic representation without the overhead of post-generation filtering or classifiers.
 
-**中.** 具体地，把文档文本、\(T_d\) 和 \(K_d\) 一起提示给 LLM，少样本模板里含 \(n\) 个示例（例如文档–主题–关键词–多查询元组），示范如何把查询分配到各主题上、同时织入关键词（完整提示见附录 A.3）。为平衡生成效率与覆盖控制，按批大小 \(b = 3\) 生成，直到达到 \(M\)。定性观察中，单条查询生成常常漏掉其余主题，覆盖不全；多查询做法则稳定地覆盖全部侧面，语义表示更忠实，也不需要生成后再过滤或加分类器。
+**中.** 具体地，把文档文本、$T_d$ 和 $K_d$ 一起提示给 LLM，少样本模板里含 $n$ 个示例（例如文档–主题–关键词–多查询元组），示范如何把查询分配到各主题上、同时织入关键词（完整提示见附录 A.3）。为平衡生成效率与覆盖控制，按批大小 $b = 3$ 生成，直到达到 $M$。定性观察中，单条查询生成常常漏掉其余主题，覆盖不全；多查询做法则稳定地覆盖全部侧面，语义表示更忠实，也不需要生成后再过滤或加分类器。
 
 ### 3.4 Sparse and Dense Retrieval with Expansion and Dual-Index Fusion / 带扩展与双索引融合的稀疏和稠密检索
 
-**EN.** Most prior document-expansion methods target sparse retrieval alone [21, 37, 38]. Accordingly, for sparse retrieval, we also follow this standard document-expansion approach: we concatenate each document’s generated queries to its original text, rebuild the inverted index over this expanded corpus (for example, using BM25), and then perform retrieval as usual. While this approach reliably boosts both recall and precision in sparse retrieval by introducing new terms and mitigating vocabulary mismatch, naively appending expansions degrades dense retrieval effectiveness [51] due to semantic noise injected by expanded queries, which weakens the original document embedding. To address this, we propose a Dual-Index Fusion strategy that decouples expanded queries from raw text. Specifically, let each document \(d\) have \(M\) expanded queries \(q_{d,1}, \ldots, q_{d,M}\) generated through a QG model. We construct two separate indices: (1) text index \(\mathcal{I}_t\) of original document embeddings \(\mathbf{v}_d\) and (2) query index \(\mathcal{I}_q\) of query embeddings \(\mathbf{u}_{d,i}\), each linked back to its source document \(d\). At retrieval time, given a user query \(Q\) with embedding \(\mathbf{v}_Q\), we perform:
+**EN.** Most prior document-expansion methods target sparse retrieval alone [21, 37, 38]. Accordingly, for sparse retrieval, we also follow this standard document-expansion approach: we concatenate each document’s generated queries to its original text, rebuild the inverted index over this expanded corpus (for example, using BM25), and then perform retrieval as usual. While this approach reliably boosts both recall and precision in sparse retrieval by introducing new terms and mitigating vocabulary mismatch, naively appending expansions degrades dense retrieval effectiveness [51] due to semantic noise injected by expanded queries, which weakens the original document embedding. To address this, we propose a Dual-Index Fusion strategy that decouples expanded queries from raw text. Specifically, let each document $d$ have $M$ expanded queries $q_{d,1}, \ldots, q_{d,M}$ generated through a QG model. We construct two separate indices: (1) text index $\mathcal{I}_t$ of original document embeddings $\mathbf{v}_d$ and (2) query index $\mathcal{I}_q$ of query embeddings $\mathbf{u}_{d,i}$, each linked back to its source document $d$. At retrieval time, given a user query $Q$ with embedding $\mathbf{v}_Q$, we perform:
 
-**中.** 先前多数文档扩展方法只针对稀疏检索 [21, 37, 38]。因此稀疏检索也沿用这一标准做法：把每篇文档的生成查询拼到原文上，在扩展语料上重建倒排索引（例如用 BM25），再按通常方式检索。引入新词、缓解词汇不匹配，这条路在稀疏检索上能较稳定地同时提高召回和精度；但朴素追加扩展会降低稠密检索效果 [51]，因为扩展查询注入的语义噪声削弱了原文档嵌入。为此提出双索引融合，把扩展查询和原文拆开。设每篇文档 \(d\) 有 QG 模型生成的 \(M\) 条扩展查询 \(q_{d,1}, \ldots, q_{d,M}\)。建两个分开的索引：（1）原文嵌入 \(\mathbf{v}_d\) 的文本索引 \(\mathcal{I}_t\)；（2）查询嵌入 \(\mathbf{u}_{d,i}\) 的查询索引 \(\mathcal{I}_q\)，每条都链回源文档 \(d\)。检索时，给定用户查询 \(Q\) 及其嵌入 \(\mathbf{v}_Q\)，做下面三步：
+**中.** 先前多数文档扩展方法只针对稀疏检索 [21, 37, 38]。因此稀疏检索也沿用这一标准做法：把每篇文档的生成查询拼到原文上，在扩展语料上重建倒排索引（例如用 BM25），再按通常方式检索。引入新词、缓解词汇不匹配，这条路在稀疏检索上能较稳定地同时提高召回和精度；但朴素追加扩展会降低稠密检索效果 [51]，因为扩展查询注入的语义噪声削弱了原文档嵌入。为此提出双索引融合，把扩展查询和原文拆开。设每篇文档 $d$ 有 QG 模型生成的 $M$ 条扩展查询 $q_{d,1}, \ldots, q_{d,M}$。建两个分开的索引：（1）原文嵌入 $\mathbf{v}_d$ 的文本索引 $\mathcal{I}_t$；（2）查询嵌入 $\mathbf{u}_{d,i}$ 的查询索引 $\mathcal{I}_q$，每条都链回源文档 $d$。检索时，给定用户查询 $Q$ 及其嵌入 $\mathbf{v}_Q$，做下面三步：
 
-**EN.** (1) Text retrieval. We query \(\mathcal{I}_t\) to obtain the top–\(n_t\) document candidates
+**EN.** (1) Text retrieval. We query $\mathcal{I}_t$ to obtain the top–$n_t$ document candidates
 
-\[
+$$
 \mathcal{D}_t = \{d^t_1, \ldots, d^t_{n_t}\},
-\]
+$$
 
-where each document \(d \in \mathcal{D}_t\) is scored by
+where each document $d \in \mathcal{D}_t$ is scored by
 
-\[
+$$
 S_t(d) = \mathrm{sim}(\mathbf{v}_Q, \mathbf{v}_d).
-\]
+$$
 
 This captures the similarity between the query and the original document embeddings.
 
-**中.** （1）文本检索。查询 \(\mathcal{I}_t\)，得到 top–\(n_t\) 文档候选
+**中.** （1）文本检索。查询 $\mathcal{I}_t$，得到 top–$n_t$ 文档候选
 
-\[
+$$
 \mathcal{D}_t = \{d^t_1, \ldots, d^t_{n_t}\},
-\]
+$$
 
-其中每篇 \(d \in \mathcal{D}_t\) 的分数为
+其中每篇 $d \in \mathcal{D}_t$ 的分数为
 
-\[
+$$
 S_t(d) = \mathrm{sim}(\mathbf{v}_Q, \mathbf{v}_d).
-\]
+$$
 
 这捕捉的是查询与原文档嵌入之间的相似度。
 
-**EN.** (2) Query retrieval and aggregation. Simultaneously, we query \(\mathcal{I}_q\) to retrieve the top–\(n_q\) expanded-query embeddings nearest to the user query vector \(\mathbf{v}_Q\). Let \(\mathcal{Q} = \{q_1, q_2, \ldots, q_N\}\) denote all generated queries from the entire corpus, where each \(q_j\) has a dense embedding \(\mathbf{u}_j\), and is associated with a source document via a mapping function \(\mathrm{doc}(j)\). Let
+**EN.** (2) Query retrieval and aggregation. Simultaneously, we query $\mathcal{I}_q$ to retrieve the top–$n_q$ expanded-query embeddings nearest to the user query vector $\mathbf{v}_Q$. Let $\mathcal{Q} = \{q_1, q_2, \ldots, q_N\}$ denote all generated queries from the entire corpus, where each $q_j$ has a dense embedding $\mathbf{u}_j$, and is associated with a source document via a mapping function $\mathrm{doc}(j)$. Let
 
-\[
+$$
 H_q = \{j_1, \ldots, j_{n_q}\} \subseteq \{1, \ldots, N\}
-\]
+$$
 
-be the indices of these retrieved query embeddings (global query indices). For each document \(d\), define the set of retrieved queries originating from \(d\) as:
+be the indices of these retrieved query embeddings (global query indices). For each document $d$, define the set of retrieved queries originating from $d$ as:
 
-\[
+$$
 Q_d = \{ j \in H_q \mid \mathrm{doc}(j) = d \}.
-\]
+$$
 
-For each \(j \in Q_d\), compute the similarity score:
+For each $j \in Q_d$, compute the similarity score:
 
-\[
+$$
 S_q(d, j) = \mathrm{sim}(\mathbf{v}_Q, \mathbf{u}_j).
-\]
+$$
 
 Since multiple queries may be retrieved from the same document, we aggregate their relevance using max-pooling:
 
-\[
+$$
 S_q(d) =
 \begin{cases}
 \max_{j \in Q_d} S_q(d, j) & \text{if } Q_d \neq \emptyset, \\
 0 & \text{if } Q_d = \emptyset.
 \end{cases}
-\]
+$$
 
-i.e., if none of \(d\)’s expanded queries appear in the top–\(n_q\) retrieved set, then \(S_q(d) = 0\).
+i.e., if none of $d$’s expanded queries appear in the top–$n_q$ retrieved set, then $S_q(d) = 0$.
 
-**中.** （2）查询检索与聚合。同时查询 \(\mathcal{I}_q\)，取出离用户查询向量 \(\mathbf{v}_Q\) 最近的 top–\(n_q\) 条扩展查询嵌入。设 \(\mathcal{Q} = \{q_1, q_2, \ldots, q_N\}\) 为全语料生成的全部查询，每条 \(q_j\) 有稠密嵌入 \(\mathbf{u}_j\)，并通过映射 \(\mathrm{doc}(j)\) 关联到源文档。令
+**中.** （2）查询检索与聚合。同时查询 $\mathcal{I}_q$，取出离用户查询向量 $\mathbf{v}_Q$ 最近的 top–$n_q$ 条扩展查询嵌入。设 $\mathcal{Q} = \{q_1, q_2, \ldots, q_N\}$ 为全语料生成的全部查询，每条 $q_j$ 有稠密嵌入 $\mathbf{u}_j$，并通过映射 $\mathrm{doc}(j)$ 关联到源文档。令
 
-\[
+$$
 H_q = \{j_1, \ldots, j_{n_q}\} \subseteq \{1, \ldots, N\}
-\]
+$$
 
-为这些被检索到的查询嵌入的下标（全局查询下标）。对每篇文档 \(d\)，来自 \(d\) 且被检索到的查询集合为
+为这些被检索到的查询嵌入的下标（全局查询下标）。对每篇文档 $d$，来自 $d$ 且被检索到的查询集合为
 
-\[
+$$
 Q_d = \{ j \in H_q \mid \mathrm{doc}(j) = d \}.
-\]
+$$
 
-对每个 \(j \in Q_d\)，相似度分数为
+对每个 $j \in Q_d$，相似度分数为
 
-\[
+$$
 S_q(d, j) = \mathrm{sim}(\mathbf{v}_Q, \mathbf{u}_j).
-\]
+$$
 
 同一文档可能有多条查询被检索到，用最大池化聚合相关性：
 
-\[
+$$
 S_q(d) =
 \begin{cases}
 \max_{j \in Q_d} S_q(d, j) & \text{若 } Q_d \neq \emptyset, \\
 0 & \text{若 } Q_d = \emptyset.
 \end{cases}
-\]
+$$
 
-也就是说，若 \(d\) 的扩展查询一条都没进 top–\(n_q\)，则 \(S_q(d) = 0\)。
+也就是说，若 $d$ 的扩展查询一条都没进 top–$n_q$，则 $S_q(d) = 0$。
 
 **EN.** (3) Score Fusion. Finally, we combine text- and query-based scores into a unified relevance metric:
 
-\[
+$$
 S(d) = (1 - \alpha)\, S_t(d) + \alpha\, S_q(d), \quad \alpha \in [0, 1].
-\]
+$$
 
-Here, \(\mathrm{sim}(\cdot, \cdot)\) denotes a similarity function (e.g., dot product or cosine). Setting \(\alpha = 0\) recovers pure text-based dense retrieval, while \(\alpha = 1\) relies solely on query-derived signals.
+Here, $\mathrm{sim}(\cdot, \cdot)$ denotes a similarity function (e.g., dot product or cosine). Setting $\alpha = 0$ recovers pure text-based dense retrieval, while $\alpha = 1$ relies solely on query-derived signals.
 
 **中.** （3）分数融合。最后把基于文本和基于查询的分数合成统一的相关性：
 
-\[
+$$
 S(d) = (1 - \alpha)\, S_t(d) + \alpha\, S_q(d), \quad \alpha \in [0, 1].
-\]
+$$
 
-\(\mathrm{sim}(\cdot, \cdot)\) 是相似度函数（例如点积或余弦）。\(\alpha = 0\) 退回纯文本稠密检索，\(\alpha = 1\) 只依赖查询侧信号。
+$\mathrm{sim}(\cdot, \cdot)$ 是相似度函数（例如点积或余弦）。$\alpha = 0$ 退回纯文本稠密检索，$\alpha = 1$ 只依赖查询侧信号。
 
 **EN.** This Dual-Index Fusion strategy restores and surpasses the performance lost to naive query appending by isolating semantic noise and exploiting query expansions through principled aggregation and fusion. We demonstrate its effectiveness across dense retrieval benchmarks in Section 4.2.4.
 
@@ -359,19 +359,19 @@ S(d) = (1 - \alpha)\, S_t(d) + \alpha\, S_q(d), \quad \alpha \in [0, 1].
 
 **中.** 指标。遵循 BEIR，用 nDCG@10（文中写作 N@10）和 Recall@100（R@100）评检索效果。N@10 给排得靠前的相关文档更高权重，并做归一化以便比较。R@100 衡量相关文档落在前 100 个结果中的比例。另外报告 MAP，以在整个排序列表上平衡精度和召回。
 
-**EN.** Retrieval. For sparse retrieval, we employ BM25 [43] via PyTerrier [32] with default parameters (\(k_1 = 0.9\), \(b = 0.4\)). Expanded documents are formed by appending generated queries to the original text before indexing. For dense retrieval, we use Contriever [27], an unsupervised dual-encoder pre-trained on large corpora for strong zero-shot performance on BEIR. We encode passages with the facebook/contriever-msmarco checkpoint and index embeddings in FAISS [17] for inner-product search. To mitigate noise from query concatenation, we apply our Dual-Index Fusion strategy (explained in Section 3.4) with \(\alpha = 0.5\), \(n_t = 300\) and \(n_q = 1000\).
+**EN.** Retrieval. For sparse retrieval, we employ BM25 [43] via PyTerrier [32] with default parameters ($k_1 = 0.9$, $b = 0.4$). Expanded documents are formed by appending generated queries to the original text before indexing. For dense retrieval, we use Contriever [27], an unsupervised dual-encoder pre-trained on large corpora for strong zero-shot performance on BEIR. We encode passages with the facebook/contriever-msmarco checkpoint and index embeddings in FAISS [17] for inner-product search. To mitigate noise from query concatenation, we apply our Dual-Index Fusion strategy (explained in Section 3.4) with $\alpha = 0.5$, $n_t = 300$ and $n_q = 1000$.
 
-**中.** 检索。稀疏检索用 PyTerrier [32] 里的 BM25 [43]，默认参数 \(k_1 = 0.9\)、\(b = 0.4\)。扩展文档是在索引前把生成查询追加到原文上。稠密检索用 Contriever [27]，一个在大语料上预训练的无监督双编码器，在 BEIR 上有较强的零样本表现。用 facebook/contriever-msmarco 检查点编码段落，嵌入放进 FAISS [17] 做内积检索。为减轻查询拼接的噪声，使用第 3.4 节的双索引融合，\(\alpha = 0.5\)，\(n_t = 300\)，\(n_q = 1000\)。
+**中.** 检索。稀疏检索用 PyTerrier [32] 里的 BM25 [43]，默认参数 $k_1 = 0.9$、$b = 0.4$。扩展文档是在索引前把生成查询追加到原文上。稠密检索用 Contriever [27]，一个在大语料上预训练的无监督双编码器，在 BEIR 上有较强的零样本表现。用 facebook/contriever-msmarco 检查点编码段落，嵌入放进 FAISS [17] 做内积检索。为减轻查询拼接的噪声，使用第 3.4 节的双索引融合，$\alpha = 0.5$，$n_t = 300$，$n_q = 1000$。
 
 **EN.** Baselines. We compare Doc2Query++ against several document expansion approaches. For fair comparison, all methods generate 30 queries per document. LLM-based methods (including ours) use LLaMA-3.1-8B-Instruct [22] with temperature 0.8 to generate 3 queries per prompt until 30 queries are reached.
 
 **中.** 基线。Doc2Query++ 与若干文档扩展方法比较。为公平比较，所有方法每篇文档都生成 30 条查询。基于 LLM 的方法（含本文）使用 LLaMA-3.1-8B-Instruct [22]，温度 0.8，每次提示生成 3 条查询，直到满 30 条。
 
-**EN.** Doc2Query [38]: popular document expansion technique using seq2seq model trained on MS MARCO to generate synthetic queries and append them to the original document for lexical search. We replicate the setup of Nogueira and Lin [38] to use T5-base model and apply top-\(k\) sampling (\(k = 10\)).
+**EN.** Doc2Query [38]: popular document expansion technique using seq2seq model trained on MS MARCO to generate synthetic queries and append them to the original document for lexical search. We replicate the setup of Nogueira and Lin [38] to use T5-base model and apply top-$k$ sampling ($k = 10$).
 
-**中.** Doc2Query [38]：常用的文档扩展技术，用在 MS MARCO 上训练的序列到序列模型生成合成查询，并追加到原文档上做词项检索。作者复现 Nogueira and Lin [38] 的设定，使用 T5-base，并做 top-\(k\) 采样（\(k = 10\)）。
+**中.** Doc2Query [38]：常用的文档扩展技术，用在 MS MARCO 上训练的序列到序列模型生成合成查询，并追加到原文档上做词项检索。作者复现 Nogueira and Lin [38] 的设定，使用 T5-base，并做 top-$k$ 采样（$k = 10$）。
 
-**EN.** Doc2Query−− [21]: Extends Doc2Query with ELECTRA [9]-based filtering for low-relevance queries. We generate an initial pool of 100 via Doc2Query, then retain the top 30% (\(\sim\)30) by cross-encoder scores.
+**EN.** Doc2Query−− [21]: Extends Doc2Query with ELECTRA [9]-based filtering for low-relevance queries. We generate an initial pool of 100 via Doc2Query, then retain the top 30% ($\sim$30) by cross-encoder scores.
 
 **中.** Doc2Query−− [21]：在 Doc2Query 上加基于 ELECTRA [9] 的过滤，去掉低相关查询。先用 Doc2Query 生成 100 条的初始池，再按交叉编码器分数保留前 30%（约 30 条）。
 
@@ -455,15 +455,15 @@ S(d) = (1 - \alpha)\, S_t(d) + \alpha\, S_q(d), \quad \alpha \in [0, 1].
 
 **EN.** To better understand the contribution of topic coverage, we analyze how well the generated queries cover the topical content of their source documents and how this affects retrieval performance. Specifically, we compute the correlation between topic recall and retrieval performance gain, measured as nDCG@10 and Recall@100 improvements over the backbone retriever. We measure topic recall by computing the overlap between a document’s gold topics and the topics inferred from its generated queries. Each query is embedded and compared to topic centroids (from BERTopic) using cosine similarity. We hard-assign each query to its nearest centroids, and define recall as:
 
-\[
+$$
 \mathrm{Topic\ Recall} = \frac{\lvert \mathrm{Assigned\ Topics} \cap \mathrm{Gold\ Topics} \rvert}{\lvert \mathrm{Gold\ Topics} \rvert} \tag{1}
-\]
+$$
 
 **中.** 为更好理解主题覆盖的贡献，分析生成查询在多大程度上覆盖源文档的主题内容，以及这如何影响检索表现。具体地，计算主题召回与检索性能增益之间的相关。增益是相对骨干检索器的 nDCG@10 和 Recall@100 提升。主题召回是文档的金主题与从其生成查询推断出的主题之间的重叠。每条查询被嵌入后，用余弦相似度与 BERTopic 的主题质心比较。把每条查询硬分到最近的质心，召回定义为：
 
-\[
+$$
 \mathrm{Topic\ Recall} = \frac{\lvert \mathrm{Assigned\ Topics} \cap \mathrm{Gold\ Topics} \rvert}{\lvert \mathrm{Gold\ Topics} \rvert} \tag{1}
-\]
+$$
 
 **EN.** As shown in Figure 2, across BEIR subsets, topic recall correlates strongly and positively with performance gains in dense retrieval, as topic coverage enriches embeddings with diverse semantic signals—novel terms from underrepresented facets integrate smoothly via vector averaging in models like Contriever, enhancing latent matches without precision loss. In sparse retrieval, however, correlations weaken or turn negative. We attribute this to BM25’s term-frequency weighting amplifying mismatches from coverage-induced novel vocabulary, diluting original document signals in the inverted index and favoring exact overlaps over broad expansions—a shortfall prior methods exacerbate through uncontrolled generation. Nonetheless, topic recall underscores Doc2Query++’s value in delivering complete expansions, with our Dual-Index Fusion mitigating sparse noise by isolating query contributions, yielding balanced gains across paradigms.
 
@@ -516,9 +516,9 @@ S(d) = (1 - \alpha)\, S_t(d) + \alpha\, S_q(d), \quad \alpha \in [0, 1].
 
 #### 4.2.5 Impact of Fusion Weight on Retrieval Performance / 融合权重对检索表现的影响
 
-**EN.** We conducted an analysis of the fusion weight \(\alpha\) in our Dual-Index Fusion strategy, revealing its critical role in balancing text and query contributions, with detailed results in Figure 4 (Appendix). Precision (nDCG@10) peaks at \(\alpha \approx 0.3\)–\(0.5\) for FiQA and \(\alpha \approx 0.5\)–\(0.6\) for SCIDOCS, declining as query dominance (\(\alpha \rightarrow 1.0\)) undermines ranking accuracy. Recall rises with \(\alpha\), enhancing coverage, but all methods drop at \(\alpha = 1.0\), highlighting text embeddings’ essential semantic depth. This positions \(\alpha\) as a precision–recall tuner, with optimal values (\(\simeq 0.3\)–\(0.6\)) maximizing ranking quality and higher settings boosting recall, suggesting potential for dynamic optimization. Notably, Doc2Query and Doc2Query− show recall declines for \(\alpha > 0\), underperforming text-only baselines due to their expansions’ limited semantic diversity.
+**EN.** We conducted an analysis of the fusion weight $\alpha$ in our Dual-Index Fusion strategy, revealing its critical role in balancing text and query contributions, with detailed results in Figure 4 (Appendix). Precision (nDCG@10) peaks at $\alpha \approx 0.3$–$0.5$ for FiQA and $\alpha \approx 0.5$–$0.6$ for SCIDOCS, declining as query dominance ($\alpha \rightarrow 1.0$) undermines ranking accuracy. Recall rises with $\alpha$, enhancing coverage, but all methods drop at $\alpha = 1.0$, highlighting text embeddings’ essential semantic depth. This positions $\alpha$ as a precision–recall tuner, with optimal values ($\simeq 0.3$–$0.6$) maximizing ranking quality and higher settings boosting recall, suggesting potential for dynamic optimization. Notably, Doc2Query and Doc2Query− show recall declines for $\alpha > 0$, underperforming text-only baselines due to their expansions’ limited semantic diversity.
 
-**中.** 作者分析了双索引融合里的融合权重 \(\alpha\)，表明它在平衡文本贡献与查询贡献上很关键，细节见图 4（附录）。精度（nDCG@10）在 FiQA 上于 \(\alpha \approx 0.3\)–\(0.5\) 达到峰值，在 SCIDOCS 上于 \(\alpha \approx 0.5\)–\(0.6\) 达到峰值；查询侧占优（\(\alpha \rightarrow 1.0\)）时精度下降，排序准确性被削弱。召回随 \(\alpha\) 上升，覆盖变好，但所有方法在 \(\alpha = 1.0\) 都下降，说明文本嵌入的语义深度不可少。因此 \(\alpha\) 是精度–召回调节器：最优值约在 \(0.3\)–\(0.6\)，排序质量最高；再高则偏向拉高召回，暗示可以做动态优化。值得注意的是，Doc2Query 和 Doc2Query− 在 \(\alpha > 0\) 时召回下降，低于纯文本基线，原因是它们的扩展语义多样性有限。
+**中.** 作者分析了双索引融合里的融合权重 $\alpha$，表明它在平衡文本贡献与查询贡献上很关键，细节见图 4（附录）。精度（nDCG@10）在 FiQA 上于 $\alpha \approx 0.3$–$0.5$ 达到峰值，在 SCIDOCS 上于 $\alpha \approx 0.5$–$0.6$ 达到峰值；查询侧占优（$\alpha \rightarrow 1.0$）时精度下降，排序准确性被削弱。召回随 $\alpha$ 上升，覆盖变好，但所有方法在 $\alpha = 1.0$ 都下降，说明文本嵌入的语义深度不可少。因此 $\alpha$ 是精度–召回调节器：最优值约在 $0.3$–$0.6$，排序质量最高；再高则偏向拉高召回，暗示可以做动态优化。值得注意的是，Doc2Query 和 Doc2Query− 在 $\alpha > 0$ 时召回下降，低于纯文本基线，原因是它们的扩展语义多样性有限。
 
 #### 4.2.6 Effect of Query Quantity on Retrieval Performance / 查询数量对检索表现的影响
 
@@ -596,13 +596,13 @@ S(d) = (1 - \alpha)\, S_t(d) + \alpha\, S_q(d), \quad \alpha \in [0, 1].
 
 **中.** 例 2 至例 6 在论文中以省略号带过，未印出正文。少样本实例另见上述匿名仓库。
 
-**EN.** Your Task. Now generate 3 relevant queries for this passage that collectively cover specified topics by using given keywords: Passage: <document \(d\)>. Topics: <topics \(T_d\)>. Keywords: <keywords \(K_d\)>. Queries:
+**EN.** Your Task. Now generate 3 relevant queries for this passage that collectively cover specified topics by using given keywords: Passage: <document $d$>. Topics: <topics $T_d$>. Keywords: <keywords $K_d$>. Queries:
 
-**中.** 你的任务。现在为这段文字生成 3 条相关查询，用给定关键词合在一起覆盖指定主题。段落：<文档 \(d\)>。主题：<主题 \(T_d\)>。关键词：<关键词 \(K_d\)>。查询：
+**中.** 你的任务。现在为这段文字生成 3 条相关查询，用给定关键词合在一起覆盖指定主题。段落：<文档 $d$>。主题：<主题 $T_d$>。关键词：<关键词 $K_d$>。查询：
 
-**Caption EN.** Figure 4: Impact of fusion weight \(\alpha\) on retrieval performance across different document expansion methods.
+**Caption EN.** Figure 4: Impact of fusion weight $\alpha$ on retrieval performance across different document expansion methods.
 
-**Caption 中.** 图 4：融合权重 \(\alpha\) 对不同文档扩展方法检索表现的影响。
+**Caption 中.** 图 4：融合权重 $\alpha$ 对不同文档扩展方法检索表现的影响。
 
 ![图 4a：SCIDOCS 上融合权重与检索指标。](figs/fig04a.png)
 

@@ -19,7 +19,7 @@
 | 项 | 内容 |
 | --- | --- |
 | 数据发动机 | GPT-4（为主）+ GPT-3.5-Turbo：约 500k 例、150k 独特指令 |
-| 训练骨干 | Mistral-7B，LoRA rank 16，InfoNCE，\(\tau=0.02\) |
+| 训练骨干 | Mistral-7B，LoRA rank 16，InfoNCE，$\tau=0.02$ |
 | 池化 | 序列末尾 **[EOS]** 隐状态 |
 | 宣称 | 纯合成 MTEB 平均 63.1；full data 66.6（相对前 SOTA +2.4） |
 
@@ -84,15 +84,15 @@ Prompt 原文要求：`"hard_negative_document": a string, a hard negative docum
 
 ## 训练：指令 + EOS + InfoNCE
 
-给定正对 \((q^+, d^+)\)，先构造带指令的 query：
+给定正对 $(q^+, d^+)$，先构造带指令的 query：
 
-\[
+$$
 q^+_{\mathrm{inst}} = \texttt{Instruct: \{task\_definition\}} \backslash\texttt{n} \texttt{Query: }\{q^+\}
-\]
+$$
 
-合成数据的 `task_definition` 用 brainstorm 结果；MS-MARCO 等则手工任务描述。Query / document 末尾加 `[EOS]`，取末层 EOS 向量为 \(h_{q}, h_{d}\)。
+合成数据的 `task_definition` 用 brainstorm 结果；MS-MARCO 等则手工任务描述。Query / document 末尾加 `[EOS]`，取末层 EOS 向量为 $h_{q}, h_{d}$。
 
-损失为对 in-batch 负例与 hard negative 的 InfoNCE；匹配函数为温度缩放余弦，\(\tau=0.02\)。
+损失为对 in-batch 负例与 hard negative 的 InfoNCE；匹配函数为温度缩放余弦，$\tau=0.02$。
 
 实现要点（原文实验设定）：以 Mistral-7B 为初始化，按 RankLLaMA 配方用 **LoRA（rank 16）** 微调约 **1 epoch**；配合 gradient checkpointing、混合精度、DeepSpeed ZeRO-3。全文强调整个训练过程 **少于 1k steps**。
 
@@ -124,5 +124,5 @@ q^+_{\mathrm{inst}} = \texttt{Instruct: \{task\_definition\}} \backslash\texttt{
 | \<1k steps | 摘要：仅用合成数据且少于 1k 训练步可达强嵌入 |
 | 500k / 150k | 合成例数 / 独特指令数 |
 | 93 语言；180M token | 覆盖与 API 消耗 |
-| \(\tau=0.02\)；LoRA 16 | 对比温度与微调 rank |
+| $\tau=0.02$；LoRA 16 | 对比温度与微调 rank |
 | MTEB 63.1 / 66.6 | 纯合成 vs full data 平均分 |

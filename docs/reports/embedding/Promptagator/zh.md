@@ -73,25 +73,25 @@
 
 ### 2.1 Retrieval Task / 检索任务
 
-**EN.** Given a large corpus, a retrieval model is responsible to find documents that are most relevant to a provided query \(q\) according to a pre-defined relevancy. Formally, we define a retrieval task as:
+**EN.** Given a large corpus, a retrieval model is responsible to find documents that are most relevant to a provided query $q$ according to a pre-defined relevancy. Formally, we define a retrieval task as:
 
 $$
 T = \{D, Q, I\},
 $$
 
-where \(D = \{d_1, d_2, \ldots, d_n\}\) is a large corpus of documents for retrieval, \(Q\) is a query distribution, and \(I\) is the underlying search intent for the task. Depending on the task, \(D\) can be any document collection, such as web or Wikipedia. \(Q\) also varies across tasks, e.g., short keyword search queries, questions, arguments, etc. If \(I(q, d) = 1\), it means search intent of \(q\) has been satisfied by the document \(d\). For example, in QA tasks such as Natural Questions (NQ) the search intent is to find passages that provide the answer to the question, meaning \(I_{\mathrm{NQ}}(q, d) = 1\) if \(d\) answers \(q\). Importantly, for the same pair of \((q, d)\), their relevance can be completely different under different search intents. For example, some argument retrieval tasks look for supporting arguments, while other tasks need to retrieve counter arguments.
+where $D = \{d_1, d_2, \ldots, d_n\}$ is a large corpus of documents for retrieval, $Q$ is a query distribution, and $I$ is the underlying search intent for the task. Depending on the task, $D$ can be any document collection, such as web or Wikipedia. $Q$ also varies across tasks, e.g., short keyword search queries, questions, arguments, etc. If $I(q, d) = 1$, it means search intent of $q$ has been satisfied by the document $d$. For example, in QA tasks such as Natural Questions (NQ) the search intent is to find passages that provide the answer to the question, meaning $I_{\mathrm{NQ}}(q, d) = 1$ if $d$ answers $q$. Importantly, for the same pair of $(q, d)$, their relevance can be completely different under different search intents. For example, some argument retrieval tasks look for supporting arguments, while other tasks need to retrieve counter arguments.
 
-**中.** 给定一个大语料，检索模型要按预先定义的相关性，为查询 \(q\) 找出最相关的文档。形式化地，检索任务定义为 \(T = \{D, Q, I\}\)。其中 \(D = \{d_1, d_2, \ldots, d_n\}\) 是供检索的大型文档语料，\(Q\) 是查询分布，\(I\) 是该任务底层的搜索意图。视任务而定，\(D\) 可以是任何文档集合，例如网页或 Wikipedia。\(Q\) 也随任务变化，例如短的关键词查询、问题、论点等。若 \(I(q, d) = 1\)，表示文档 \(d\) 满足了 \(q\) 的搜索意图。例如在 Natural Questions（NQ）这类 QA 任务里，搜索意图是找到能回答问题的段落，也就是若 \(d\) 回答了 \(q\)，则 \(I_{\mathrm{NQ}}(q, d) = 1\)。重要的是：同一对 \((q, d)\)，在不同搜索意图下相关性可以完全不同。例如有的论辩检索要找支持论点，有的任务则要检索反论点。
+**中.** 给定一个大语料，检索模型要按预先定义的相关性，为查询 $q$ 找出最相关的文档。形式化地，检索任务定义为 $T = \{D, Q, I\}$。其中 $D = \{d_1, d_2, \ldots, d_n\}$ 是供检索的大型文档语料，$Q$ 是查询分布，$I$ 是该任务底层的搜索意图。视任务而定，$D$ 可以是任何文档集合，例如网页或 Wikipedia。$Q$ 也随任务变化，例如短的关键词查询、问题、论点等。若 $I(q, d) = 1$，表示文档 $d$ 满足了 $q$ 的搜索意图。例如在 Natural Questions（NQ）这类 QA 任务里，搜索意图是找到能回答问题的段落，也就是若 $d$ 回答了 $q$，则 $I_{\mathrm{NQ}}(q, d) = 1$。重要的是：同一对 $(q, d)$，在不同搜索意图下相关性可以完全不同。例如有的论辩检索要找支持论点，有的任务则要检索反论点。
 
-**EN.** In this work, we target the scenario where a target retrieval corpus \(D_T\) is available, but the amount of annotated query-document pairs for the new task is limited. Most prior of research efforts were put into adapting retrievers to new corpus \(D_T\), but the divergence in queries \(Q_T\) and intents \(I_T\) remains under-explored. Next, we explore how search intent can be expressed with a short description and very few number of examples.
+**EN.** In this work, we target the scenario where a target retrieval corpus $D_T$ is available, but the amount of annotated query-document pairs for the new task is limited. Most prior of research efforts were put into adapting retrievers to new corpus $D_T$, but the divergence in queries $Q_T$ and intents $I_T$ remains under-explored. Next, we explore how search intent can be expressed with a short description and very few number of examples.
 
-**中.** 本文针对的场景是：目标检索语料 \(D_T\) 可以拿到，但新任务上标注好的查询–文档对数量有限。先前研究大多把力气花在让检索器适应新语料 \(D_T\)，而查询 \(Q_T\) 和意图 \(I_T\) 上的分歧仍然探索不足。接下来讨论如何用一段短描述和极少的示例把搜索意图表达出来。
+**中.** 本文针对的场景是：目标检索语料 $D_T$ 可以拿到，但新任务上标注好的查询–文档对数量有限。先前研究大多把力气花在让检索器适应新语料 $D_T$，而查询 $Q_T$ 和意图 $I_T$ 上的分歧仍然探索不足。接下来讨论如何用一段短描述和极少的示例把搜索意图表达出来。
 
 ### 2.2 Few-shot BEIR Setting / 少样本 BEIR 设定
 
-**EN.** In this paper, we argue that it is important to let retrievers be aware of task-specific query distribution and search intent, as opposed to merely focusing on the domain adaptation of \(D\). Prior belief is that it is expensive to collect enough in-distribution queries and relevance labels to train a neural retriever, but intuitively, a person can understand a retrieval task by reading a short instruction and going over a few examples. In this work, we ask if a few (8 or fewer) examples are sufficient for the machines to learn a task-specific retriever. To facilitate our study and future research of few-shot retrieval, we define a new few-shot retrieval evaluation setting built upon the BEIR heterogeneous retrieval benchmark (Thakur et al., 2021).
+**EN.** In this paper, we argue that it is important to let retrievers be aware of task-specific query distribution and search intent, as opposed to merely focusing on the domain adaptation of $D$. Prior belief is that it is expensive to collect enough in-distribution queries and relevance labels to train a neural retriever, but intuitively, a person can understand a retrieval task by reading a short instruction and going over a few examples. In this work, we ask if a few (8 or fewer) examples are sufficient for the machines to learn a task-specific retriever. To facilitate our study and future research of few-shot retrieval, we define a new few-shot retrieval evaluation setting built upon the BEIR heterogeneous retrieval benchmark (Thakur et al., 2021).
 
-**中.** 本文认为，让检索器知道任务特定的查询分布和搜索意图是重要的，不能只做语料 \(D\) 的领域适应。以往的看法是：要收集足够多的分布内查询和相关性标签来训练神经检索器，代价很高。但直觉上，人读一段短说明、再看几条示例，就能理解一个检索任务。本文追问：少量（8 条或更少）示例是否足够让机器学会一个任务专用检索器。为便于本文的研究和以后的少样本检索研究，本文在 BEIR 异构检索基准（Thakur et al., 2021）上定义一种新的少样本检索评测设定。
+**中.** 本文认为，让检索器知道任务特定的查询分布和搜索意图是重要的，不能只做语料 $D$ 的领域适应。以往的看法是：要收集足够多的分布内查询和相关性标签来训练神经检索器，代价很高。但直觉上，人读一段短说明、再看几条示例，就能理解一个检索任务。本文追问：少量（8 条或更少）示例是否足够让机器学会一个任务专用检索器。为便于本文的研究和以后的少样本检索研究，本文在 BEIR 异构检索基准（Thakur et al., 2021）上定义一种新的少样本检索评测设定。
 
 **EN.** BEIR has 18 information retrieval datasets across 9 domains, including Bio-Medical, Finance, News, Twitter, Wikipedia, StackExchange, Quora, Scientific, and Misc. These datasets also cover a diverse range of search intents: QA retrieval (question-to-document), duplicate question discovery (question-to-question), fact checking (claim-to-document), etc. Following Santhanam et al. (2022) and Formal et al. (2021), we narrow our focus to the publicly-available datasets in BEIR. The original BEIR evaluation used a zero-shot set up, where no queries or relevant query-document pairs from the evaluation datasets can be used to train the retrievers.
 
@@ -109,25 +109,25 @@ where \(D = \{d_1, d_2, \ldots, d_n\}\) is a large corpus of documents for retri
 
 **中.** 为了从少样本示例做出检索器，本文提出 Promptagator。它的关键想法是：通过提示一个 LLM，把少量示例变成多得多的示例，而不是直接拿这几条去训练检索器。
 
-**EN.** Promptagator consists of three components: prompt-based query generation, consistency filtering, and retriever training. During prompt-based query generation, a task-specific prompt will be combined with a large language model to produce queries for the target task using \(D_T\). Then a filtering step cleans the generated data based on round-trip consistency; surprisingly, we found a retriever trained only on the synthetic data can be used to filter the synthetic data. Finally, a retriever (in this paper, dual encoders) and a cross attention reranker will be trained based on the generated data. Figure 5 in Appendix shows the overall procedure.
+**EN.** Promptagator consists of three components: prompt-based query generation, consistency filtering, and retriever training. During prompt-based query generation, a task-specific prompt will be combined with a large language model to produce queries for the target task using $D_T$. Then a filtering step cleans the generated data based on round-trip consistency; surprisingly, we found a retriever trained only on the synthetic data can be used to filter the synthetic data. Finally, a retriever (in this paper, dual encoders) and a cross attention reranker will be trained based on the generated data. Figure 5 in Appendix shows the overall procedure.
 
-**中.** Promptagator 由三部分组成：基于提示的查询生成、一致性过滤，以及检索器训练。基于提示的查询生成阶段，把任务专用提示和一个大语言模型结合起来，用 \(D_T\) 为目标任务产生查询。然后一个过滤步骤按往返一致性清洗生成数据；出人意料的是，只用合成数据训练出来的检索器，就可以用来过滤合成数据。最后，基于生成数据训练一个检索器（本文用双编码器）和一个交叉注意力重排器。附录图 5 给出整体流程。
+**中.** Promptagator 由三部分组成：基于提示的查询生成、一致性过滤，以及检索器训练。基于提示的查询生成阶段，把任务专用提示和一个大语言模型结合起来，用 $D_T$ 为目标任务产生查询。然后一个过滤步骤按往返一致性清洗生成数据；出人意料的是，只用合成数据训练出来的检索器，就可以用来过滤合成数据。最后，基于生成数据训练一个检索器（本文用双编码器）和一个交叉注意力重排器。附录图 5 给出整体流程。
 
 ### 3.1 Prompt-base Query Generation / 基于提示的查询生成
 
-**EN.** Promptagator constructs an instruction prompt that consists of task-specific query and passage descriptions and \(k\) annotated query-document examples from the target dataset. Specifically, let \(\{(q_i, d_i)\}_{i=1}^{k}\) be \(k\) relevant query-document pairs from the target task \(T\), where \(q_i \sim Q_T\), \(d_i \in D_T\), and \(I_T(q_i, d_i) = 1\). Following FLAN (Wei et al., 2022a), we use instruction prompts with the following form:
+**EN.** Promptagator constructs an instruction prompt that consists of task-specific query and passage descriptions and $k$ annotated query-document examples from the target dataset. Specifically, let $\{(q_i, d_i)\}_{i=1}^{k}$ be $k$ relevant query-document pairs from the target task $T$, where $q_i \sim Q_T$, $d_i \in D_T$, and $I_T(q_i, d_i) = 1$. Following FLAN (Wei et al., 2022a), we use instruction prompts with the following form:
 
 $$
 \big(e_{\mathrm{doc}}(d_1),\ e_{\mathrm{query}}(q_1),\ \ldots,\ e_{\mathrm{doc}}(d_k),\ e_{\mathrm{query}}(q_k),\ e_{\mathrm{doc}}(d)\big)
 $$
 
-where \(e_{\mathrm{doc}}(d)\) and \(e_{\mathrm{query}}(q)\) are task-specific document and query descriptions respectively, and \(d\) is a new document. Take ArguAna for example, we set \(e_{\mathrm{doc}}(d) = \text{“Argument: }\{d\}\text{”}\) and \(e_{\mathrm{query}}(q) = \text{“Counter Argument: }\{q\}\text{”}\) to inform the LLM to generate counter arguments. The LLM is expected to generate \(e_{\mathrm{query}}(\hat{q})\). If the LLM does not generate the query description correctly, we consider it a generation failure and drop the output; otherwise we accept \(\hat{q}\) and form a synthetic relevant example \((\hat{q}, d)\).
+where $e_{\mathrm{doc}}(d)$ and $e_{\mathrm{query}}(q)$ are task-specific document and query descriptions respectively, and $d$ is a new document. Take ArguAna for example, we set $e_{\mathrm{doc}}(d) = \text{“Argument: }\{d\}\text{”}$ and $e_{\mathrm{query}}(q) = \text{“Counter Argument: }\{q\}\text{”}$ to inform the LLM to generate counter arguments. The LLM is expected to generate $e_{\mathrm{query}}(\hat{q})$. If the LLM does not generate the query description correctly, we consider it a generation failure and drop the output; otherwise we accept $\hat{q}$ and form a synthetic relevant example $(\hat{q}, d)$.
 
-**中.** Promptagator 构造指令提示，其中包含任务特定的查询与段落描述，以及来自目标数据集的 \(k\) 条标注查询–文档示例。具体地，设 \(\{(q_i, d_i)\}_{i=1}^{k}\) 是目标任务 \(T\) 上的 \(k\) 条相关查询–文档对，其中 \(q_i \sim Q_T\)，\(d_i \in D_T\)，且 \(I_T(q_i, d_i) = 1\)。沿 FLAN（Wei et al., 2022a），指令提示取如下形式：先交替放入 \(k\) 条示例的文档描述与查询描述，最后放入一篇新文档的文档描述。\(e_{\mathrm{doc}}(d)\) 和 \(e_{\mathrm{query}}(q)\) 分别是任务特定的文档描述和查询描述，\(d\) 是新文档。以 ArguAna 为例，设 \(e_{\mathrm{doc}}(d) = \text{“Argument: }\{d\}\text{”}\)，\(e_{\mathrm{query}}(q) = \text{“Counter Argument: }\{q\}\text{”}\)，用来告诉 LLM 去生成反论点。期望 LLM 生成 \(e_{\mathrm{query}}(\hat{q})\)。如果 LLM 没有正确生成查询描述，就视为生成失败并丢掉该输出；否则接受 \(\hat{q}\)，组成一条合成相关示例 \((\hat{q}, d)\)。
+**中.** Promptagator 构造指令提示，其中包含任务特定的查询与段落描述，以及来自目标数据集的 $k$ 条标注查询–文档示例。具体地，设 $\{(q_i, d_i)\}_{i=1}^{k}$ 是目标任务 $T$ 上的 $k$ 条相关查询–文档对，其中 $q_i \sim Q_T$，$d_i \in D_T$，且 $I_T(q_i, d_i) = 1$。沿 FLAN（Wei et al., 2022a），指令提示取如下形式：先交替放入 $k$ 条示例的文档描述与查询描述，最后放入一篇新文档的文档描述。$e_{\mathrm{doc}}(d)$ 和 $e_{\mathrm{query}}(q)$ 分别是任务特定的文档描述和查询描述，$d$ 是新文档。以 ArguAna 为例，设 $e_{\mathrm{doc}}(d) = \text{“Argument: }\{d\}\text{”}$，$e_{\mathrm{query}}(q) = \text{“Counter Argument: }\{q\}\text{”}$，用来告诉 LLM 去生成反论点。期望 LLM 生成 $e_{\mathrm{query}}(\hat{q})$。如果 LLM 没有正确生成查询描述，就视为生成失败并丢掉该输出；否则接受 $\hat{q}$，组成一条合成相关示例 $(\hat{q}, d)$。
 
-**EN.** Running the prompt on all documents from \(D_T\), we can create a large set of synthetic \((q, d)\) examples, amplifying the information from few examples into a large synthetic dataset whose query distribution is similar to the true task distribution \(Q_T\) and whose query-document pairs convey the true search intent \(I_T\).
+**EN.** Running the prompt on all documents from $D_T$, we can create a large set of synthetic $(q, d)$ examples, amplifying the information from few examples into a large synthetic dataset whose query distribution is similar to the true task distribution $Q_T$ and whose query-document pairs convey the true search intent $I_T$.
 
-**中.** 在 \(D_T\) 的文档上运行这一提示，就能造出一大批合成 \((q, d)\) 示例，把少量示例里的信息放大成一个大型合成数据集：其查询分布接近真实任务分布 \(Q_T\)，其查询–文档对传递真实搜索意图 \(I_T\)。
+**中.** 在 $D_T$ 的文档上运行这一提示，就能造出一大批合成 $(q, d)$ 示例，把少量示例里的信息放大成一个大型合成数据集：其查询分布接近真实任务分布 $Q_T$，其查询–文档对传递真实搜索意图 $I_T$。
 
 **EN.** We use FLAN (Wei et al., 2022a) as the LLM for query generation in this work. FLAN is trained on a collection of tasks described via instructions and was shown to have good zero/few-shot performance on unseen tasks. We use the 137B FLAN checkpoint provided by the authors. During prompt engineering, we use at most 8 examples, and reduce the number if they exceed the input length limit of FLAN. We also manually truncate individual query and document in the examples if they are too long. We randomly sample up to 1 million documents from each corpus and generate 8 questions per document using sampling decoding with temperature 0.7. The set of templates can be found in Table 4 in the Appendix.
 
@@ -139,9 +139,9 @@ where \(e_{\mathrm{doc}}(d)\) and \(e_{\mathrm{query}}(q)\) are task-specific do
 
 **中.** 过滤步骤通过保证往返一致性（Alberti et al., 2019）来提高生成查询的质量：一条查询应当能被生成它的那段话回答。落到本文的检索情形，查询应当检索回它的源段落。一致性过滤（Alberti et al., 2019; Lewis et al., 2021）已被表明对 QA 任务上的合成问题生成至关重要。不过这些技术通常依赖一个外部问答模型当过滤器，而该模型是在已有的监督 QA 数据上训练的。本文要应对不同的搜索意图，用单一的外部过滤模型并不合适。
 
-**EN.** Surprisingly, we find out that consistency filtering based on the generated data alone can work well over the different search intents observed in BEIR. We first use the generated query and document pairs to train an initial retriever. Given a synthetic query-document pair \((q, d)\), we use the initial retriever to predict the most relevant passages for \(q\). We keep \(q\) only when \(d\) occurs among the Top-\(K\) passages returned by the retriever. This may seem unintuitive because the filtering model (the initial retriever) is trained on the same noisy synthetic data that it will filter. We show this filter substantially reduces the number of synthetic queries and significantly improves retrieval performance.
+**EN.** Surprisingly, we find out that consistency filtering based on the generated data alone can work well over the different search intents observed in BEIR. We first use the generated query and document pairs to train an initial retriever. Given a synthetic query-document pair $(q, d)$, we use the initial retriever to predict the most relevant passages for $q$. We keep $q$ only when $d$ occurs among the Top-$K$ passages returned by the retriever. This may seem unintuitive because the filtering model (the initial retriever) is trained on the same noisy synthetic data that it will filter. We show this filter substantially reduces the number of synthetic queries and significantly improves retrieval performance.
 
-**中.** 出人意料的是，只基于生成数据的一致性过滤，在 BEIR 里观察到的不同搜索意图上都能工作得不错。本文先用生成的查询和文档对训练一个初始检索器。给定一条合成查询–文档对 \((q, d)\)，用这个初始检索器预测对 \(q\) 最相关的段落。只有当 \(d\) 出现在检索器返回的 Top-\(K\) 段落里时，才保留 \(q\)。这看起来不太直观，因为过滤模型（那个初始检索器）正是在它将要过滤的同一份有噪声的合成数据上训练的。本文表明，这个过滤器大幅减少合成查询的数量，并显著提高检索效果。
+**中.** 出人意料的是，只基于生成数据的一致性过滤，在 BEIR 里观察到的不同搜索意图上都能工作得不错。本文先用生成的查询和文档对训练一个初始检索器。给定一条合成查询–文档对 $(q, d)$，用这个初始检索器预测对 $q$ 最相关的段落。只有当 $d$ 出现在检索器返回的 Top-$K$ 段落里时，才保留 $q$。这看起来不太直观，因为过滤模型（那个初始检索器）正是在它将要过滤的同一份有噪声的合成数据上训练的。本文表明，这个过滤器大幅减少合成查询的数量，并显著提高检索效果。
 
 ### 3.3 Few-shot Promptagator Retriever / 少样本 Promptagator 检索器
 
@@ -181,9 +181,9 @@ where \(e_{\mathrm{doc}}(d)\) and \(e_{\mathrm{query}}(q)\) are task-specific do
 
 ### 3.4 Zero-shot Promptagator Retriever / 零样本 Promptagator 检索器
 
-**EN.** The prompt-based query generation can also run in a zero-shot manner, where we universally apply the following prompt irrespective of the target task: `{d} Read the passage and generate a query.` Here \(d\) denotes the document text. We train retrievers and rerankers on the zero-shot prompt generated data, leading to zero-shot Promptagator and zero-shot Promptagator++.
+**EN.** The prompt-based query generation can also run in a zero-shot manner, where we universally apply the following prompt irrespective of the target task: `{d} Read the passage and generate a query.` Here $d$ denotes the document text. We train retrievers and rerankers on the zero-shot prompt generated data, leading to zero-shot Promptagator and zero-shot Promptagator++.
 
-**中.** 基于提示的查询生成也可以按零样本方式运行：不论目标任务是什么，统一使用提示 `{d} Read the passage and generate a query.`（读这段话并生成一条查询）。这里 \(d\) 表示文档文本。在零样本提示生成的数据上训练检索器和重排器，就得到零样本 Promptagator 和零样本 Promptagator++。
+**中.** 基于提示的查询生成也可以按零样本方式运行：不论目标任务是什么，统一使用提示 `{d} Read the passage and generate a query.`（读这段话并生成一条查询）。这里 $d$ 表示文档文本。在零样本提示生成的数据上训练检索器和重排器，就得到零样本 Promptagator 和零样本 Promptagator++。
 
 ### 3.5 Discussion / 讨论
 
@@ -205,9 +205,9 @@ where \(e_{\mathrm{doc}}(d)\) and \(e_{\mathrm{query}}(q)\) are task-specific do
 
 **中.** 原来的 FLAN 训练集与 BEIR 里的 2 个数据集有重叠：NQ 和 Quora。FLAN 只在「问题到答案」任务上训练，从未见过检索训练所需的「问题–段落」监督。另外，FLAN 也没有在 QA 数据集的查询生成任务上微调过。现有系统大多在系统里使用了 MS MARCO 的全部监督数据。因此主评测排除 MS MARCO、NQ 和 Quora。本文报告 nDCG@10，即 BEIR 上的标准检索评价指标。NQ 和 Quora 对 FLAN 查询生成的影响在 §4.3 研究。
 
-**EN.** For Promptagator’s prompt-based query generation, we sample questions from the LLM with a temperature of 0.7. For round-trip filtering, we use MS MARCO as validation set and tune \(K\). We find setting \(K\) to 1 leads to the best results and thus use 1 for all BEIR datasets, i.e. we keep a \((q, d)\) pair only when \(d\) is ranked in the top 1 place by the initial dual encoder.
+**EN.** For Promptagator’s prompt-based query generation, we sample questions from the LLM with a temperature of 0.7. For round-trip filtering, we use MS MARCO as validation set and tune $K$. We find setting $K$ to 1 leads to the best results and thus use 1 for all BEIR datasets, i.e. we keep a $(q, d)$ pair only when $d$ is ranked in the top 1 place by the initial dual encoder.
 
-**中.** Promptagator 的基于提示的查询生成，以温度 0.7 从 LLM 采样问题。往返过滤用 MS MARCO 作验证集来调节 \(K\)。发现把 \(K\) 设为 1 结果最好，因此全部 BEIR 数据集都用 1：只有当初始双编码器把 \(d\) 排在第 1 名时，才保留 \((q, d)\) 对。
+**中.** Promptagator 的基于提示的查询生成，以温度 0.7 从 LLM 采样问题。往返过滤用 MS MARCO 作验证集来调节 $K$。发现把 $K$ 设为 1 结果最好，因此全部 BEIR 数据集都用 1：只有当初始双编码器把 $d$ 排在第 1 名时，才保留 $(q, d)$ 对。
 
 **EN.** We implement Promptagator’s dual encoders following GTR (Ni et al., 2021); in particular, we use a shared Transformer encoder initialized from T5, take the mean pooling of the top encoder layer, and project it to a fixed 768-dimensional embedding. To ensure efficiency, we use the T5-base version 1.1 encoder architecture consisting of 110M parameters. For Promptagator++ reranking models, we use the standard Transformer cross attention encoder, also initialized with a 110M T5-base encoder checkpoint. At inference time, we rerank the top 200 candidates retrieved from the Promptagator dual encoder retriever.
 
@@ -231,9 +231,9 @@ where \(e_{\mathrm{doc}}(d)\) and \(e_{\mathrm{query}}(q)\) are task-specific do
 
 **中.** 把少样本 Promptagator 和基线比较，提升最大的是 Touche-2020（touché），其次是 ArguAna（arg）。Touche-2020 的目标是为一个有争议的话题检索文档，例如 “should felons who have completed their sentence be allowed to vote?”（已服完刑期的重罪犯是否应被允许投票？）。ArguAna 的目标是找到反对输入论点的反论点，输入论点往往有好几句长。这两个任务都和其它模型所用的传统 QA 检索数据极不相同，那些数据以事实型问题为主。另一方面，少样本 Promptagator 用少量示例就能成功适应这类任务。
 
-**EN.** Climate-FEVER’s relevant \((q, d)\) pairs in BEIR are not well-defined (§4.3), so we also tried running query-generation with FEVER’s few-shot prompt on Climate-FEVER. We report the results with the FEVER prompt in parentheses, but they are not used for computing the average.
+**EN.** Climate-FEVER’s relevant $(q, d)$ pairs in BEIR are not well-defined (§4.3), so we also tried running query-generation with FEVER’s few-shot prompt on Climate-FEVER. We report the results with the FEVER prompt in parentheses, but they are not used for computing the average.
 
-**中.** BEIR 里 Climate-FEVER 的相关 \((q, d)\) 对定义得并不清楚（§4.3），因此本文也试过用 FEVER 的少样本提示在 Climate-FEVER 上做查询生成。用 FEVER 提示得到的结果写在括号里，但不计入平均。
+**中.** BEIR 里 Climate-FEVER 的相关 $(q, d)$ 对定义得并不清楚（§4.3），因此本文也试过用 FEVER 的少样本提示在 Climate-FEVER 上做查询生成。用 FEVER 提示得到的结果写在括号里，但不计入平均。
 
 表 2 的列是 BEIR 公开集上的 nDCG@10。列名缩写与论文一致：arg = ArguAna，touché = Touche-2020，covid = TREC-COVID，nfc = NFCorpus，hotpot = HotpotQA，dbp = DBPedia-Entity，climate = Climate-FEVER，fever = FEVER，scifact = SciFact，scidocs = SCIDOCS，fiqa = FiQA-2018。括号中的 Climate-FEVER 数字来自 FEVER 提示，不参与 AVG。
 
@@ -276,9 +276,9 @@ where \(e_{\mathrm{doc}}(d)\) and \(e_{\mathrm{query}}(q)\) are task-specific do
 
 **中.** 一致性过滤的影响。图 2(a) 给出少样本 Promptagator 在有、无往返过滤时的质量差。可以看到过滤在 11 个数据集中的 8 个上提高了表现，平均提高 2.5 个点。这些结果说明过滤策略是有效的。尽管如此，仍有数据集上过滤损害模型质量，例如 NFCorpus 和 SciFact。注意这两份按生成查询数量来说是最小的数据集。本文推测，在过滤后的数据上继续调双编码器会导致过拟合。
 
-**EN.** Manually examining the query-document pairs removed by the filter, we find the majority of cases are either the query being too general which matches many documents, or the query contains hallucination irrelevant to the document. There are also cases where high quality query-document pairs were incorrectly removed since the initial dual encoder model ranks other documents higher. We suspect designing query-specific \(K\) values would help retain such query-document pairs and further improve model performance. We leave this to future exploration.
+**EN.** Manually examining the query-document pairs removed by the filter, we find the majority of cases are either the query being too general which matches many documents, or the query contains hallucination irrelevant to the document. There are also cases where high quality query-document pairs were incorrectly removed since the initial dual encoder model ranks other documents higher. We suspect designing query-specific $K$ values would help retain such query-document pairs and further improve model performance. We leave this to future exploration.
 
-**中.** 人工检查被过滤器去掉的查询–文档对，发现多数情况要么是查询过于笼统、能匹配很多文档，要么是查询含有与文档无关的幻觉。也有高质量查询–文档对被错误去掉的情况，因为初始双编码器把其它文档排得更高。本文猜测，为每条查询设计不同的 \(K\) 会有助于留下这样的对，并进一步提高模型表现。这一点留待以后探索。
+**中.** 人工检查被过滤器去掉的查询–文档对，发现多数情况要么是查询过于笼统、能匹配很多文档，要么是查询含有与文档无关的幻觉。也有高质量查询–文档对被错误去掉的情况，因为初始双编码器把其它文档排得更高。本文猜测，为每条查询设计不同的 $K$ 会有助于留下这样的对，并进一步提高模型表现。这一点留待以后探索。
 
 **EN.** Can generated queries replace human annotated queries? In Figure 2(b), we compare the dual encoders trained on examples generated from the 8-shot Promptagator versus the dual encoders trained on supervised data. Note that we did not add other components to make the comparison simple. We choose MS MARCO as there are enough labeled data for this task and neither FLAN nor our models are trained on MS MARCO examples. The results showed that the eight examples plus LLM can replace a significant portion of the supervised examples.
 

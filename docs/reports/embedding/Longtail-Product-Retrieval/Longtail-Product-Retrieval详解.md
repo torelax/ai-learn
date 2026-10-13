@@ -72,7 +72,7 @@ $$
 
 ### 多样性
 
-每条查询看 \(k=5\) 条改写。\(n_i\) 是第 \(i\) 条改写的字符 bigram（\(n=2\)）。奖励是两两 Jaccard 距离的平均，避免五条改写挤在同一种说法上：
+每条查询看 $k=5$ 条改写。$n_i$ 是第 $i$ 条改写的字符 bigram（$n=2$）。奖励是两两 Jaccard 距离的平均，避免五条改写挤在同一种说法上：
 
 $$
 R_{\mathrm{Diversity}} = \frac{1}{\binom{k}{2}} \sum_{i<j}\left(1 - \frac{|n_i \cap n_j|}{|n_i \cup n_j|}\right)
@@ -90,7 +90,7 @@ $$
 R_{\mathrm{total}} = \alpha R_{\mathrm{QSR}} + \beta R_{\mathrm{PDA}} + \gamma R_{\mathrm{Diversity}}
 $$
 
-\(\alpha,\beta,\gamma\) 启发式取 \(1.0,\ 0.5,\ 0.1\)。RL 一直做到奖励大体收敛。
+$\alpha,\beta,\gamma$ 启发式取 $1.0,\ 0.5,\ 0.1$。RL 一直做到奖励大体收敛。
 
 表 3 单独看 PDA。现成 Qwen3-30B-A3B 的改写人工准确率是 39.6%。任务优化但去掉 PDA：准确率 67.5%，商品侧 PPL 1407.4，检索 Item Goodrate 54.1%。加上 PDA：准确率 70.9%，PPL 降到 134.5，Item Goodrate 升到 72.8%。PPL 下降和召回商品变好是同一件事：改写更像商品语言，检索器才接得住。
 
@@ -124,9 +124,9 @@ $$
 离线和在线的 Query Goodrate **不是同一个定义**。
 
 - **离线 Item Goodrate**：每条查询在召回集合里高度相关商品的比例，再对查询平均。
-- **离线 Query Goodrate@N**：top-200 里至少有 \(N\) 个相关商品的查询所占比例。每类从淘宝在线日志抽 500 条，人工标 query–item 相关性。
+- **离线 Query Goodrate@N**：top-200 里至少有 $N$ 个相关商品的查询所占比例。每类从淘宝在线日志抽 500 条，人工标 query–item 相关性。
 - **在线 Query Goodrate**：页面级。SRP 上 top-10 按展示商品相关性被标成 Good 或 Mid 的查询比例。同样每类 500 条。
-- **GSB**：并排盲评里，测试结果被偏好于基线的比例。GSB \(+x\%\) 表示有 \(x\%\) 的测试页优于基线。
+- **GSB**：并排盲评里，测试结果被偏好于基线的比例。GSB $+x\%$ 表示有 $x\%$ 的测试页优于基线。
 
 在线实验在淘宝跑了四周以上，分到 10% 长尾查询流量。目标是查询–商品相关性，论文称订单量没有被伤害。
 

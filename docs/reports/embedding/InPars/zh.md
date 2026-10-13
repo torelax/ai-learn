@@ -35,9 +35,9 @@
 
 **中.** 尽管大语言模型能力诱人，数十亿参数的模型在信息检索里仍然很少被直接使用，少数例外包括 Nogueira et al. (2020)、Pradeep et al. (2021)、Neelakantan et al. (2022)。原因之一是信息检索任务计算很重。以典型重排为例：一条查询要计算 1000 篇候选文档的相关性，也就是在重排模型上做 1000 次推理。用大模型时，这笔开销往往高到不可接受。例如 OpenAI 提供搜索 API，可以用其数十亿参数的模型计算查询–文档相关性。截至 2022 年 2 月，其最大模型按每 1000 个 token 收费 0.06 美元。
 
-**Caption EN.** Figure 1: Illustration of our few-shot method that generates training data for search tasks. We use a language model \(G\) to generate a question \(q\) (and its probability \(p_q\)) from a document \(d\). The top \(K\) pairs \((q, d)\) with respect to \(p_q\) are used as positive examples to train a reranker whose task it to estimate the relevancy of \(d\) to \(q\).
+**Caption EN.** Figure 1: Illustration of our few-shot method that generates training data for search tasks. We use a language model $G$ to generate a question $q$ (and its probability $p_q$) from a document $d$. The top $K$ pairs $(q, d)$ with respect to $p_q$ are used as positive examples to train a reranker whose task it to estimate the relevancy of $d$ to $q$.
 
-**Caption 中.** 图 1：为搜索任务生成训练数据的少样本方法示意。用语言模型 \(G\) 从文档 \(d\) 生成问题 \(q\)（及其概率 \(p_q\)）。按 \(p_q\) 取出最高的 \(K\) 对 \((q, d)\)，作为正例去训练重排器；重排器的任务是估计 \(d\) 对 \(q\) 的相关性。
+**Caption 中.** 图 1：为搜索任务生成训练数据的少样本方法示意。用语言模型 $G$ 从文档 $d$ 生成问题 $q$（及其概率 $p_q$）。按 $p_q$ 取出最高的 $K$ 对 $(q, d)$，作为正例去训练重排器；重排器的任务是估计 $d$ 对 $q$ 的相关性。
 
 ![图 1（原文 Figure 1）](figs/fig01.png)
 
@@ -85,17 +85,17 @@
 
 ## 3 Our Method: InPars / 方法：InPars
 
-**EN.** In this section, we describe the proposed method, dubbed InPars (Inquisitive Parrots for Search), for generating synthetic training datasets for IR tasks. Given a document \(d\) and a prefix \(t\) consisting of \(N\) pairs of questions and their relevant documents, i.e., \(t = \{(q^{*}_{1}, d^{*}_{1}), \ldots, (q^{*}_{N}, d^{*}_{N})\}\), our method uses a language model \(G(t, d)\) to generate a question \(q\) that is likely to be relevant to \(d\). The pair \((q, d)\) forms a positive training example that is later used to finetune our retrieval models.
+**EN.** In this section, we describe the proposed method, dubbed InPars (Inquisitive Parrots for Search), for generating synthetic training datasets for IR tasks. Given a document $d$ and a prefix $t$ consisting of $N$ pairs of questions and their relevant documents, i.e., $t = \{(q^{*}_{1}, d^{*}_{1}), \ldots, (q^{*}_{N}, d^{*}_{N})\}$, our method uses a language model $G(t, d)$ to generate a question $q$ that is likely to be relevant to $d$. The pair $(q, d)$ forms a positive training example that is later used to finetune our retrieval models.
 
-**中.** 本节描述所提方法 InPars（Inquisitive Parrots for Search，爱追问的鹦鹉，用于搜索），用来为 IR 任务生成合成训练数据集。给定文档 \(d\)，以及由 \(N\) 对问题及其相关文档组成的前缀 \(t\)，即 \(t = \{(q^{*}_{1}, d^{*}_{1}), \ldots, (q^{*}_{N}, d^{*}_{N})\}\)，方法用语言模型 \(G(t, d)\) 生成一个很可能与 \(d\) 相关的问题 \(q\)。对 \((q, d)\) 构成正训练例，随后用来微调检索模型。
+**中.** 本节描述所提方法 InPars（Inquisitive Parrots for Search，爱追问的鹦鹉，用于搜索），用来为 IR 任务生成合成训练数据集。给定文档 $d$，以及由 $N$ 对问题及其相关文档组成的前缀 $t$，即 $t = \{(q^{*}_{1}, d^{*}_{1}), \ldots, (q^{*}_{N}, d^{*}_{N})\}$，方法用语言模型 $G(t, d)$ 生成一个很可能与 $d$ 相关的问题 $q$。对 $(q, d)$ 构成正训练例，随后用来微调检索模型。
 
-**EN.** We generate thousands of these positive training examples using documents randomly sampled from a collection \(D\). The prefix \(t\) is always the same regardless of the input document \(d\), i.e., we can potentially generate millions of synthetic training examples using only \(N\) manually annotated examples. This characterizes our method as a few-shot learning approach as long as \(N\) is small (in our experiments, we use three examples).
+**EN.** We generate thousands of these positive training examples using documents randomly sampled from a collection $D$. The prefix $t$ is always the same regardless of the input document $d$, i.e., we can potentially generate millions of synthetic training examples using only $N$ manually annotated examples. This characterizes our method as a few-shot learning approach as long as $N$ is small (in our experiments, we use three examples).
 
-**中.** 从集合 \(D\) 中随机抽取文档，生成成千上万条这样的正训练例。无论输入文档 \(d\) 是哪一篇，前缀 \(t\) 始终相同。也就是说，只用 \(N\) 条人工标注样例，就有可能生成数百万条合成训练例。只要 \(N\) 很小，这就构成少样本学习（实验中使用三条样例）。
+**中.** 从集合 $D$ 中随机抽取文档，生成成千上万条这样的正训练例。无论输入文档 $d$ 是哪一篇，前缀 $t$ 始终相同。也就是说，只用 $N$ 条人工标注样例，就有可能生成数百万条合成训练例。只要 $N$ 很小，这就构成少样本学习（实验中使用三条样例）。
 
-**EN.** As a last step to create our training dataset, we select the top \(K\) pairs with respect to the following (log) probability:
+**EN.** As a last step to create our training dataset, we select the top $K$ pairs with respect to the following (log) probability:
 
-**中.** 构建训练数据集的最后一步，是按下式的（对数）概率选出最高的 \(K\) 对：
+**中.** 构建训练数据集的最后一步，是按下式的（对数）概率选出最高的 $K$ 对：
 
 $$
 p_q = \frac{1}{|q|}\sum_{i=1}^{|q|}\log p(q_i \mid t, d, q_{<i})
@@ -103,9 +103,9 @@ $$
 
 **(1)**
 
-**EN.** where \(p(q_i \mid t, d, q_{<i})\) is the probability assigned by \(G\) when autoregressively generating the \(i\)-th token of \(q\). We show in Section 6.3 that this filtering step largely improves IR metrics.
+**EN.** where $p(q_i \mid t, d, q_{<i})$ is the probability assigned by $G$ when autoregressively generating the $i$-th token of $q$. We show in Section 6.3 that this filtering step largely improves IR metrics.
 
-**中.** 其中 \(p(q_i \mid t, d, q_{<i})\) 是 \(G\) 自回归生成 \(q\) 的第 \(i\) 个 token 时给出的概率。第 6.3 节表明，这一过滤步骤大幅提高 IR 指标。
+**中.** 其中 $p(q_i \mid t, d, q_{<i})$ 是 $G$ 自回归生成 $q$ 的第 $i$ 个 token 时给出的概率。第 6.3 节表明，这一过滤步骤大幅提高 IR 指标。
 
 **EN.** Due to its few-shot nature, our method can be used to adapt retrievers to any collection or IR task, which we later empirically confirm on various collections. This is particularly relevant for IR tasks as gathering data to train retrieval models is an expensive process (Yilmaz et al., 2020), with most high-quality collections having less than a few hundred queries (Voorhees and Harman, 1999; Voorhees, 2004).
 
@@ -207,13 +207,13 @@ $$
 
 ### 4.2 Training Data Generation / 训练数据生成
 
-**EN.** Our training set comprises triples of a query, a positive, and a negative document. We first describe how pairs of query and positive documents are generated. We randomly sample 100,000 documents from the collection and generate one question per document using GPT-3’s Curie as our language model \(G\). We prepend the document text with its title, when it is available. Documents with less than 300 characters are discarded and a new one is sampled. We use a temperature of 0, which defaults to greedy decoding. We tried other decoding algorithms such as sampling (with a temperature of 1.0) and top-p sampling (Holtzman et al., 2019) (with p=0.95) but did not notice significant differences in the final results.
+**EN.** Our training set comprises triples of a query, a positive, and a negative document. We first describe how pairs of query and positive documents are generated. We randomly sample 100,000 documents from the collection and generate one question per document using GPT-3’s Curie as our language model $G$. We prepend the document text with its title, when it is available. Documents with less than 300 characters are discarded and a new one is sampled. We use a temperature of 0, which defaults to greedy decoding. We tried other decoding algorithms such as sampling (with a temperature of 1.0) and top-p sampling (Holtzman et al., 2019) (with p=0.95) but did not notice significant differences in the final results.
 
-**中.** 训练集由（查询、正文档、负文档）三元组组成。先说明查询与正文档对如何生成。从集合中随机抽取 100,000 篇文档，用 GPT-3 的 Curie 作为语言模型 \(G\)，每篇文档生成一个问题。若有标题，则把标题接在正文前面。少于 300 个字符的文档丢弃并重新抽样。温度取 0，即默认贪心解码。作者也试过采样（温度 1.0）和 top-p 采样（Holtzman et al., 2019，p=0.95），但最终结果没有看到显著差异。
+**中.** 训练集由（查询、正文档、负文档）三元组组成。先说明查询与正文档对如何生成。从集合中随机抽取 100,000 篇文档，用 GPT-3 的 Curie 作为语言模型 $G$，每篇文档生成一个问题。若有标题，则把标题接在正文前面。少于 300 个字符的文档丢弃并重新抽样。温度取 0，即默认贪心解码。作者也试过采样（温度 1.0）和 top-p 采样（Holtzman et al., 2019，p=0.95），但最终结果没有看到显著差异。
 
-**EN.** We experiment with two prompt templates for generating questions which are illustrated in Figure 2. The first called “Vanilla” (left), uses \(N = 3\) pairs of document and relevant question randomly chosen from the MS MARCO training dataset. The string {document_text} is replaced with the document sampled from the collection and the language model generates a question one token at a time until a termination token \n is chosen or a maximum number of 64 tokens is reached.
+**EN.** We experiment with two prompt templates for generating questions which are illustrated in Figure 2. The first called “Vanilla” (left), uses $N = 3$ pairs of document and relevant question randomly chosen from the MS MARCO training dataset. The string {document_text} is replaced with the document sampled from the collection and the language model generates a question one token at a time until a termination token \n is chosen or a maximum number of 64 tokens is reached.
 
-**中.** 实验使用两种生成问题的提示模板，见图 2。第一种称为 “Vanilla”（左），使用从 MS MARCO 训练集随机抽取的 \(N = 3\) 对文档与相关问题。字符串 {document_text} 替换成从集合中抽到的文档，语言模型一次生成一个 token，直到选出终止符换行，或达到最多 64 个 token。
+**中.** 实验使用两种生成问题的提示模板，见图 2。第一种称为 “Vanilla”（左），使用从 MS MARCO 训练集随机抽取的 $N = 3$ 对文档与相关问题。字符串 {document_text} 替换成从集合中抽到的文档，语言模型一次生成一个 token，直到选出终止符换行，或达到最多 64 个 token。
 
 **EN.** The second prompt template called “Guided by Bad Questions” (GBQ) illustrated in Figure 2 (right) is similar to the “Vanilla” template, but we encourage the language model to produce more contextual-aware questions than the ones from MS MARCO. For that, we use MS MARCO questions as examples of “bad” questions, and manually create more complicated ones as examples of “good” questions. Rather than finding the answer in part of the input document, the full context of the document will contribute to the answer. With this prompt, the model generates a “good” and a “bad” question for each document and we keep only the good ones to form our positive training pairs. Because the GBQ prompt, by design, generates questions that are different from MS MARCO ones, we use the “Vanilla” prompt to generate questions that are used in finetuning retrievers evaluated on MS MARCO and TREC-DL datasets.
 
@@ -223,13 +223,13 @@ $$
 
 **中.** 经 OpenAI API 对公众开放的 GPT-3 模型有四个：Ada、Babbage、Curie 和 Davinci。它们的规模并未明确写出，但根据 Neelakantan et al. (2022) 报告的图及其配套博文，作者推断 Ada、Baggage、Curie 和 Davinci 分别有 3 亿、12 亿、60 亿和 1750 亿参数（原文此处把 Babbage 写成了 Baggage）。第 6.2 节表明，更贵的 Davinci 生成的问题只给 IR 指标带来边际提升。因此全文报告的结果都使用 Curie 生成的问题。脚注链接：https://openai.com/blog/introducing-text-and-code-embeddings/
 
-**EN.** Of the 100,000 questions generated (and their respective input documents), we use the top \(K=10{,}000\) pairs w.r.t to \(p_q\) as positive examples for finetuning our models.
+**EN.** Of the 100,000 questions generated (and their respective input documents), we use the top $K=10{,}000$ pairs w.r.t to $p_q$ as positive examples for finetuning our models.
 
-**中.** 在生成的 100,000 个问题（及其对应输入文档）中，按 \(p_q\) 取最高的 \(K=10{,}000\) 对，作为微调模型的正例。
+**中.** 在生成的 100,000 个问题（及其对应输入文档）中，按 $p_q$ 取最高的 $K=10{,}000$ 对，作为微调模型的正例。
 
-**EN.** Our retrievers are binary classifiers, so we also need to select documents that are not relevant to \(q\) to form negative finetuning examples \((q, d^{-})\). We use a simple method that has been shown to be effective for finetuning rerankers (Pradeep et al., 2021). We use BM25 with \(q\) as query to retrieve 1000 documents from the collection \(D\). We randomly select one of these as \(d^{-}\), and the pair \((q, d^{-})\) forms a negative example.
+**EN.** Our retrievers are binary classifiers, so we also need to select documents that are not relevant to $q$ to form negative finetuning examples $(q, d^{-})$. We use a simple method that has been shown to be effective for finetuning rerankers (Pradeep et al., 2021). We use BM25 with $q$ as query to retrieve 1000 documents from the collection $D$. We randomly select one of these as $d^{-}$, and the pair $(q, d^{-})$ forms a negative example.
 
-**中.** 检索器是二分类器，因此还要选出与 \(q\) 不相关的文档，构成负微调例 \((q, d^{-})\)。作者采用一种已被证明对微调重排器有效的简单方法（Pradeep et al., 2021）。用 BM25、以 \(q\) 为查询，从集合 \(D\) 检索 1000 篇文档。从中随机选一篇作为 \(d^{-}\)，对 \((q, d^{-})\) 构成负例。
+**中.** 检索器是二分类器，因此还要选出与 $q$ 不相关的文档，构成负微调例 $(q, d^{-})$。作者采用一种已被证明对微调重排器有效的简单方法（Pradeep et al., 2021）。用 BM25、以 $q$ 为查询，从集合 $D$ 检索 1000 篇文档。从中随机选一篇作为 $d^{-}$，对 $(q, d^{-})$ 构成负例。
 
 ### 4.3 Retrieval Methods / 检索方法
 
@@ -237,9 +237,9 @@ $$
 
 **中.** 本文使用多阶段检索架构（Matveeva et al., 2006; Wang et al., 2011; Chen et al., 2017; Liu et al., 2017）：先用词袋 BM25（Robertson et al., 1995）做初始检索，再接神经重排器。
 
-**EN.** The collection is indexed using pyserini (Lin et al., 2021) and 1000 candidate documents for each query are retrieved using BM25. Then we rerank the candidate documents using monoT5, which is an adaption of the T5 model (Raffel et al., 2020) to text ranking proposed by Nogueira et al. (2020). We finetune monoT5 base (220M parameters) and 3B with a constant learning rate of \(10^{-3}\) and an equal number of positive and negative examples in each batch of size 128. We did not conduct experiments with the 11B version due to its computational cost. To simplify our training procedure (and related hyperparameters) as well as to eliminate the need for convergence checks, we simply train for 156 steps (approximately one epoch). Because the number of training steps is small, we observed a difference of up to two points in the final metric depending on the order in which the training examples are shown to the model. Thus, we report the results that are the average of three seeds. Training T5 base and 3B takes a few minutes on a single Google TPU v3-8.
+**EN.** The collection is indexed using pyserini (Lin et al., 2021) and 1000 candidate documents for each query are retrieved using BM25. Then we rerank the candidate documents using monoT5, which is an adaption of the T5 model (Raffel et al., 2020) to text ranking proposed by Nogueira et al. (2020). We finetune monoT5 base (220M parameters) and 3B with a constant learning rate of $10^{-3}$ and an equal number of positive and negative examples in each batch of size 128. We did not conduct experiments with the 11B version due to its computational cost. To simplify our training procedure (and related hyperparameters) as well as to eliminate the need for convergence checks, we simply train for 156 steps (approximately one epoch). Because the number of training steps is small, we observed a difference of up to two points in the final metric depending on the order in which the training examples are shown to the model. Thus, we report the results that are the average of three seeds. Training T5 base and 3B takes a few minutes on a single Google TPU v3-8.
 
-**中.** 用 pyserini（Lin et al., 2021）为集合建索引，对每条查询用 BM25 检索 1000 篇候选文档。再用 monoT5 重排这些候选。monoT5 是 Nogueira et al. (2020) 把 T5 模型（Raffel et al., 2020）改成文本排序的做法。微调 monoT5 base（2.2 亿参数）和 3B，学习率恒为 \(10^{-3}\)，每个大小为 128 的 batch 里正例与负例数量相等。因计算成本，没有做 11B 版本的实验。为简化训练过程（及相关超参）并免去收敛检查，直接训练 156 步（大约一个 epoch）。因为训练步数少，作者观察到：训练例展示顺序不同时，最终指标最多可差两个点。因此报告三个随机种子的平均。在单块 Google TPU v3-8 上，训练 T5 base 和 3B 只需几分钟。
+**中.** 用 pyserini（Lin et al., 2021）为集合建索引，对每条查询用 BM25 检索 1000 篇候选文档。再用 monoT5 重排这些候选。monoT5 是 Nogueira et al. (2020) 把 T5 模型（Raffel et al., 2020）改成文本排序的做法。微调 monoT5 base（2.2 亿参数）和 3B，学习率恒为 $10^{-3}$，每个大小为 128 的 batch 里正例与负例数量相等。因计算成本，没有做 11B 版本的实验。为简化训练过程（及相关超参）并免去收敛检查，直接训练 156 步（大约一个 epoch）。因为训练步数少，作者观察到：训练例展示顺序不同时，最终指标最多可差两个点。因此报告三个随机种子的平均。在单块 Google TPU v3-8 上，训练 T5 base 和 3B 只需几分钟。
 
 **EN.** We finetune a model per collection using the synthetic questions generated from that collection. In Section 6.1, we show that having in-domain synthetic sets is beneficial. Nevertheless, using only MS MARCO as a source for documents also leads to reasonable results.
 
@@ -249,7 +249,7 @@ $$
 
 **中.** 输入最多 512 个 token，输出两个 token（一个是目标 token，另一个是序列结束 token）。在 MS MARCO 段落数据集的实验中，没有输入超过这一长度限制。对 NQ 和 TREC-COVID，文档经常被截断。
 
-**表 1 / Table 1.** Main results. / 主要结果。Figures marked with a † and a ‡ are from Reimers and Gurevych (2020) and Thakur et al. (2021), respectively. Experiments that are too expensive to run are marked with a $ symbol. For example, evaluating Davinci as a reranker on the MS MARCO development set would cost approximately 6.3k USD. ▷ indicates the dataset used for finetuning the model. / 标 † 与 ‡ 的数字分别来自 Reimers and Gurevych (2020) 与 Thakur et al. (2021)。贵到跑不起的实验标 $。例如，用 Davinci 在 MS MARCO 开发集上做重排评测大约要 6.3k 美元。▷ 表示用于微调该模型的数据集。
+**表 1 / Table 1.** Main results. / 主要结果。Figures marked with a † and a ‡ are from Reimers and Gurevych (2020) and Thakur et al. (2021), respectively. Experiments that are too expensive to run are marked with a \$ symbol. For example, evaluating Davinci as a reranker on the MS MARCO development set would cost approximately 6.3k USD. ▷ indicates the dataset used for finetuning the model. / 标 † 与 ‡ 的数字分别来自 Reimers and Gurevych (2020) 与 Thakur et al. (2021)。贵到跑不起的实验标 \$。例如，用 Davinci 在 MS MARCO 开发集上做重排评测大约要 6.3k 美元。▷ 表示用于微调该模型的数据集。
 
 | | MARCO MRR@10 | TREC-DL 2020 MAP | TREC-DL 2020 nDCG@10 | Robust04 MAP | Robust04 nDCG@20 | NQ nDCG@10 | TRECC nDCG@10 |
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
@@ -258,9 +258,9 @@ $$
 | (2) Contriever (Izacard et al., 2021) | — | — | — | — | — | 0.2580 | 0.2740 |
 | (3) cpt-text (Neelakantan et al., 2022) | 0.2270 | — | — | — | — | — | 0.4270 |
 | **OpenAI Search reranking 100 docs from BM25 / 用 OpenAI Search 重排 BM25 的 100 篇** | | | | | | | |
-| (4) Ada (300M) | $ | 0.3141 | 0.5161 | 0.2691 | 0.4847 | 0.4092 | 0.6757 |
-| (5) Curie (6B) | $ | 0.3296 | 0.5422 | 0.2785 | 0.5053 | 0.4171 | 0.7251 |
-| (6) Davinci (175B) | $ | 0.3163 | 0.5366 | 0.2790 | 0.5103 | $ | 0.6918 |
+| (4) Ada (300M) | \$ | 0.3141 | 0.5161 | 0.2691 | 0.4847 | 0.4092 | 0.6757 |
+| (5) Curie (6B) | \$ | 0.3296 | 0.5422 | 0.2785 | 0.5053 | 0.4171 | 0.7251 |
+| (6) Davinci (175B) | \$ | 0.3163 | 0.5366 | 0.2790 | 0.5103 | \$ | 0.6918 |
 | **InPars (ours) / 本文** | | | | | | | |
 | (7) monoT5-220M | 0.2585 | 0.3599 | 0.5764 | 0.2490 | 0.4268 | 0.3354 | 0.6666 |
 | (8) monoT5-3B | 0.2967 | 0.4334 | 0.6612 | 0.3180 | 0.5181 | 0.5133 | 0.7835 |
@@ -381,9 +381,9 @@ $$
 
 ### 6.3 Filtering by the Most Likely Questions / 按最可能的问题过滤
 
-**EN.** As mentioned in Section 3, we used only the top \(K = 10{,}000\) pairs w.r.t to \(p_q\) to finetune the rerankers. Finetuning on all 100,000 synthetic examples leads to a 4 MRR@10 points decrease on MS MARCO when compared to the top \(K\) filtering approach. Thus, to avoid relying on the test sets and keep the method fully unsupervised, we only evaluated this difference on MS MARCO and applied the filtering approach to all other datasets.
+**EN.** As mentioned in Section 3, we used only the top $K = 10{,}000$ pairs w.r.t to $p_q$ to finetune the rerankers. Finetuning on all 100,000 synthetic examples leads to a 4 MRR@10 points decrease on MS MARCO when compared to the top $K$ filtering approach. Thus, to avoid relying on the test sets and keep the method fully unsupervised, we only evaluated this difference on MS MARCO and applied the filtering approach to all other datasets.
 
-**中.** 如第 3 节所述，微调重排器时只用按 \(p_q\) 最高的 \(K = 10{,}000\) 对。若在全部 100,000 条合成例上微调，相对 top-\(K\) 过滤，MS MARCO 上的 MRR@10 下降 4 个点。因此，为了不依赖测试集、并保持方法完全无监督，这一差异只在 MS MARCO 上评估，过滤做法则用到所有其他数据集。
+**中.** 如第 3 节所述，微调重排器时只用按 $p_q$ 最高的 $K = 10{,}000$ 对。若在全部 100,000 条合成例上微调，相对 top-$K$ 过滤，MS MARCO 上的 MRR@10 下降 4 个点。因此，为了不依赖测试集、并保持方法完全无监督，这一差异只在 MS MARCO 上评估，过滤做法则用到所有其他数据集。
 
 ### 6.4 Was GPT-3 Trained on Supervised IR Data? / GPT-3 是否在有监督 IR 数据上训练过？
 

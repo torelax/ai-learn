@@ -123,13 +123,13 @@
 
 **中.** 本节描述本文提出的生成式伪标签（GPL）方法，用于稠密检索器的无监督域适应。图 1 说明了 GPL 的想法。
 
-**EN.** For a given target corpus, we generate for each passage three queries (cf. Table 3) using an T5-encoder-decoder model (Raffel et al., 2020). For each of the generated queries, we use an existing retrieval system to retrieve 50 negative passages. Dense retrieval with a pre-existing model was slightly more effective than BM25 lexical retrieval (cf. Appendix A). For each (query, positive, negative)-tuple we compute the margin \(\delta = \mathrm{CE}(Q, P^{+}) - \mathrm{CE}(Q, P^{-})\) with CE the score as predicted by a cross-encoder, \(Q\) the query and \(P^{+} / P^{-}\) the positive / negative passage.
+**EN.** For a given target corpus, we generate for each passage three queries (cf. Table 3) using an T5-encoder-decoder model (Raffel et al., 2020). For each of the generated queries, we use an existing retrieval system to retrieve 50 negative passages. Dense retrieval with a pre-existing model was slightly more effective than BM25 lexical retrieval (cf. Appendix A). For each (query, positive, negative)-tuple we compute the margin $\delta = \mathrm{CE}(Q, P^{+}) - \mathrm{CE}(Q, P^{-})$ with CE the score as predicted by a cross-encoder, $Q$ the query and $P^{+} / P^{-}$ the positive / negative passage.
 
-**中.** 对给定的目标语料，用一个 T5 编码器–解码器模型（Raffel et al., 2020）为每个段落生成三条查询（参见表 3）。对每条生成的查询，用已有检索系统检索 50 个负段落。用已有模型做稠密检索，比 BM25 词法检索略更有效（参见附录 A）。对每个（查询，正例，负例）三元组，计算间隔 \(\delta = \mathrm{CE}(Q, P^{+}) - \mathrm{CE}(Q, P^{-})\)，其中 CE 是交叉编码器预测的分数，\(Q\) 是查询，\(P^{+} / P^{-}\) 是正段落 / 负段落。
+**中.** 对给定的目标语料，用一个 T5 编码器–解码器模型（Raffel et al., 2020）为每个段落生成三条查询（参见表 3）。对每条生成的查询，用已有检索系统检索 50 个负段落。用已有模型做稠密检索，比 BM25 词法检索略更有效（参见附录 A）。对每个（查询，正例，负例）三元组，计算间隔 $\delta = \mathrm{CE}(Q, P^{+}) - \mathrm{CE}(Q, P^{-})$，其中 CE 是交叉编码器预测的分数，$Q$ 是查询，$P^{+} / P^{-}$ 是正段落 / 负段落。
 
-**EN.** We use the synthetic dataset \(\mathcal{D}_{\mathrm{GPL}} = \{(Q_i, P_i, P_i^{-}, \delta_i)\}_i\) with the MarginMSE loss (Hofstätter et al., 2020) for training a domain-adapted dense retriever that maps queries and passages into the shared vector space.
+**EN.** We use the synthetic dataset $\mathcal{D}_{\mathrm{GPL}} = \{(Q_i, P_i, P_i^{-}, \delta_i)\}_i$ with the MarginMSE loss (Hofstätter et al., 2020) for training a domain-adapted dense retriever that maps queries and passages into the shared vector space.
 
-**中.** 作者使用合成数据集 \(\mathcal{D}_{\mathrm{GPL}} = \{(Q_i, P_i, P_i^{-}, \delta_i)\}_i\)，以 MarginMSE 损失（Hofstätter et al., 2020）训练一个域适应的稠密检索器，把查询和段落映射到共享向量空间。
+**中.** 作者使用合成数据集 $\mathcal{D}_{\mathrm{GPL}} = \{(Q_i, P_i, P_i^{-}, \delta_i)\}_i$，以 MarginMSE 损失（Hofstätter et al., 2020）训练一个域适应的稠密检索器，把查询和段落映射到共享向量空间。
 
 **EN.** Our method requires from the target domain just an unlabeled collection of passages. Further, we use use pre-existing T5- and cross-encoder models that have been trained on the MS MARCO passages dataset.
 
@@ -145,9 +145,9 @@ $$
 \mathcal{L}_{\mathrm{MNRL}}(\theta) = -\frac{1}{M}\sum_{i=0}^{M-1}\log\frac{\exp\big(\tau\cdot\sigma(f_{\theta}(Q_i), f_{\theta}(P_i))\big)}{\sum_{j=0}^{M-1}\exp\big(\tau\cdot\sigma(f_{\theta}(Q_i), f_{\theta}(P_j))\big)}
 $$
 
-**EN.** where \(P_i\) is a relevant passage for \(Q_i\); \(\sigma\) is a certain similarity function for vectors; \(\tau\) controls the sharpness of the softmax normalization; \(M\) is the batch size.
+**EN.** where $P_i$ is a relevant passage for $Q_i$; $\sigma$ is a certain similarity function for vectors; $\tau$ controls the sharpness of the softmax normalization; $M$ is the batch size.
 
-**中.** 其中 \(P_i\) 是 \(Q_i\) 的相关段落；\(\sigma\) 是某种向量相似度函数；\(\tau\) 控制 softmax 归一化的锐度；\(M\) 是批大小。
+**中.** 其中 $P_i$ 是 $Q_i$ 的相关段落；$\sigma$ 是某种向量相似度函数；$\tau$ 控制 softmax 归一化的锐度；$M$ 是批大小。
 
 ### MarginMSE loss / MarginMSE 损失
 
@@ -163,11 +163,11 @@ $$
 \mathcal{L}_{\mathrm{MarginMSE}}(\theta) = -\frac{1}{M}\sum_{i=0}^{M-1}\big|\hat{\delta}_i - \delta_i\big|^2 \tag{1}
 $$
 
-**EN.** where \(\hat{\delta}_i\) is the corresponding score margin of the student dense retriever, i.e. \(\hat{\delta}_i = f_{\theta}(Q_i)^{\top} f_{\theta}(P_i) - f_{\theta}(Q_i)^{\top} f_{\theta}(P_i^{-})\). Here the dot-product is usually used due to the infinite range of the cross-encoder scores.
+**EN.** where $\hat{\delta}_i$ is the corresponding score margin of the student dense retriever, i.e. $\hat{\delta}_i = f_{\theta}(Q_i)^{\top} f_{\theta}(P_i) - f_{\theta}(Q_i)^{\top} f_{\theta}(P_i^{-})$. Here the dot-product is usually used due to the infinite range of the cross-encoder scores.
 
-**中.** 其中 \(\hat{\delta}_i\) 是学生稠密检索器对应的分数间隔，即 \(\hat{\delta}_i = f_{\theta}(Q_i)^{\top} f_{\theta}(P_i) - f_{\theta}(Q_i)^{\top} f_{\theta}(P_i^{-})\)。这里通常使用点积，因为交叉编码器分数的取值范围是无穷的。
+**中.** 其中 $\hat{\delta}_i$ 是学生稠密检索器对应的分数间隔，即 $\hat{\delta}_i = f_{\theta}(Q_i)^{\top} f_{\theta}(P_i) - f_{\theta}(Q_i)^{\top} f_{\theta}(P_i^{-})$。这里通常使用点积，因为交叉编码器分数的取值范围是无穷的。
 
-教师间隔（正文中的定义，与上式中的 \(\delta_i\) 对应）：
+教师间隔（正文中的定义，与上式中的 $\delta_i$ 对应）：
 
 $$
 \delta = \mathrm{CE}(Q, P^{+}) - \mathrm{CE}(Q, P^{-})
@@ -191,9 +191,9 @@ $$
 
 **中.** 源域数据使用 MS MARCO 段落排序数据集（Nguyen et al., 2016）。它有 880 万段落，训练集中有 53.28 万对被标为相关的查询–段落对。如表 1 所示，一个在 MS MARCO 段落排序数据集上 MRR@10 达到 33.2 点的先进稠密检索模型，在六个选定的领域专用检索数据集上，相对简单的 BM25 词法搜索表现很差。
 
-**EN.** We use the DistilBERT (Sanh et al., 2019) for all the experiments. We use the concatenation of the title and the body text as the input passage for all the models. We use a maximum sequence length of 350 with mean pooling and dot-product similarity by default. For QGen, we use the default setting in Thakur et al. (2021b): 1-epoch training and batch size 75. For GPL, we train the models with 140k training steps and batch size 32. To generate queries for both QGen and GPL, we use the DocT5Query (Nogueira et al., 2019a) generator trained on MS MARCO and generate queries<sup>4</sup> using nucleus sampling with temperature 1.0, \(k = 25\) and \(p = 0.95\). To retrieve hard negatives for both GPL and the zero-shot setting of MS MARCO training, we use two dense retrievers with cosine-similarity trained on MS MARCO: msmarco-distilbert-base-v3 and msmarco-MiniLM-L-6-v3 from Sentence-Transformers<sup>5</sup>. The zero-shot performance of these two dense retrievers are available in Appendix B. We retrieve 50 negatives using each retriever and uniformly sample one negative passage and one positive passage for each training query to form one training example. For pseudo labeling, we use the ms-marco-MiniLM-L-6-v2<sup>6</sup> cross-encoder. For all the pre-training methods (e.g. TSDAE and MLM), we train the models for 100K training steps and with batch size 8.
+**EN.** We use the DistilBERT (Sanh et al., 2019) for all the experiments. We use the concatenation of the title and the body text as the input passage for all the models. We use a maximum sequence length of 350 with mean pooling and dot-product similarity by default. For QGen, we use the default setting in Thakur et al. (2021b): 1-epoch training and batch size 75. For GPL, we train the models with 140k training steps and batch size 32. To generate queries for both QGen and GPL, we use the DocT5Query (Nogueira et al., 2019a) generator trained on MS MARCO and generate queries<sup>4</sup> using nucleus sampling with temperature 1.0, $k = 25$ and $p = 0.95$. To retrieve hard negatives for both GPL and the zero-shot setting of MS MARCO training, we use two dense retrievers with cosine-similarity trained on MS MARCO: msmarco-distilbert-base-v3 and msmarco-MiniLM-L-6-v3 from Sentence-Transformers<sup>5</sup>. The zero-shot performance of these two dense retrievers are available in Appendix B. We retrieve 50 negatives using each retriever and uniformly sample one negative passage and one positive passage for each training query to form one training example. For pseudo labeling, we use the ms-marco-MiniLM-L-6-v2<sup>6</sup> cross-encoder. For all the pre-training methods (e.g. TSDAE and MLM), we train the models for 100K training steps and with batch size 8.
 
-**中.** 全部实验使用 DistilBERT（Sanh et al., 2019）。所有模型都把标题与正文的拼接当作输入段落。默认最大序列长度为 350，均值池化，点积相似度。对 QGen，使用 Thakur et al.（2021b）的默认设置：训练 1 个 epoch，批大小 75。对 GPL，以 14 万训练步、批大小 32 训练模型。为 QGen 和 GPL 生成查询时，使用在 MS MARCO 上训练的 DocT5Query（Nogueira et al., 2019a）生成器，并以温度 1.0、\(k = 25\)、\(p = 0.95\) 的 nucleus sampling 生成查询<sup>4</sup>。为 GPL 以及 MS MARCO 训练的零样本设定检索难负例时，使用两个在 MS MARCO 上以余弦相似度训练的稠密检索器：来自 Sentence-Transformers<sup>5</sup> 的 msmarco-distilbert-base-v3 和 msmarco-MiniLM-L-6-v3。这两个稠密检索器的零样本性能见附录 B。每个检索器检索 50 个负例，并对每条训练查询均匀采样一个负段落和一个正段落，组成一条训练样本。伪标签使用 ms-marco-MiniLM-L-6-v2<sup>6</sup> 交叉编码器。对所有预训练方法（例如 TSDAE 和 MLM），以 10 万训练步、批大小 8 训练模型。
+**中.** 全部实验使用 DistilBERT（Sanh et al., 2019）。所有模型都把标题与正文的拼接当作输入段落。默认最大序列长度为 350，均值池化，点积相似度。对 QGen，使用 Thakur et al.（2021b）的默认设置：训练 1 个 epoch，批大小 75。对 GPL，以 14 万训练步、批大小 32 训练模型。为 QGen 和 GPL 生成查询时，使用在 MS MARCO 上训练的 DocT5Query（Nogueira et al., 2019a）生成器，并以温度 1.0、$k = 25$、$p = 0.95$ 的 nucleus sampling 生成查询<sup>4</sup>。为 GPL 以及 MS MARCO 训练的零样本设定检索难负例时，使用两个在 MS MARCO 上以余弦相似度训练的稠密检索器：来自 Sentence-Transformers<sup>5</sup> 的 msmarco-distilbert-base-v3 和 msmarco-MiniLM-L-6-v3。这两个稠密检索器的零样本性能见附录 B。每个检索器检索 50 个负例，并对每条训练查询均匀采样一个负段落和一个正段落，组成一条训练样本。伪标签使用 ms-marco-MiniLM-L-6-v2<sup>6</sup> 交叉编码器。对所有预训练方法（例如 TSDAE 和 MLM），以 10 万训练步、批大小 8 训练模型。
 
 <sup>4</sup> We use the script from BeIR at https://github.com/UKPLab/beir. / 使用 BeIR 的脚本：https://github.com/UKPLab/beir 。
 
@@ -201,9 +201,9 @@ $$
 
 <sup>6</sup> https://huggingface.co/cross-encoder/ms-marco-MiniLM-L-6-v2
 
-**EN.** As shown in Section 6, small corpora require more generated queries and for large corpora, a small down-sampled subset (e.g. 50K) is enough for good performance. Based on these findings, we adjust the number of generated queries per passage \(q_{\mathrm{avg.}}\) and the corpus size \(|C|\) to make the total number of generated queries equal to a fixed number, 250K, i.e. \(q_{\mathrm{avg.}} \times |C| = 250\mathrm{K}\). In detail, we first set \(q_{\mathrm{avg.}} \ge 3\) and uniformly down-sample the corpus if \(3 \times |C| > 250\mathrm{K}\); then we calculate \(q_{\mathrm{avg.}} = \lceil 250\mathrm{K}/|C|\rceil\). For example, the \(q_{\mathrm{avg.}}\) values for FiQA (original size = 57.6K) and Robust04 (original size = 528.2K) are 5 and 3, resp. and the Robust04 corpus is down-sampled to 83.3K. QGen and GPL share the generated queries for fair comparision.
+**EN.** As shown in Section 6, small corpora require more generated queries and for large corpora, a small down-sampled subset (e.g. 50K) is enough for good performance. Based on these findings, we adjust the number of generated queries per passage $q_{\mathrm{avg.}}$ and the corpus size $|C|$ to make the total number of generated queries equal to a fixed number, 250K, i.e. $q_{\mathrm{avg.}} \times |C| = 250\mathrm{K}$. In detail, we first set $q_{\mathrm{avg.}} \ge 3$ and uniformly down-sample the corpus if $3 \times |C| > 250\mathrm{K}$; then we calculate $q_{\mathrm{avg.}} = \lceil 250\mathrm{K}/|C|\rceil$. For example, the $q_{\mathrm{avg.}}$ values for FiQA (original size = 57.6K) and Robust04 (original size = 528.2K) are 5 and 3, resp. and the Robust04 corpus is down-sampled to 83.3K. QGen and GPL share the generated queries for fair comparision.
 
-**中.** 如第 6 节所示，小语料需要更多生成查询；对大语料，一个较小的下采样子集（例如 5 万）就足以取得好性能。基于这些发现，作者调整每段生成查询数 \(q_{\mathrm{avg.}}\) 和语料规模 \(|C|\)，使生成查询总数等于一个固定数 250K，即 \(q_{\mathrm{avg.}} \times |C| = 250\mathrm{K}\)。具体而言，先设 \(q_{\mathrm{avg.}} \ge 3\)，若 \(3 \times |C| > 250\mathrm{K}\) 则对语料做均匀下采样；然后计算 \(q_{\mathrm{avg.}} = \lceil 250\mathrm{K}/|C|\rceil\)。例如，FiQA（原始规模 = 57.6K）和 Robust04（原始规模 = 528.2K）的 \(q_{\mathrm{avg.}}\) 分别为 5 和 3，并且 Robust04 语料被下采样到 83.3K。为公平比较，QGen 与 GPL 共用同一批生成查询。
+**中.** 如第 6 节所示，小语料需要更多生成查询；对大语料，一个较小的下采样子集（例如 5 万）就足以取得好性能。基于这些发现，作者调整每段生成查询数 $q_{\mathrm{avg.}}$ 和语料规模 $|C|$，使生成查询总数等于一个固定数 250K，即 $q_{\mathrm{avg.}} \times |C| = 250\mathrm{K}$。具体而言，先设 $q_{\mathrm{avg.}} \ge 3$，若 $3 \times |C| > 250\mathrm{K}$ 则对语料做均匀下采样；然后计算 $q_{\mathrm{avg.}} = \lceil 250\mathrm{K}/|C|\rceil$。例如，FiQA（原始规模 = 57.6K）和 Robust04（原始规模 = 528.2K）的 $q_{\mathrm{avg.}}$ 分别为 5 和 3，并且 Robust04 语料被下采样到 83.3K。为公平比较，QGen 与 GPL 共用同一批生成查询。
 
 ### 4.2 Evaluation / 评测
 
@@ -439,8 +439,8 @@ $$
 | --- | --- | ---: | ---: |
 | Query | what is futures contract | – | – |
 | Positive | Futures contracts are a member of a larger class of financial assets called derivatives ... | 10.3 | 1 |
-| Negative 1 | ... Anyway in this one example the s&p 500 futures contract has an "initial margin" of $19,250, meaning ... | 2.0 | 0 |
-| Negative 2 | ... but the moment you exercise you must have $5,940 in a margin account to actually use the futures contract ... | 0.3 | 0 |
+| Negative 1 | ... Anyway in this one example the s&p 500 futures contract has an "initial margin" of \$19,250, meaning ... | 2.0 | 0 |
+| Negative 2 | ... but the moment you exercise you must have \$5,940 in a margin account to actually use the futures contract ... | 0.3 | 0 |
 | Negative 3 | ... a futures contract is simply a contract that requires party A to buy a given amount of a commodity from party B at a specified price... | 8.2 | 0 |
 | Negative 4 | ... A futures contract commits two parties to a buy/sell of the underlying securities, but ... | 6.9 | 0 |
 
