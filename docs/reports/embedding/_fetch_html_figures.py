@@ -57,6 +57,9 @@ PAPERS: list[tuple[str, str]] = [
     ("DINOv3_2508.10104", "2508.10104"),
     ("Qwen3-Embedding_2506.05176", "2506.05176"),
     ("ViDoRev2_2505.17166", "2505.17166"),
+    # Batch 5: 蒸馏基石（跨架构 / 多语）
+    ("Margin-MSE", "2010.02666"),
+    ("Multilingual-SBERT", "2004.09813"),
 ]
 
 

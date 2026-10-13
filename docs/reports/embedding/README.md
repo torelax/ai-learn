@@ -47,6 +47,15 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 | [CLIP详解.md](CLIP/CLIP详解.md) | [arXiv:2103.00020](https://arxiv.org/abs/2103.00020)（图文双塔基石；对称 InfoNCE + WIT 4 亿对 + zero-shot 分类） |
 | [SigLIP与SigLIP2详解.md](SigLIP/SigLIP与SigLIP2详解.md) | SigLIP [2303.15343](https://arxiv.org/abs/2303.15343) + SigLIP 2 [2502.14786](https://arxiv.org/abs/2502.14786)（sigmoid loss + 100 语 + LocCa + SILC/TIPS + NaFlex） |
 
+## 蒸馏基石
+
+方法论总览见 [Embedding蒸馏技术详解.md](Embedding蒸馏技术详解.md)；下面两篇是被反复引用的原始论文，按论文结构写成研读笔记。
+
+| 文档 | 论文 / 来源 |
+|------|-------------|
+| [Margin-MSE研读笔记.md](Margin-MSE/Margin-MSE研读笔记.md) | [arXiv:2010.02666](https://arxiv.org/abs/2010.02666)（跨架构蒸馏：只对齐正负例间隔，拼接式 BERT 教任意架构；GPL / R-GPL / `msmarco-*-margin-mse` 的源头） |
+| [Multilingual-SBERT研读笔记.md](Multilingual-SBERT/Multilingual-SBERT研读笔记.md) | [arXiv:2004.09813](https://arxiv.org/abs/2004.09813) / [EMNLP 2020](https://aclanthology.org/2020.emnlp-main.365/)（多语蒸馏：平行句对 + 单条 MSE 把英文空间搬到 50 语；`paraphrase-multilingual-*` 的方法） |
+
 ## 领域专用 Embedding（2026-08 补齐）
 
 面向文搜图等垂直场景：先读实践综述，再按领域看案例。主文 §10.4 只保留索引。
