@@ -1,4 +1,12 @@
+# 模型权重：refs/ 下的参考仓库会自带 checkpoint，不入库
 *.bin
+*.pth
+*.pt
+*.safetensors
+
+# _fetch_html_figures.py 换用 HTML 原图时留下的 PDF 裁切备份，属构建产物
+**/figs/_from_pdf_crop/
+
 /.vscode
 .kiro/
 
