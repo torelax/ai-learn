@@ -97,6 +97,7 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 |------|-------------|
 | [ColBERT详解.md](ColBERT/ColBERT详解.md) | [arXiv:2004.12832](https://arxiv.org/abs/2004.12832) |
 | [ColBERTv2详解.md](ColBERTv2/ColBERTv2详解.md) | [arXiv:2112.01488](https://arxiv.org/abs/2112.01488) |
+| [PLAID详解.md](PLAID/PLAID详解.md) | [arXiv:2205.09707](https://arxiv.org/abs/2205.09707)（质心交互、质心剪枝与多阶段检索加速；附中英稿和原图） |
 | [ColPali详解.md](ColPali/ColPali详解.md) | [arXiv:2407.01449](https://arxiv.org/abs/2407.01449) |
 | [ColQwen系列详解.md](ColQwen/ColQwen系列详解.md) | 同 ColPali 论文 + Vidore 模型卡（ColQwen2 / 2.5；社区 ColQwen3） |
 

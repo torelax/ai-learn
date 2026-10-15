@@ -1,0 +1,558 @@
+{
+  "paper_id": "2205.09707",
+  "at_utc": "2026-10-13T07:58:35.735570+00:00",
+  "requests": [
+    {
+      "url": "https://arxiv.org/pdf/2205.09707",
+      "status": 200,
+      "bytes": 1569420,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707",
+      "status": 200,
+      "bytes": 217050,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/colbert.png",
+      "status": 200,
+      "bytes": 44275,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/msmarco_baseline_latency_breakdown_legend.svg",
+      "status": 200,
+      "bytes": 26840,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/msmarco_baseline_latency_breakdown_gpu.svg",
+      "status": 200,
+      "bytes": 20736,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/msmarco_plaid_latency_breakdown_gpu.svg",
+      "status": 200,
+      "bytes": 20520,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_legend.svg",
+      "status": 200,
+      "bytes": 12560,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_k=10.svg",
+      "status": 200,
+      "bytes": 48503,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_k=100.svg",
+      "status": 200,
+      "bytes": 41554,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_k=1000.svg",
+      "status": 200,
+      "bytes": 42147,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/centroid_score_distribution.svg",
+      "status": 200,
+      "bytes": 330264,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/centroid_interaction_overview.svg",
+      "status": 200,
+      "bytes": 213832,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/gpu_ablation.svg",
+      "status": 200,
+      "bytes": 33679,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/cpu_ablation.svg",
+      "status": 200,
+      "bytes": 32776,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/latency_vs_dataset_size_legend.svg",
+      "status": 200,
+      "bytes": 7414,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/latency_vs_dataset_size_gpu.svg",
+      "status": 200,
+      "bytes": 44268,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/latency_vs_dataset_size_cpu.svg",
+      "status": 200,
+      "bytes": 45262,
+      "success": true
+    },
+    {
+      "url": "https://arxiv.org/html/2205.09707v1/cpu_scaling.svg",
+      "status": 200,
+      "bytes": 56135,
+      "success": true
+    }
+  ],
+  "pdf": {
+    "url": "https://arxiv.org/pdf/2205.09707",
+    "file": "PLAID: An Efficient Engine for Late Interaction Retrieval_2205.09707.pdf",
+    "sha256": "abb5b497b543a24755218f457228b5bdb6291652d41504a5dcb143892c18d256",
+    "pages": 10,
+    "caption_candidates": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "version_alignment": "requires manual PDF/HTML verification"
+  },
+  "html": {
+    "url": "https://arxiv.org/html/2205.09707",
+    "sha256": "c4f5caa3fbd0af7215e84287798bb37bad10f99499ca9d524ae7a8236c395574",
+    "captions": {
+      "1": "Figure 1 . The late interaction architecture, given a query and a passage. Diagram from Khattab\net al. (2021b) with permission.",
+      "2": "Figure 2 . Latency breakdown of MS MARCO v1 dev queries run with vanilla ColBERTv2 and PLAID ColBERTv2 on a TITAN V GPU. Vanilla ColBERTv2 is overwhelmingly bottlenecked with the cost of index lookup and decompression, a challenge that PLAID addresses.",
+      "3": "Figure 3 . Recall of passages retrieved by a centroid-only version of ColBERTv2 with respect to the top k k passages retrieved by vanilla ColBERTv2. Centroids alone can identify virtually all of the top- k k passages retrieved with the full ColBERTv2 pipeline, within 10 ⋅ k 10\\cdot k or fewer candidates, motivating our centroid interaction strategy.",
+      "4": "Figure 4 . Centroid score distribution for each query among a random sample of 15 MS MARCO v1 dev queries evaluated with ColBERTv2.",
+      "5": "Figure 5 . The PLAID scoring pipeline. The first stage generates an initial set of candidate passages using the centroids. Next the second and third stages leverage centroid pruning and centroid interaction respectively to refine the candidate set. Then the last stage performs full residual decompression to obtain the final passage ranking. We use the hyperparameter ndocs to specify the number of candidates returned by Stage 2, and in our experiments we have Stage 3 output ndocs 4 \\frac{\\texttt{ndocs}}{4} passages.",
+      "6": "Figure 6 . Ablation of performance optimizations included in PLAID.",
+      "7": "Figure 7 . End-to-end latency versus dataset size (as measured in number of embeddings) for each setting of k k (note the log-log scale). Dataset sizes are taken from Table 1 , and latency numbers are taken from Tables 3 , 4 , 5 , and 6 .",
+      "8": "Figure 8 . PLAID scaling behavior with respect to the number of available CPU threads."
+    },
+    "caption_numbers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "parser_numbers": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8
+    ],
+    "legacy_parser_numbers": [
+      1
+    ],
+    "panel_metadata": {
+      "1": [
+        {
+          "html_id": "S1.F1.g1",
+          "caption": "Figure 1 . The late interaction architecture, given a query and a passage. Diagram from Khattab\net al. (2021b) with permission.",
+          "legend": false
+        }
+      ],
+      "2": [
+        {
+          "html_id": "S2.F2.g1",
+          "caption": "Figure 2 . Latency breakdown of MS MARCO v1 dev queries run with vanilla ColBERTv2 and PLAID ColBERTv2 on a TITAN V GPU. Vanilla ColBERTv2 is overwhelmingly bottlenecked with the cost of index lookup and decompression, a challenge that PLAID addresses.",
+          "legend": true
+        },
+        {
+          "html_id": "S2.F2.sf1.g1",
+          "caption": "(a) Vanilla ColBERTv2 ( nprobe =4, ncandidates = 2 16 2^{16} ).",
+          "legend": false
+        },
+        {
+          "html_id": "S2.F2.sf2.g1",
+          "caption": "(b) PLAID ColBERTv2 ( k = 1000 k=1000 )",
+          "legend": false
+        }
+      ],
+      "3": [
+        {
+          "html_id": "S2.F3.g1",
+          "caption": "Figure 3 . Recall of passages retrieved by a centroid-only version of ColBERTv2 with respect to the top k k passages retrieved by vanilla ColBERTv2. Centroids alone can identify virtually all of the top- k k passages retrieved with the full ColBERTv2 pipeline, within 10 ⋅ k 10\\cdot k or fewer candidates, motivating our centroid interaction strategy.",
+          "legend": true
+        },
+        {
+          "html_id": "S2.F3.sf1.g1",
+          "caption": "(a) k = 10 k=10",
+          "legend": false
+        },
+        {
+          "html_id": "S2.F3.sf2.g1",
+          "caption": "(b) k = 100 k=100",
+          "legend": false
+        },
+        {
+          "html_id": "S2.F3.sf3.g1",
+          "caption": "(c) k = 1000 k=1000",
+          "legend": false
+        }
+      ],
+      "4": [
+        {
+          "html_id": "S3.F4.g1",
+          "caption": "Figure 4 . Centroid score distribution for each query among a random sample of 15 MS MARCO v1 dev queries evaluated with ColBERTv2.",
+          "legend": false
+        }
+      ],
+      "5": [
+        {
+          "html_id": "S4.F5.g1",
+          "caption": "Figure 5 . The PLAID scoring pipeline. The first stage generates an initial set of candidate passages using the centroids. Next the second and third stages leverage centroid pruning and centroid interaction respectively to refine the candidate set. Then the last stage performs full residual decompression to obtain the final passage ranking. We use the hyperparameter ndocs to specify the number of candidates returned by Stage 2, and in our experiments we have Stage 3 output ndocs 4 \\frac{\\texttt{ndocs}}{4} passages.",
+          "legend": false
+        }
+      ],
+      "6": [
+        {
+          "html_id": "S5.F6.sf1.g1",
+          "caption": "(a) GPU.",
+          "legend": false
+        },
+        {
+          "html_id": "S5.F6.sf2.g1",
+          "caption": "(b) CPU (8 threads).",
+          "legend": false
+        }
+      ],
+      "7": [
+        {
+          "html_id": "S5.F7.g1",
+          "caption": "Figure 7 . End-to-end latency versus dataset size (as measured in number of embeddings) for each setting of k k (note the log-log scale). Dataset sizes are taken from Table 1 , and latency numbers are taken from Tables 3 , 4 , 5 , and 6 .",
+          "legend": true
+        },
+        {
+          "html_id": "S5.F7.sf1.g1",
+          "caption": "(a) GPU.",
+          "legend": false
+        },
+        {
+          "html_id": "S5.F7.sf2.g1",
+          "caption": "(b) CPU (8 threads).",
+          "legend": false
+        }
+      ],
+      "8": [
+        {
+          "html_id": "S5.F8.g1",
+          "caption": "Figure 8 . PLAID scaling behavior with respect to the number of available CPU threads.",
+          "legend": false
+        }
+      ]
+    }
+  },
+  "images": [
+    {
+      "figure": 1,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/colbert.png",
+      "status": "decoded",
+      "html_id": "S1.F1.g1",
+      "caption": "Figure 1 . The late interaction architecture, given a query and a passage. Diagram from Khattab\net al. (2021b) with permission.",
+      "legend": false,
+      "size": [
+        609,
+        365
+      ],
+      "format": "PNG",
+      "png": "figs/fig01-panel01.png",
+      "png_sha256": "8597e8c81486307db87c2498ee1e4813a8a27237982ef9a7ef57589222f81969",
+      "original_sha256": "8597e8c81486307db87c2498ee1e4813a8a27237982ef9a7ef57589222f81969",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 2,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/msmarco_baseline_latency_breakdown_legend.svg",
+      "status": "decoded",
+      "html_id": "S2.F2.g1",
+      "caption": "Figure 2 . Latency breakdown of MS MARCO v1 dev queries run with vanilla ColBERTv2 and PLAID ColBERTv2 on a TITAN V GPU. Vanilla ColBERTv2 is overwhelmingly bottlenecked with the cost of index lookup and decompression, a challenge that PLAID addresses.",
+      "legend": true,
+      "size": [
+        1534,
+        329
+      ],
+      "format": "PNG",
+      "png": "figs/fig02-panel01.png",
+      "png_sha256": "bcf9471033e964384a1a82167c4c8457e4fa4ed61daf00b49b8a3e8a77166025",
+      "original_sha256": "fd840fe3065b93e1c03505782e5688816c19b7f1ff26b37b3635de92c63c7d6c",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 2,
+      "panel": 2,
+      "url": "https://arxiv.org/html/2205.09707v1/msmarco_baseline_latency_breakdown_gpu.svg",
+      "status": "decoded",
+      "html_id": "S2.F2.sf1.g1",
+      "caption": "(a) Vanilla ColBERTv2 ( nprobe =4, ncandidates = 2 16 2^{16} ).",
+      "legend": false,
+      "size": [
+        1394,
+        474
+      ],
+      "format": "PNG",
+      "png": "figs/fig02-panel02.png",
+      "png_sha256": "d36f24787152b25435412c9dbf68e64465f9aa7d5555547b2128c1a570b80731",
+      "original_sha256": "ed049f98b5bf621dfe2942b648a87279dcb06626009587a958dab86e52edff27",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 2,
+      "panel": 3,
+      "url": "https://arxiv.org/html/2205.09707v1/msmarco_plaid_latency_breakdown_gpu.svg",
+      "status": "decoded",
+      "html_id": "S2.F2.sf2.g1",
+      "caption": "(b) PLAID ColBERTv2 ( k = 1000 k=1000 )",
+      "legend": false,
+      "size": [
+        1394,
+        474
+      ],
+      "format": "PNG",
+      "png": "figs/fig02-panel03.png",
+      "png_sha256": "c4ac96aadbf9c12d72b3d0349048d70143c36be71825497193122b9a05f4ae22",
+      "original_sha256": "a2f21e7ace04a132f20fb9f98b8506f5a8d53cb79ef0b9b6b05139898aeb24e7",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 3,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_legend.svg",
+      "status": "decoded",
+      "html_id": "S2.F3.g1",
+      "caption": "Figure 3 . Recall of passages retrieved by a centroid-only version of ColBERTv2 with respect to the top k k passages retrieved by vanilla ColBERTv2. Centroids alone can identify virtually all of the top- k k passages retrieved with the full ColBERTv2 pipeline, within 10 ⋅ k 10\\cdot k or fewer candidates, motivating our centroid interaction strategy.",
+      "legend": true,
+      "size": [
+        1378,
+        148
+      ],
+      "format": "PNG",
+      "png": "figs/fig03-panel01.png",
+      "png_sha256": "5fc4b72f7f500a798efb5dc4491ff7e75fa56485246c98b0e20bfe9f187050e8",
+      "original_sha256": "231ec0ebc4a8787d8487262105a01a3807376e6b40f9281d2d94cdc3d729616b",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 3,
+      "panel": 2,
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_k=10.svg",
+      "status": "decoded",
+      "html_id": "S2.F3.sf1.g1",
+      "caption": "(a) k = 10 k=10",
+      "legend": false,
+      "size": [
+        1138,
+        773
+      ],
+      "format": "PNG",
+      "png": "figs/fig03-panel02.png",
+      "png_sha256": "f85171dcefadca42e13cde36ed7f949315de3985fa0ca01410269a90fde789ce",
+      "original_sha256": "708477cbb92d830585207f2a050611f03e30294aaa6ba49a44d936c8e32d897c",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 3,
+      "panel": 3,
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_k=100.svg",
+      "status": "decoded",
+      "html_id": "S2.F3.sf2.g1",
+      "caption": "(b) k = 100 k=100",
+      "legend": false,
+      "size": [
+        1154,
+        769
+      ],
+      "format": "PNG",
+      "png": "figs/fig03-panel03.png",
+      "png_sha256": "482466a4601cc8674d177c5e93e750377d28094eb36318e9e06cd893979f4176",
+      "original_sha256": "8fbfc3c766d516553290383a6f9bd8978828fb1ef8785ebf3aa8185af9cf5dd7",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 3,
+      "panel": 4,
+      "url": "https://arxiv.org/html/2205.09707v1/self_recall_k=1000.svg",
+      "status": "decoded",
+      "html_id": "S2.F3.sf3.g1",
+      "caption": "(c) k = 1000 k=1000",
+      "legend": false,
+      "size": [
+        1170,
+        766
+      ],
+      "format": "PNG",
+      "png": "figs/fig03-panel04.png",
+      "png_sha256": "4d7ebbca3f40931d302c8382b398cd36961a7f64ea5368c266c933b1d7e75b33",
+      "original_sha256": "bc3c9f6fdebfb1341d6a4334e536629d2628176cb3490fcf24bf112a94596644",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 4,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/centroid_score_distribution.svg",
+      "status": "decoded",
+      "html_id": "S3.F4.g1",
+      "caption": "Figure 4 . Centroid score distribution for each query among a random sample of 15 MS MARCO v1 dev queries evaluated with ColBERTv2.",
+      "legend": false,
+      "size": [
+        1142,
+        764
+      ],
+      "format": "PNG",
+      "png": "figs/fig04-panel01.png",
+      "png_sha256": "44296da0d3173a03ea96b30825f4f7bc3b8dbaf99e540a0fe1fc0976e8a41480",
+      "original_sha256": "3c387458e87f6134f6dd4f998afa234f2efb407e1bafe99f91625dfd55f2fd5a",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 5,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/centroid_interaction_overview.svg",
+      "status": "decoded",
+      "html_id": "S4.F5.g1",
+      "caption": "Figure 5 . The PLAID scoring pipeline. The first stage generates an initial set of candidate passages using the centroids. Next the second and third stages leverage centroid pruning and centroid interaction respectively to refine the candidate set. Then the last stage performs full residual decompression to obtain the final passage ranking. We use the hyperparameter ndocs to specify the number of candidates returned by Stage 2, and in our experiments we have Stage 3 output ndocs 4 \\frac{\\texttt{ndocs}}{4} passages.",
+      "legend": false,
+      "size": [
+        3744,
+        1632
+      ],
+      "format": "PNG",
+      "png": "figs/fig05-panel01.png",
+      "png_sha256": "934ad34f045d8a8e8ac380295a71879e2004f9716de925fa869a08ede13bb143",
+      "original_sha256": "81449852a8141a436745b71509b6e33132912ac9208c15dd793d6d689a4ddf02",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 6,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/gpu_ablation.svg",
+      "status": "decoded",
+      "html_id": "S5.F6.sf1.g1",
+      "caption": "(a) GPU.",
+      "legend": false,
+      "size": [
+        1369,
+        465
+      ],
+      "format": "PNG",
+      "png": "figs/fig06-panel01.png",
+      "png_sha256": "937e2aef99543c86514173e7edc51017a25c5032878adae93e41acd5f82dde9c",
+      "original_sha256": "523af64b57f76c702aa6bd5965ca40b60db606099911c528f8d2ffc658d6804d",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 6,
+      "panel": 2,
+      "url": "https://arxiv.org/html/2205.09707v1/cpu_ablation.svg",
+      "status": "decoded",
+      "html_id": "S5.F6.sf2.g1",
+      "caption": "(b) CPU (8 threads).",
+      "legend": false,
+      "size": [
+        1369,
+        465
+      ],
+      "format": "PNG",
+      "png": "figs/fig06-panel02.png",
+      "png_sha256": "5bb744cc1a1f08295689781461cdeb328c25600b7a3633e0d78cabb9b160039f",
+      "original_sha256": "9e0da130c094904ef6d7bef712b23f3ce11d30e812eae0855a8e9dc8ddbeb929",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 7,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/latency_vs_dataset_size_legend.svg",
+      "status": "decoded",
+      "html_id": "S5.F7.g1",
+      "caption": "Figure 7 . End-to-end latency versus dataset size (as measured in number of embeddings) for each setting of k k (note the log-log scale). Dataset sizes are taken from Table 1 , and latency numbers are taken from Tables 3 , 4 , 5 , and 6 .",
+      "legend": true,
+      "size": [
+        1375,
+        148
+      ],
+      "format": "PNG",
+      "png": "figs/fig07-panel01.png",
+      "png_sha256": "39e9f1aa46d543c00a767e14fe256be62ab97945874bbe751b262aa7aaa3d350",
+      "original_sha256": "7c9fe845022db1c0c06bb9a53ea0f4fa71a2cd28feae3708c31368cd094b96aa",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 7,
+      "panel": 2,
+      "url": "https://arxiv.org/html/2205.09707v1/latency_vs_dataset_size_gpu.svg",
+      "status": "decoded",
+      "html_id": "S5.F7.sf1.g1",
+      "caption": "(a) GPU.",
+      "legend": false,
+      "size": [
+        1119,
+        803
+      ],
+      "format": "PNG",
+      "png": "figs/fig07-panel02.png",
+      "png_sha256": "e4b3a54b3dbad45b6cf78a833c3df7a9f9cb5d2ea192531eabf429e0cadd9509",
+      "original_sha256": "5bd9a55150aada2ccb95c5ab9eb23fccadaf3943b6965df314cdebba30cc67a3",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 7,
+      "panel": 3,
+      "url": "https://arxiv.org/html/2205.09707v1/latency_vs_dataset_size_cpu.svg",
+      "status": "decoded",
+      "html_id": "S5.F7.sf2.g1",
+      "caption": "(b) CPU (8 threads).",
+      "legend": false,
+      "size": [
+        1119,
+        786
+      ],
+      "format": "PNG",
+      "png": "figs/fig07-panel03.png",
+      "png_sha256": "9942bd35baa024f326c7458d6a459c2c33a6e4931644de9b20dd16050aa60dad",
+      "original_sha256": "d87e3871cc5e41cd3fca5f3cf5270b2cefdd8ce81237e60d10a8378790e8c737",
+      "visual_review": "pending"
+    },
+    {
+      "figure": 8,
+      "panel": 1,
+      "url": "https://arxiv.org/html/2205.09707v1/cpu_scaling.svg",
+      "status": "decoded",
+      "html_id": "S5.F8.g1",
+      "caption": "Figure 8 . PLAID scaling behavior with respect to the number of available CPU threads.",
+      "legend": false,
+      "size": [
+        1155,
+        872
+      ],
+      "format": "PNG",
+      "png": "figs/fig08-panel01.png",
+      "png_sha256": "29049b58530daf93f299b0ad6cb2b2b09446dc933b2b40dc5c1f9c1d1048c468",
+      "original_sha256": "c842b8c0de697b0131abc16522f3cd1fdc364ac03a6302dad01079a495cda447",
+      "visual_review": "pending"
+    }
+  ],
+  "blockers": [],
+  "outcome": "assets_retrieved_manual_review_pending"
+}

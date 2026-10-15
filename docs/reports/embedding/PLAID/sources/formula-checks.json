@@ -1,0 +1,87 @@
+{
+  "scope": "Pinned official pure-Python scoring functions plus educational arithmetic; no compiled engine, trained model or retrieval benchmark run",
+  "checks": [
+    {
+      "check": "Equation 1: official MaxSim reduction",
+      "passed": true,
+      "evidence": {
+        "score": 2.0,
+        "all_pairs_sum": 1.0
+      }
+    },
+    {
+      "check": "Padding excluded before max, including negative valid scores",
+      "passed": true,
+      "evidence": {
+        "score": -1.0
+      }
+    },
+    {
+      "check": "MaxSim generally asymmetric",
+      "passed": true,
+      "evidence": {
+        "forward": 1.4142135381698608,
+        "reverse": 0.7071067690849304
+      }
+    },
+    {
+      "check": "Equations 2–4: row gather and correct max axis",
+      "passed": true,
+      "evidence": {
+        "A_shape": [
+          3,
+          2
+        ],
+        "B_shape": [
+          3,
+          2
+        ],
+        "score": 2.0
+      }
+    },
+    {
+      "check": "Repeated centroid IDs do not change unpruned MaxSim",
+      "passed": true,
+      "evidence": {
+        "score": 2.0
+      }
+    },
+    {
+      "check": "Equation 5: max over query axis, inclusive threshold",
+      "passed": true,
+      "evidence": {
+        "keep": [
+          true,
+          true,
+          false
+        ]
+      }
+    },
+    {
+      "check": "Centroid approximation is neither guaranteed upper nor lower bound",
+      "passed": true,
+      "evidence": {
+        "underestimate_approx_exact": [
+          0.0,
+          0.6000000238418579
+        ],
+        "overestimate_approx_exact": [
+          1.0,
+          0.800000011920929
+        ]
+      }
+    },
+    {
+      "check": "Table 3 speedup arithmetic and recall-point differences",
+      "passed": true,
+      "evidence": {
+        "GPU_speedup": 6.760416666666668,
+        "8CPU_speedup": 45.09871668311945,
+        "v1_R1000_drop_pp": 0.8,
+        "v2_R1000_drop_pp": 2.4
+      }
+    }
+  ],
+  "passed": 8,
+  "failed": 0
+}

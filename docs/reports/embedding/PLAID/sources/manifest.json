@@ -1,0 +1,74 @@
+[
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "README.md",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/README.md",
+    "sha256": "40897ba2f2db6854660a62893fb299941bf54350ddaad6a4ecfdd151ef028110",
+    "bytes": 11959
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "colbert/search/candidate_generation.py",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/colbert/search/candidate_generation.py",
+    "sha256": "3cc92b56e677c0c64a2780a6ed1957909435993d26c6ee4eff9b8d6985ca1b30",
+    "bytes": 1984
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "colbert/search/index_storage.py",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/colbert/search/index_storage.py",
+    "sha256": "22f77df00c96ff93ef30a2ed968076aff8e7e1714e45e9f789c4c9045746afe6",
+    "bytes": 8849
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "colbert/search/filter_pids.cpp",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/colbert/search/filter_pids.cpp",
+    "sha256": "9b72bda27be1fe314d1ec5d0cf6baad64f05cef005c1552b5513b81dacf0e99d",
+    "bytes": 5894
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "colbert/searcher.py",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/colbert/searcher.py",
+    "sha256": "2b2cdb8ea121c4bcba588898a642ba7a94b7498ff35da5dfe826c4dd70090a2e",
+    "bytes": 5165
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "docs/images/ColBERT-Framework-MaxSim-W370px.png",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/docs/images/ColBERT-Framework-MaxSim-W370px.png",
+    "sha256": "ed43eecc6c65c38c3b131cc604a8a66a3179af23218c83f3411e973b35baf4fa",
+    "bytes": 41146
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "colbert/modeling/colbert.py",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/colbert/modeling/colbert.py",
+    "sha256": "29f54b1916a32b5682befc331f5391c5e757642cc7bc2a1842511b28bc7e378b",
+    "bytes": 7547
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "colbert/indexing/codecs/residual.py",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/colbert/indexing/codecs/residual.py",
+    "sha256": "64c1dce732fd8d5a9544bcf641cd350d8561d2329d0db461da09e35fc543d601",
+    "bytes": 10915
+  },
+  {
+    "repository": "stanford-futuredata/ColBERT",
+    "commit": "cc4f3dc91c0b45d2d08c251d9d95178285c65f1c",
+    "path": "LICENSE",
+    "url": "https://raw.githubusercontent.com/stanford-futuredata/ColBERT/cc4f3dc91c0b45d2d08c251d9d95178285c65f1c/LICENSE",
+    "sha256": "641c1a7fc3e22f3ea8521617c690213f0d741bf95ff35eeba99b34ff2102e0ae",
+    "bytes": 1091
+  }
+]
