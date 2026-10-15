@@ -44,6 +44,24 @@ docs/reports/<topic>/
 - 目录按专题分；不存在则创建
 - 报告 MD **不要**写 `local PDF`、本地 PDF 路径、中译落盘路径；用 arXiv / ACL / 官方链接即可
 - 配图优先从 **arXiv HTML / ar5iv** 下载原图到对应 `figs/`；无 HTML 原图时再 PDF 裁切兜底（见 `docs/reports/embedding/_fetch_html_figures.py`）
+- **PDF 入库前先压**（见下）
+
+### 2.1 PDF 压缩（首次 commit 之前做）
+
+arXiv 的 PDF 常把配图嵌到离谱的分辨率（DINOv3 原件里有 1515 dpi 的图，而屏幕阅读只需 ~150 dpi）。这类 PDF 里的**文字是矢量的**，降采样只动位图，正文、公式、图内标注逐像素不变。
+
+```bash
+cd docs/reports/embedding
+python3 _shrink_pdf.py <新论文目录> --dry-run   # 先看一眼
+python3 _shrink_pdf.py <新论文目录>             # 默认 /ebook
+python3 _shrink_pdf.py DINO/DINOv3 --quality printer
+```
+
+- 默认 **`--quality ebook`**（图降到 150 dpi）。文字为主的论文和原件看不出区别，通常省 80–90%
+- **图本身就是论文结论**时（DINOv2/DINOv3/CLIP 这类视觉论文）用 **`--quality printer`**（300 dpi）。ebook 会把照片细节明显糊掉
+- 脚本只在「poppler 能读 + 页数不变 + 确实变小 + 图不低于 `--min-dpi`」时才替换；重复跑是空操作
+
+**时机很关键：只压还没 commit 的 PDF。** 已入库的 PDF 压了反而让仓库变大——新 blob 加进去，旧的还留在历史里。存量大 PDF（`_shrink_pdf.py . --dry-run` 可列出，约 69 MB 可回收）留到将来重写历史时一次性处理。
 
 ---
 
