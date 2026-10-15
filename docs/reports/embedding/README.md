@@ -4,7 +4,7 @@
 
 单篇/系列精读与论文 PDF、中译、`figs/` 放在同一方法文件夹（如 `GTE/GTE系列详解.md`、`InternLM2/InternLM2数据处理与过滤详解.md`）。总览、合写、索引仍在本目录。报告嵌入图在 `figures/<短名>/`。
 
-Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范见根目录 [AGENTS.md](../../../AGENTS.md)。
+Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + ModelCard mention；过程记录不创建子页。写作参照 [论文阅读笔记指南](../../paper-reading-guide.md)，权限与落点见根目录 [AGENTS.md](../../../AGENTS.md)。
 
 ## 总览与规划
 
@@ -97,7 +97,7 @@ Notion：Embedding&Rerank → Paper 库全文导入 + ModelCard mention。规范
 |------|-------------|
 | [ColBERT详解.md](ColBERT/ColBERT详解.md) | [arXiv:2004.12832](https://arxiv.org/abs/2004.12832) |
 | [ColBERTv2详解.md](ColBERTv2/ColBERTv2详解.md) | [arXiv:2112.01488](https://arxiv.org/abs/2112.01488) |
-| [PLAID详解.md](PLAID/PLAID详解.md) | [arXiv:2205.09707](https://arxiv.org/abs/2205.09707)（质心交互、质心剪枝与多阶段检索加速；附中英稿和原图） |
+| [PLAID详解.md](PLAID/PLAID详解.md) | [arXiv:2205.09707](https://arxiv.org/abs/2205.09707)（阅读笔记：背景、质心交互与剪枝、四阶段流程、完整实验表和消融；8 张原图，中英翻译独立保留） |
 | [ColPali详解.md](ColPali/ColPali详解.md) | [arXiv:2407.01449](https://arxiv.org/abs/2407.01449) |
 | [ColQwen系列详解.md](ColQwen/ColQwen系列详解.md) | 同 ColPali 论文 + Vidore 模型卡（ColQwen2 / 2.5；社区 ColQwen3） |
 

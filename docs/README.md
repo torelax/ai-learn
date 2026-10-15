@@ -1,6 +1,6 @@
 # docs
 
-学习与调研文档。论文研究流程（PDF 副本、Notion 导入、禁删）见仓库根目录 [AGENTS.md](../AGENTS.md)。
+学习与调研文档。阅读笔记风格与单页同步流程见 [论文阅读笔记指南](paper-reading-guide.md)。论文研究流程（PDF 副本、Notion 导入、禁删）见仓库根目录 [AGENTS.md](../AGENTS.md)。
 
 | 路径 | 说明 |
 |------|------|

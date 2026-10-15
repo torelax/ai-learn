@@ -35,7 +35,7 @@ ai-learn/
 ├── ...
 ```
 
-论文深读须把 PDF / 中译 / 配图与报告 MD 放在同一 `docs/reports/<topic>/` 目录；报告 MD 为权威正文，并主动全文同步 Notion（Embedding 落点见 `AGENTS.md`；其他专题先问）。
+论文深读须把 PDF / 中译 / 配图与报告 MD 放在同一 `docs/reports/<topic>/` 目录；具名报告 MD 为阅读笔记权威正文，按 [阅读笔记指南](docs/paper-reading-guide.md) 组织，并主动全文同步到单个 Notion 阅读页（不附审核清单等子页）（Embedding 落点见 `AGENTS.md`；其他专题先问）。
 
 ## 贡献
 

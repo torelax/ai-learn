@@ -67,11 +67,11 @@ python3 _shrink_pdf.py DINO/DINOv3 --quality printer
 
 ## 3. 研究报告 → Notion（主动导入）
 
-写完或重大更新 `docs/reports/**` 中的**论文/算法深读**后，**主动**将全文导入 Notion，并保证 **MD 与 Notion 正文一致**（格式可按 Notion 转换，信息不得删减摘要化）。**图必须同步**：Notion 页不得只有文字、漏掉报告中的关键图。
+写完或重大更新 `docs/reports/**` 中的**论文阅读笔记**后，**主动**将该篇正文全文导入 Notion，并保证 **MD 与 Notion 正文一致**（格式可按 Notion 转换）。默认**一篇论文一个阅读页**；不自动导入研究过程、审核清单、选题依据，也不为这些资料创建子页或附件。**图必须同步**：Notion 页不得只有文字、漏掉报告中的关键图。
 
 ### 3.1 Embedding（已知落点，勿再问）
 
-1. 全文写入 **Embedding&Rerank → Reference → Paper** 数据库  
+1. 全文写入 **Embedding&Rerank → Reference → Paper** 数据库
    （data source：`collection://0391fb9a-5dfb-4b28-b7dc-84cb27713890`）
 2. 若属模型/算法卡片，在 **ModelCard** 对应 tab（如 Others）加 `<mention-page>` 引用
 3. Paper 属性建议：`Type=Paper`，`DOMAIN` 含 `LLM`，`SubDomain` 含 `Embedding`，`URL`=论文链接，`简述`=一句话，`Readed` 按实情
@@ -83,19 +83,26 @@ python3 _shrink_pdf.py DINO/DINOv3 --quality printer
 ### 3.3 Notion 删除禁令
 
 - **禁止删除**任何既有 Notion 页面或他人/历史内容
-- 任何删除（含自己误写的大块清理）**必须先问用户并得到明确同意**
+- 删除（含自己误写的大块清理）须有用户明确授权；已有的具体清理指示可以直接执行，不重复询问。仅清理授权范围内的页面/内容
 - 默认只做：新建、追加、用全文 `replace_content` **覆盖自己负责导入的那一页**（覆盖前确认是本报告对应页）
 
 ---
 
 ## 4. 算法类 Notion / MD 版式
 
+### 4.0 阅读笔记风格与文件职责
+
+- 详细做法见 [论文阅读笔记指南](docs/paper-reading-guide.md)；风格参照 `docs/reports/embedding/E5-Mistral/zh.md` 的中文技术展开
+- 正文顺着论文讲清背景、相关工作、方法、实验、消融和结论；公式配符号/直觉，图表后解释结果，不写成审计报告或工作流水账
+- `<方法名>详解.md` / 既有具名报告是阅读笔记与同步源；`zh.md` 保持中文翻译职责，`en.md` 为英文转写。样例历史文件不因本规则自动改写
+- 本地核查记录、脚本和 `sources/` 用于证据留存，不自动进入 Notion；阅读页不附审核清单、同步进度等过程内容
+
 ### 4.1 配图（之后新建/大改必做；存量不必整页补）
 
 研究报告与同步到 Notion 的页面**必须有图**，至少包含：
 
-1. **原图**：优先 arXiv HTML / ar5iv 抽出的论文原图（非 PDF 糊裁）；关键方法图、主结果图不得省略  
-2. **对应解释**：每张图下方（或紧邻）用中文说明「图在讲什么、和本文论点如何对应」——不要只贴图不写字，也不要只写「见图 N」而无图  
+1. **原图**：优先 arXiv HTML / ar5iv 抽出的论文原图（非 PDF 糊裁）；关键方法图、主结果图不得省略
+2. **对应解释**：每张图下方（或紧邻）用中文说明「图在讲什么、和本文论点如何对应」——不要只贴图不写字，也不要只写「见图 N」而无图
 
 落盘建议（便于入库与 Notion 上传）：
 
@@ -125,9 +132,9 @@ docs/reports/<topic>/figures/<短名>/fig01.png
 
 正文（MD = Notion）须写清：
 
-1. **训练数据**：用了哪些数据 / 合成策略 / 规模量级  
-2. **评测 benchmark**：MTEB / CMTEB / 词级 CoNLL 等  
-3. **对比方法**：和谁比、结论是什么  
+1. **训练数据**：用了哪些数据 / 合成策略 / 规模量级
+2. **评测 benchmark**：MTEB / CMTEB / 词级 CoNLL 等
+3. **对比方法**：和谁比、结论是什么
 4. **数据集简介**：关键训练集或评测集用一两段说明（不必百科全文）
 
 另按论文写清：方法步骤、损失/公式、消融、可迁移实践。
@@ -167,4 +174,5 @@ docs/reports/<topic>/figures/<短名>/fig01.png
 | [docs/README.md](docs/README.md) | 文档索引 |
 | [docs/reports/embedding/README.md](docs/reports/embedding/README.md) | Embedding 报告索引 |
 | [.cursor/rules/paper-research.mdc](.cursor/rules/paper-research.mdc) | 论文研究强制规则 |
+| [docs/paper-reading-guide.md](docs/paper-reading-guide.md) | 阅读笔记风格、文件职责与单页同步流程 |
 | [.gitignore](.gitignore) | 忽略缓存 / 未完成目录等 |
