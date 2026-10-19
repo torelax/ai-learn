@@ -5,7 +5,7 @@
 | 路径 | 说明 |
 |------|------|
 | [`reports/embedding/`](reports/embedding/) | Embedding 调研报告 + 论文 PDF / 中译 / 配图（自 vlm_train / modelforge 迁入） |
-| [`reports/lora/`](reports/lora/) | LoRA / PEFT 调研报告 |
+| [`reports/lora/`](reports/lora/) | LLM 微调 / PEFT：LoRA、量化适配与提示微调 |
 | [`reports/distillation/`](reports/distillation/) | 知识蒸馏调研 |
 | [`reports/Qwen/`](reports/Qwen/) | Qwen 系列技术演进 |
 

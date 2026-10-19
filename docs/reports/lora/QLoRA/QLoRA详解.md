@@ -1,343 +1,162 @@
-# QLoRA 技术详解
+# QLoRA 论文研读：四位基座微调、Guanaco 与评测边界
 
-> 基于论文 [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314)（Dettmers, Pagnoni, Holtzman, Zettlemoyer；University of Washington；arXiv:2305.14314，2023-05）。
-> 本文把 **NF4 量化数据类型、Double Quantization、Paged Optimizers、存储/计算双数据类型机制、「LoRA 必须铺满所有线性层」的关键发现、Guanaco 与 Elo 评测、数据质量 > 数据量** 以及 **附录 A–G 工程细节** 写全，便于在单卡上复现 65B 级微调。
+> **简述**：将冻结基座压为 NF4，以双重量化减少量化常数开销，并用分页优化器处理显存峰值，在低显存下训练 LoRA。<br>
+> **paper**：[QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314) · NeurIPS 2023<br>
+> **code**：[artidoro/qlora](https://github.com/artidoro/qlora) · **refs**：[LoRA](https://arxiv.org/abs/2106.09685)<br>
+> **backbone**：LLaMA 7B–65B；另有 RoBERTa、T5 实验 · **date**：2023-05<br>
+> **modality / languages**：文本；主要英语指令与评测，不据此承诺多语言效果。
 
----
+## 论文简介
 
-## 1. 一句话定位
+LoRA 大幅减少了可训练状态，但仍需在显存中保存高精度基座，超大模型的适配门槛依然很高。QLoRA 将基座冻结并以四位 NF4 存储，计算时反量化到较高精度，让梯度经过基座传向 LoRA；同时对量化尺度再次量化，并通过统一内存分页缓解优化器状态引起的显存峰值。论文展示了在单张 48 GB GPU 上微调 65B 模型的可行性，在多组任务上接近十六位 LoRA 的效果，训练出的 Guanaco 也获得较强的对话评分。但四位描述的是权重存储，实际显存还包括激活和适配器状态；聊天评测存在裁判与顺序偏差，量化格式及推理部署收益也依赖具体实现。
 
-**QLoRA** 回答的问题是：*能否在一张消费级/单张专业卡上，把 65B 模型微调到与 16-bit 全量微调无差别的水平？* 答案是肯定的——**冻结 4-bit 量化的基座权重，反向传播穿过量化权重去更新 16-bit 的 LoRA 适配器**：
+## 摘要译文
 
-| 项 | 内容 |
-| --- | --- |
-| 核心机制 | 基座权重存 **NF4（4-bit NormalFloat）**，计算时反量化为 **BF16** 做 matmul；只训练 **BF16 的 LoRA (A,B)** |
-| 显存账 | LLaMA-65B 微调：**>780GB → <48GB**（单卡 48GB 可训）；7B 推理部署仅需 **~5GB** |
-| 三大组件 | **NF4**、**Double Quantization（DQ）**、**Paged Optimizers** |
-| 关键训练发现 | 默认 LoRA 超参（只挂 Q/V）**追不平** 16-bit 全量微调；**LoRA 铺满所有线性层** 才能追平 |
-| 代表性产物 | **Guanaco** 家族（7/13/33/65B）：Vicuna 基准上 65B 达 **ChatGPT 的 99.3%**，单卡 24h |
-| 数据结论 | **数据质量 ≫ 数据量**：OASST1 9k 样本在 chatbot 评测胜过 FLAN v2 45 万样本 |
-| 评测结论 | **MMLU 强 ≠ Vicuna 强**；GPT-4 评判与人评大体一致但有分歧案例；现有 chatbot 基准不可全信 |
-| 工程落地 | 开源 CUDA 4-bit 内核，进 **bitsandbytes** 与 Hugging Face transformers 栈 |
+我们提出 QLoRA，一种高效微调方法：它大幅降低显存使用，使单张 48 GB GPU 可以微调 65B 参数模型，同时保留十六位微调的任务表现。QLoRA 将梯度通过冻结的四位量化预训练模型，传播到低秩适配器。
 
-QLoRA 的价值不止「省显存」：它把「最大公开模型的微调」从集群工程变为**单机工程**，并顺带做了一轮此前因成本无法开展的大规模指令微调实证研究（>1000 个模型）。
+我们最好的模型系列 Guanaco，在 Vicuna benchmark 上超过此前所有公开发布的模型，仅用单张 GPU 微调 24 小时，达到 ChatGPT 表现的 99.3%。QLoRA 引入了三项节省显存且保持效果的创新：面向正态分布权重的四位 NormalFloat、通过量化量化常数来降低平均存储开销的双重量化，以及管理显存峰值的分页优化器。
 
----
+我们利用节约的资源训练了超过一千个模型，研究指令遵循与聊天表现，涵盖八种指令数据、多种模型类型（LLaMA、T5），以及使用常规微调难以实验的规模，例如 33B 和 65B。结果说明，小而高质量的数据可以获得很强效果，即使所用模型小于此前最佳模型。我们通过人工与 GPT-4 评测分析聊天模型，发现 GPT-4 评测虽是较廉价、合理的人工评测替代方案，但现有聊天基准不足以准确评估聊天模型水平。我们还通过生成样例分析 Guanaco 相对 ChatGPT 的失败之处，并发布模型、代码及四位训练内核。
 
-## 2. 论文目录与结构导读
+**解读**：“99.3%”是特定相对评分，不是通用能力百分比；33B/65B 与完整十六位全量微调的严格等价性，也没有被正文全部建立，后文会说明。
 
-```text
-§1  Introduction                     问题：65B 全量微调 >780GB；提出 QLoRA 三组件 + Guanaco
-§2  Background                       分块 k-bit 量化、LoRA 回顾、PEFT 显存构成的澄清
-§3  QLoRA Finetuning                 NF4 / Double Quantization / Paged Optimizers / 形式化定义
-§4  QLoRA vs. Standard Finetuning    NF4 vs FP4；4-bit 是否追平 16-bit 全量/LoRA
-§5  Pushing the Chatbot SOTA         Guanaco：8 个指令数据集、Elo 锦标赛、GPT-4/人评
-§6  Qualitative Analysis             生成样例的成功/失败剖析（lemon-picked）
-§7  Related Work                     量化、PEFT、指令微调相关文献
-§8  Limitations and Discussion       局限：评测噪声、长序列、3-bit 以下未探明
-§9  Broader Impacts                  普惠化 vs 滥用风险
-附录 A  §4 实验设置细节（超参、TK-Instruct 设置）
-附录 B  Guanaco 实验细节（数据集、超参、消融、数据量 vs 质量）
-附录 C  人评协议
-附录 D  GPT-4 成对评测细节
-附录 E  NormalFloat 4-bit 具体取值表
-附录 F  预训练权重正态性的验证
-附录 G  显存细账（Memory Footprint 分解）
-```
+## 引言与相关工作：量化和 PEFT 分别解决一部分成本
 
-读法建议：**§2 的显存澄清**（LoRA 参数本身不是显存大头）和 **§4 的「铺满所有层」**是实践中最常被忽视的两点；**附录 G** 对排产/选卡最有用。
+量化研究希望减少权重或激活的位宽，但异常值和分布差异会导致误差；PEFT 则减少参与训练的参数及其梯度、优化器状态。LoRA 解决了后一部分，却仍需保存基座权重。QLoRA 让两条路线结合：基座以低位存储，反向信号仍经过该基座，任务变化由高精度适配器承载。
 
----
+论文中的 Guanaco 是监督指令微调模型，并未因为使用 OASST1 就自动包含 RLHF。OASST1 本身可用于偏好或强化学习相关流程，但本文的训练目标与数据处理仍需按其实际实验理解。
 
-## 3. 逐章节讲解
+## LoRA 之后，显存还花在哪里
 
-### 3.1 §1 Introduction：把 780GB 压进 48GB
+LoRA 让梯度和优化器状态主要属于小适配器，但 65B 的十六位基座权重本身就约为 130 GB。QLoRA 因此进一步压缩**冻结基座**。它没有把每次优化都变成对四位整数权重求梯度，也没有让全部计算都使用四位算术。
 
-论文开门见山：16-bit 全量微调 LLaMA-65B 需要 **>780GB** GPU 显存（权重 130GB + 梯度 130GB + Adam 两阶态 520GB + 激活）。已有的量化方法（GPTQ、LLM.int8() 等）只能压缩**推理**显存，训练时会崩。
+![QLoRA 原论文图 1：全量微调、LoRA 与 QLoRA 的状态分布](figs/S1-F1-01.png)
 
-QLoRA 的解法一句话：**量化基座到 4-bit 并冻结，梯度穿过量化权重流向 LoRA 适配器**。这带来三个此前不敢想的规模：
+绿色箭头表示梯度流，蓝色箭头表示参数更新。QLoRA 的基座仍参与前后向，但更新发生在适配器；紫色箭头表示优化器状态可以通过分页在 CPU/GPU 之间迁移。图中的四位基座、十六位适配器和三十二位优化器状态不能合并理解为“整个模型都是四位”。
 
-- 65B 单卡 48GB 可微调（Guanaco-65B，24 小时，Vicuna 达 ChatGPT 的 **99.3%**）；
-- 33B 单卡 24GB 消费级显卡 12 小时内达 **97.8%**；
-- 顺带微调了 **>1000 个模型**，做了 8 个指令数据集 × 多架构（LLaMA、T5）× 80M–65B 规模的系统研究。
+## 一次前向与反向如何进行
 
-引言还给出一个表 1 的 Elo 排名（GPT-4 评判）：Guanaco-65B（41GB）Elo 1022，仅次于 GPT-4（1348），高于 ChatGPT（966）与 Bard（902）；Guanaco-13B（10GB）已接近 ChatGPT。
+用 $q$ 表示四位代码，$s$ 表示量化尺度，$D(q,s)$ 表示反量化后的近似权重：
 
-> **笔者的边注**：论文同时埋下一条对社区的纠偏——「QLoRA 之后，微调门槛是数据质量而不是显存」。这在 §5/附录 B.4 有系统证据。
+$$
+h=D(q,s)x+\frac{\alpha}{r}BAx.
+$$
 
-### 3.2 §2 Background：三个必须讲清的前置概念
+基座的代码与尺度被冻结；矩阵乘法使用反量化后的计算表示，论文通常采用 BF16，LoRA 参数在较高精度下训练。损失沿冻结网络回传到 $A,B$，不优化 $q$。尺度、优化器状态和某些算子可能有自己的精度，因此“存储四位”和“计算 BF16”是主路径的区分，并不表示实现只出现两种数据类型。
 
-#### 3.2.1 分块 k-bit 量化（Block-wise k-bit Quantization）
+任务目标仍是监督学习：对生成任务最大化正确目标序列的条件似然；分类任务使用相应标签目标。是否只对回复计算损失，取决于数据格式和训练配置，不能由 QLoRA 这个名字推断。
 
-朴素 absmax 量化把 FP32 张量按 $c = 127/\text{absmax}(X)$ 缩放后取整到 Int8。问题：**一个 outlier 会撑爆整个 absmax**，导致大量量化 bin 空置、误差集中在小值区。
+## NF4：把有限代码分给更常见的权重
 
-工程解法：把张量拉平后切成 $n = (b \times h)/B$ 个连续块，每块独立求 $c_i$ 独立量化。块越小越精确，但每块都要存一个量化常数——这就是后面 Double Quantization 要对付的开销。
+均匀 INT4 在数轴上等距放置表示值，但预训练权重通常集中在零附近。NF4（NormalFloat 4-bit）用正态分布分位数构造非均匀码本，在密集区域分配更多分辨率，使用 16 个四位代码表示归一化权重，并包含精确零。
 
-#### 3.2.2 LoRA 回顾
+对一个权重块，以绝对最大值等尺度归一化后，选择最近的 NF4 码本值；计算时用码本查表并乘回尺度。原文常用块大小 64，以控制异常值对整块分辨率的影响。
 
-给定投影 $Y = XW$，$X \in \mathbb{R}^{b \times h}, W \in \mathbb{R}^{h \times o}$，LoRA 计算
+“信息论最优”带有分布假设：它针对近似正态权重的表示设计，不意味着对任意权重、异常值或激活都最优。NF4 也不是均匀 INT4 的另一个名称。
 
-$$Y = XW + s \cdot X L_1 L_2, \quad L_1 \in \mathbb{R}^{h \times r},\ L_2 \in \mathbb{R}^{r \times o}$$
+![QLoRA 原论文图 3：不同四位类型下 LLaMA 的零样本均值](figs/S4-F3-01.png)
 
-基座 $W$ 冻结，梯度经 $W$ 传向 $L_1, L_2$。QLoRA 完全继承这一形式，只是把 $W$ 换成 4-bit 存储。
+图中平均了 Winogrande、HellaSwag、PIQA、ARC-Easy 和 ARC-Challenge 的准确率。NF4 比常规 FP4 更能保留这些模型的零样本表现；双重量化主要提供进一步的存储收益，其性能变化较小。这一实验比较的是特定模型上的表示损失，不是所有部署内核的速度。
 
-#### 3.2.3 一个被广泛误解的显存账（本节最重要）
+## 双重量化：连尺度也占空间
 
-> **PEFT 的显存大头不是适配器参数，而是激活值/输入梯度。**
+若每 64 个权重共享一个 FP32 尺度，单尺度开销为
 
-论文给出的实测（LLaMA-7B，FLAN v2，batch=1，LoRA 参数为常规 0.2% 量级）：
+$$
+\frac{32}{64}=0.5\ \text{bit/parameter}.
+$$
 
-| 构成 | 显存 |
-| --- | --- |
-| LoRA 参数本身 | **26 MB** |
-| LoRA 输入梯度（无 checkpointing） | **567 MB** |
-| LoRA 输入梯度（开 gradient checkpointing） | ~18 MB/序列 |
-| **4-bit 基座** | **5,048 MB** |
+四位权重之外的 0.5 bit 已不可忽视。Double Quantization 将这些尺度再量化为八位，并让每 256 个尺度共享更高层的 FP32 常数，近似开销为
 
-两个推论直接决定了 QLoRA 的设计取向：
+$$
+\frac{8}{64}+\frac{32}{64\times256}\approx0.127\ \text{bit/parameter}.
+$$
 
-1. **再往死里压 LoRA 参数量（更小 r、更少层）收益甚微**——26MB 对 5GB 是噪声；真正的大头是基座存储与激活。
-2. **可以放心地把 LoRA 铺满所有层**——参数量翻倍几乎不涨总显存，而对追平 16-bit 性能**至关重要**（§4 图 2）。
+于是每个参数约节省 0.373 bit，65B 模型约节省 3.03 GB（十进制）。主权重加这部分尺度约为 4.127 bit/parameter；这只是主要表示成本，不包括所有元数据、未量化层、激活、临时缓冲和适配器。原文还对尺度作中心化处理以适合二次量化。
 
-这与 VeRA 那种「把适配器参数再砍 10×」的路线形成有趣对照：VeRA 省的是**存储/分发**成本（多租户场景），QLoRA 省的是**训练显存**（单卡场景），两者解决的不是同一个瓶颈。
+## 分页优化器：给峰值留出空间
 
-### 3.3 §3 QLoRA Finetuning：三组件 + 形式化
+Paged Optimizers 使用 NVIDIA Unified Memory，在 GPU 不够时将优化器状态页迁移到 CPU，需要时再迁回。它针对的是训练中的瞬时峰值，特别是较长序列或 checkpointing 相关的波动。
 
-#### 3.3.0 总原则：双数据类型
+它不会消除激活，也不会把内存不足自动变成无代价的训练；频繁迁移会引入传输和同步成本。是否需要分页，取决于模型、优化器、序列长度、batch、梯度累积和硬件。论文的“单张 48 GB GPU 微调 65B”是一个组合配置的结果，不应写成不依赖这些设置的固定显存需求，也不应误写为“A100 48GB”。
 
-QLoRA 有且只有两种精度：
+![QLoRA 原论文附录图 6：基座、适配器与激活相关显存拆分](figs/A7-F6-01.png)
 
-- **存储数据类型**：4-bit（默认 NF4）——只负责「放着省地方」；
-- **计算数据类型**：BF16——所有 matmul 都在 16-bit 下进行。
+该图的输入梯度估算采用 batch size 1、序列长度 512，并未计入完整注意力开销。它说明量化之后适配器状态和激活仍然重要，不适合当成任意训练配置的显存计算器。
 
-每次用到权重张量，先 **dequantize 到 BF16** 再做矩阵乘。前向、反向都走这条路径，但**只对 LoRA 参数算梯度**，4-bit 权重本身不接收梯度。
+## 实验先建立一个强的十六位基线
 
-#### 3.3.1 4-bit NormalFloat（NF4）
+若十六位 LoRA 本身没有调好，四位版本与它相近并不能证明量化几乎无损。作者先在 LLaMA 7B 的 Alpaca 指令微调中调学习率、batch 和适配位置，并使用 ROUGE-L 比较。
 
-**直觉**：4-bit 一共只有 16 个可用取值，怎么摆这 16 个点损失最小？
+![QLoRA 原论文图 2：学习率、batch 与适配位置消融](figs/S4-F2-01.png)
 
-- **FP4（浮点）**：按指数/尾数均匀铺——对钟形分布浪费 bin；
-- **Int4（均匀整型）**：均匀铺——同样浪费；
-- **NF4**：让 16 个点恰好是 **$N(0,1)$ 的等概率分位点**——信息论意义上对**零均值正态数据**最优（每个 bin 期望落入相同数量的值）。
+原图显示，仅在少量注意力投影上训练可能不足，覆盖 Transformer 中更多线性层是匹配强十六位基线的重要因素。这里的结论来自 LLaMA/Alpaca 的设置；它支持把 all-linear 纳入候选，不能推出所有架构、数据和预算下都必须用同一位置或同一秩。
 
-具体构造（附录 E 有完整取值表）：
+## 数据、基准与比较对象
 
-1. 估计 $2^k + 1$ 个 $N(0,1)$ 分位数，得到理论最优 k-bit 分位量化类型；
-2. 归一化到 $[-1, 1]$；
-3. 输入权重按 absmax 归一化到同一区间后按块量化。
+论文先用 RoBERTa/GLUE 和 T5/Super-NaturalInstructions 检查量化微调，再研究 LLaMA 7B、13B、33B、65B 的指令适配。Alpaca 是约 52K 条合成指令数据；FLAN v2 是多任务指令集合，论文对其使用的子集与后续聊天训练数据规模不同。Guanaco 使用筛选后的 OASST1 对话数据，约 9K 条训练样本。
 
-麻烦点：对称 k-bit 量化**没有精确的 0**，而 0 对 padding、稀疏结构必须无损表示。解法：**非对称构造**——负半轴取 $2^{k-1}$ 个分位点、正半轴取 $2^k-1+1$ 个，合并后去掉重复的一个 0。这样 16 个码字里有一个精确的 0。
+MMLU 汇集 57 类学科多项选择题，衡量较广的知识与理解，论文报告五样本分数。Vicuna benchmark 则是 80 个开放式问题上的聊天回答评分。知识选择题和开放式对话不是同一个目标，聊天评分较强不意味着所有知识指标也更高。
 
-为何可以直接假设权重正态？附录 F 给了实证：预训练神经网络权重普遍近似零均值正态（标准差 $\sigma$ 可被 absmax 缩放吸收）。
+### 四位 NF4 与十六位 LoRA：平均接近，单项仍有差异
 
-#### 3.3.2 Double Quantization（DQ）
+下表摘自原论文表 4，均为五样本 MMLU，同一精度下分别在 Alpaca 或 FLAN v2 上微调：
 
-块量化省误差，但**量化常数本身要钱**：块大小 64、FP32 常数 → 每参数多 $32/64 = 0.5$ bit。对 65B 模型约 32.5GB——不是小数。
+| 模型 | BF16 Alpaca | NF4+DQ Alpaca | BF16 FLAN | NF4+DQ FLAN |
+|---|---:|---:|---:|---:|
+| LLaMA 7B | 38.4 | 39.0 | 45.6 | 44.5 |
+| LLaMA 13B | 47.2 | 47.5 | 50.6 | 50.7 |
+| LLaMA 33B | 57.7 | 57.3 | 60.5 | 59.2 |
+| LLaMA 65B | 61.8 | 61.8 | 62.5 | 63.9 |
 
-DQ 的做法：**对量化常数再做一次量化**：
+八个设置的均值分别为 53.0 与 53.1。均值接近支持量化适配的可行性，但 7B/FLAN、33B/FLAN 等单项存在下降，不能写成“所有测试零损失”。表 3 的 T5 11B 上，全量 BF16、BF16 LoRA、NF4+DQ 分别为 62.0、60.7、60.9，也说明适配器与全量微调本身仍可能有差距。
 
-- 一级量化：权重 → NF4，常数 $c_2^{FP32}$（块 64）；
-- 二级量化：$c_2$ 先减去均值（使分布居中，可用对称量化），再用 **FP8、块 256** 量化，得到 $c_2^{FP8}$ 与二级常数 $c_1^{FP32}$。
+### Guanaco 的“99.3% ChatGPT”具体指什么
 
-平均开销从 0.5 bit/参数降到：
+原论文表 6 用 GPT-4 为 Vicuna 问题上的回答评分，再相对 ChatGPT 归一化：
 
-$$8/64 + 32/(64 \times 256) = 0.127 \text{ bit/参数}$$
+| 模型 | 论文报告的推理内存 | 相对 ChatGPT 的平均评分 |
+|---|---:|---:|
+| Guanaco 7B，四位 | 5 GB | 87.0 ± 5.4 |
+| Guanaco 13B，四位 | 10 GB | 90.4 ± 5.2 |
+| Guanaco 33B，四位 | 21 GB | 97.8 ± 4.4 |
+| Guanaco 65B，四位 | 41 GB | 99.3 ± 4.4 |
 
-即**每参数省 0.373 bit**，65B 模型约省 **3GB**。实验证明 FP8 二级量化无性能损失。
+这些是特定聊天问题、裁判和协议下的相对评分及原文区间，不是模型能力百分比。65B 在两种回答排列顺序下分别得到 96.7 与 101.9，顺序偏差已经足以影响相对排名。表中的推理内存也不是训练显存。
 
-#### 3.3.3 Paged Optimizers
+论文比较不同指令数据后发现，较小的高质量 OASST1 在聊天评测上很有效，而 FLAN 在 MMLU 等任务上有自身优势。这体现训练数据与目标评测的匹配程度；“9K 数据胜过更大集合”不能脱离数据性质成为普遍规律。
 
-微调时最致命的不是稳态显存，而是**长序列 mini-batch 触发的激活尖峰**——梯度 checkpointing 重计算瞬间 OOM。
+## 附录中的配方与消融
 
-Paged Optimizers 借 NVIDIA Unified Memory：把优化器状态分配到**分页内存**，GPU 不够时自动换出到 CPU RAM，需要时再换回。等价于给 optimizer state 加了一层「虚拟内存」。论文实测：65B 在 48GB 卡上 batch=16 时，分页优化器与常规优化器**训练速度相同**（分页只在尖峰时刻触发）。
+附录 A 比较 LoRA dropout、秩和目标层，并给出 T5/Super-NaturalInstructions 配置。LLaMA 7B/Alpaca 的消融中，当覆盖所有线性层时，所测秩范围的最终效果差异较小；这与原文强调适配位置一致，却不能推出任何任务都与秩无关。附录 B 的聊天训练则使用 $r=64,\alpha=16$、全部线性层、NF4+DQ 和 BF16 计算，并按模型及数据集调整 batch、学习率和步数。T5 实验使用另一套秩与 alpha，不能将两套设置混写成一个统一默认值。
 
-#### 3.3.4 形式化定义
+OASST1 原始集合有 161443 条消息、66497 个对话，涵盖 35 种语言；本文每层仅保留排名最好的回复，最终得到 9209 个训练示例。这并不是以全部原始对话训练。作者在这些对话上训练用户与助手的完整轮次；另外的七十亿参数、四数据集消融中，只对目标计算损失的 MMLU 均值为 38.6，而对输入与目标同时计算为 37.5（表 10），作者未将这个结论推广到全部聊天指标。
 
-单一线性层 + 单个 LoRA 适配器的 QLoRA：
+附录 C/D 详细给出人工与 GPT-4 的打分、成对比较协议及顺序影响；E/F 解释 NF4 的构造和神经网络权重分布；G 拆分显存。代码、数据配方与评价协议共同决定结果，单独打开四位加载并不等于复现 Guanaco。
 
-$$Y^{BF16} = X^{BF16}\,\text{doubleDequant}(c_1^{FP32}, c_2^{k\text{-bit}}, W^{NF4}) + X^{BF16} L_1^{BF16} L_2^{BF16}$$
+## 定性分析与论文自己指出的限制
 
-其中
+作者通过生成样例展示了知识回忆、对错误前提的抵抗、拒答、保密指令、数学及语言任务的成功和失败。模型可以正确回答常见事实，也会对罕见事实自信地给出错误答案；对某些简单请求会错误拒绝，稍作改写又可能违背先前约束。这些样例补充了总体分数所不能反映的行为差异，但它们也不是按完整分布进行的可靠性测量。
 
-$$\text{doubleDequant}(c_1, c_2, W) = \text{dequant}(\text{dequant}(c_1, c_2), W^{4bit}) = W^{BF16}$$
+原文限制章节明确说，资源成本使作者没有建立 33B/65B 上与十六位全量微调全面相当的结论；MMLU、Vicuna 和 OA 结果也不保证泛化到 BigBench、RAFT、HELM。对偏差的检查有限，三位基座和其他 PEFT 适配器也未在本文系统验证。作者关于手机端微调的讨论属于潜在影响与估算，不能作为已完成的设备实测结果。
 
-超参：$W$ 用 NF4 + 块 64（精度优先），$c_2$ 用 FP8 + 块 256（省存优先）。反向传播需要 $\partial E / \partial L_i$，其链路上要经过 $\partial X / \partial W$，故前向/反向都需把 $W^{NF4}$ 反量化为 $W^{BF16}$——但**梯度只落在 $L_1, L_2$ 上**。
+## 推理与合并：QLoRA 没有规定唯一部署方式
 
-### 3.4 §4 QLoRA vs. Standard Finetuning：三个实验结论
+训练后可以保留四位基座与浮点 LoRA 分支，直接运行两者的和；也可以反量化后合并为浮点模型。若要把合并结果再压回低位，通常会引入新的量化误差：
 
-#### 3.4.1 NF4 显著优于 FP4/Int4
+$$
+Q\!\left(D(q,s)+\frac{\alpha}{r}BA\right)
+$$
 
-在 OPT/BLOOM/Pythia/LLaMA（125M–13B）上做量化后 zero-shot 精度与 Pile Common Crawl 困惑度：
+一般不能与训练时的未重新量化前向完全等价。QA-LoRA 正是从可合并到量化参数这一需求出发，进一步约束更新结构。不能因此说 QLoRA “必须先变回 FP16 才能推理”，也不能因为训练省显存就承诺推理一定加速；速度还取决于反量化与矩阵乘法内核、batch 和硬件。
 
-| 数据类型 | Mean PPL（越低越好） |
-| --- | --- |
-| Int4 | 34.34 |
-| Float4 (E2M1) | 31.07 |
-| Float4 (E3M0) | 29.48 |
-| **NFloat4 + DQ** | **27.41** |
+## 结论与局限
 
-Winogrande/HellaSwag/PiQA/Arc 五项 zero-shot 均值同趋势：NF4 明显领先，DQ 只微调显存不损精度。
+QLoRA 将“少训练参数”推进到“少存储冻结权重”，NF4、双重量化和分页优化器分别解决表示误差、尺度开销和峰值显存。论文展示的不是四位全量训练，而是在量化模型上训练较高精度适配器。其局限包括量化分布假设、激活开销、分页代价、有限聊天评测，以及合并到低位部署时可能发生的再次量化误差。
 
-#### 3.4.2 默认 LoRA 超参追不平 16-bit 全量微调——铺满所有层才行
+## 参考资料
 
-这是 §4 对实践者**最重要的一张图**（图 2，LLaMA-7B 在 Alpaca 上）：
+- Dettmers et al. [QLoRA: Efficient Finetuning of Quantized LLMs](https://arxiv.org/abs/2305.14314)，NeurIPS 2023；方法、实验、定性分析与附录 A–G。
+- [官方实现与 Guanaco 说明](https://github.com/artidoro/qlora)。
 
-- 只把 LoRA 挂在 Q/V（LoRA 论文默认做法）→ **无法复现** 16-bit 全量微调性能；
-- **LoRA 铺满所有线性层（attention + FFN 全部）→ 追平**；
-- rank $r$ 等其它超参**对结果影响不大**（附录 A）。
-
-同时论文指出：很多「QLoRA/LoRA 不如全量微调」的既往结论，是因为**全量微调基线本身超参欠调**。作者对 lr ∈ [1e-6, 5e-5]、batch ∈ [8, 128] 做了搜索后才建立强基线。
-
-> **实践翻译**：「LoRA 不如全量」八成是适配位置不够或基线没调好，不是 LoRA 表达力不够。这也与 QLoRA §2.3 的显存账自洽——铺满层的参数成本可以忽略。
-
-#### 3.4.3 4-bit QLoRA 追平 16-bit 全量 / 16-bit LoRA
-
-两组实验：
-
-1. **RoBERTa-large / T5-80M…3B**，GLUE 与 Super-NaturalInstructions：BF16 全量、BF16-LoRA、QLoRA-Int8/FP4/NF4+DQ **全部打平**（误差范围内）。量化造成的精度损失可由量化后的适配器微调完全找回。
-2. **LLaMA 7B–65B**，Alpaca / FLAN v2 指令微调后 5-shot MMLU：**NF4+DQ 完全恢复 16-bit LoRA 水平**；FP4 版本落后约 1 个点，再次印证 NF4 的精度优势。
-
-§4 小结还抛出一个有趣的资源分配结论：在给定微调+推理预算下，**把参数做大、把精度做低**（更多参数 × 更低 bit）优于反过来——这正是 QLoRA 路线的理论注脚。性能-精度曲线的确切拐点（3-bit 行不行？）留给未来工作。
-
-### 3.5 §5 Pushing the Chatbot SOTA：Guanaco
-
-#### 3.5.1 设置
-
-- 模型：LLaMA 7/13/33/65B；
-- 数据：8 个指令数据集——OASST1、HH-RLHF、Alpaca、Self-Instruct、LongForm、FLAN v2、Unnatural Instructions、Chip2（混 HongKongese/Japanese 等）；
-- 评测：**Vicuna 基准**（80 条提示）+ MMLU；
-- 评判：**锦标赛制**——两两模型对同一提示作答，GPT-4 或人类标注胜负，聚合为 **Elo 分**（表 1：万局随机序平均）。
-
-#### 3.5.2 关键结果
-
-- **Guanaco-65B（OASST1）**：Vicuna Elo 1022，**ChatGPT 的 99.3%**；单张 A100 48GB 训 24 小时；
-- **Guanaco-33B**：97.8%，单张 24GB 消费卡 <12 小时；
-- **Guanaco-7B**：部署仅需 ~5GB，却在 Vicuna 上**反超 26GB 的 Alpaca 20 多个点**；
-- GPT-4 评判与人评在排序上**大体一致**，但存在显著分歧个例 → 模型评判便宜可用，但**不是免审金牌**。
-
-#### 3.5.3 数据质量 ≫ 数据量（附录 B.4 系统证据）
-
-| 数据集 | 规模 | 聊天机器人表现 |
-| --- | --- | --- |
-| **OASST1** | **9k** | **最强** |
-| FLAN v2（子采样） | 450k | 明显更弱 |
-
-以及：**MMLU 表现好 ≠ Vicuna 表现好**，反之亦然——数据与任务的适配性比规模更决定成败。这直接挑战了「指令数据越多越好」的直觉。
-
-#### 3.5.4 对基准的警告
-
-论文明确指出**当时的 chatbot 基准不可信**（Vicuna 80 题、GPT-4 评判方差、数据污染），并用 lemon-picked 失败样例（§6）展示 Guanaco 相对 ChatGPT 的具体短板：保密性、事实准确性、拒答边界等。
-
-### 3.6 §6 Qualitative Analysis：lemon-picked 失败学
-
-§6 不是走过场的样例展示，而是刻意挑**最差案例**（lemon-picked）做归因：
-
-- **事实性错误**：Guanaco 会编造具体数字/日期；
-- **指令层级混乱**：对「装作…」类角色指令的边界处理不如 ChatGPT 稳定；
-- **安全与拒答**：偶尔该拒不拒、不该拒乱拒；
-- **长上下文退化**：多轮对话中早期指令被遗忘。
-
-§6.2 的 Considerations 部分给出冷静评估：4-bit 微调让「谁都能训大模型」，但**评测科学没跟上**——锦标赛 Elo 依赖评判模型的偏见，人评规模小，这既是论文的诚实声明，也是给后续工作的任务清单。
-
-### 3.7 §7 Related Work
-
-三条线：
-
-1. **LLM 量化**：GPTQ、AWQ、LLM.int8()——都面向推理；QLoRA 首次证明 4-bit 下**可训练且不损性能**；
-2. **PEFT**：Adapter、Prefix/Prompt Tuning、LoRA、(IA)³——QLoRA 与这些方法**正交**，可叠加；
-3. **指令微调**：T0/FLAN 系（多任务规模路线）vs Alpaca/Vicuna 系（蒸馏路线）vs OASST（众包质量路线）——QLoRA 的实证站在了质量路线一边。
-
-### 3.8 §8 Limitations and Discussion
-
-- **未探明区域**：3-bit 及以下是否也能无损微调；分页开销在长序列高频触发时的真实代价；NF4 对非正态分布张量（如某些激活）的适用性；
-- **评测噪声**：Elo 对评判模型敏感；Vicuna 覆盖面窄；
-- **只验证了 ≤65B**：更大规模（175B+）是否仍无损未验证；
-- **结论边界**：QLoRA 恢复的是「任务性能」，不保证恢复所有涌现行为（作者明确提示）。
-
-### 3.9 §9 Broader Impacts
-
-双面：一方面**民主化**——学术实验室、小公司、个人都能在单卡上微调最强开源模型；另一方面同一技术降低了**恶意微调**（去安全对齐、定向造谣言）的成本。作者的立场是开源利大于弊，并强调可复现性（开源全部模型、代码、CUDA 内核、标注数据）。
-
----
-
-## 4. 附录要点
-
-### 附录 A：§4 实验细节
-
-- QLoRA 默认超参：LoRA r=64、α=16、dropout 0.1、**所有线性层**；lr 2e-4（paged AdamW 32bit）；常数 schedule；batch 16；bf16 计算；
-- 再次强调：r 从 8 到 256 变化对 MMLU 影响甚微，**铺满层**才是关键变量。
-
-### 附录 B：Guanaco 细节
-
-- B.1 数据集构成与清洗；B.2 超参（65B 用 r=64，lr 1e-4；33B/13B/7B 类似缩放）；B.3 消融（DQ 开关、Paged 开关、层覆盖）；
-- B.4 数据量 vs 质量：固定预算下，9k OASST1 胜过 450k FLAN v2（chatbot 评测），但 MMLU 上 FLAN v2 更好——**评测目标决定数据选型**。
-
-### 附录 C/D：评测协议
-
-- 人评：成对比较、盲评、标注一致性统计；GPT-4 评判：固定模板、随机顺序、温度 0；两者 Elo 相关性高但尾部案例分歧明显。
-
-### 附录 E：NF4 取值表
-
-16 个非对称分位点的精确值（负半轴 7 个 + 0 + 正半轴 8 个），bitsandbytes 的 `NF4` 量化即按此表硬编码。
-
-### 附录 F：权重正态性验证
-
-对 OPT/LLaMA/BLOOM 各层权重做正态性检验（Q-Q 图 / KS 统计），绝大多数线性层权重近似零均值正态，支撑 NF4 的「信息论最优」前提。
-
-### 附录 G：显存细账（排产最有用）
-
-以 LLaMA-65B、QLoRA、梯度 checkpointing 为例的稳态构成（量级）：
-
-| 构成 | 近似显存 |
-| --- | --- |
-| 4-bit 基座权重 | ~35 GB（含 DQ 常数） |
-| LoRA 参数 + 优化器态（32-bit AdamW，r=64 全层） | ~3–5 GB |
-| 激活 + 梯度（checkpointed） | 数 GB，随 batch/序列长波动 |
-| **合计** | **<48 GB**（Paged Optimizer 兜底尖峰） |
-
----
-
-## 5. 与 LoRA / rsLoRA / DoRA 的关系
-
-| 维度 | LoRA | QLoRA | rsLoRA | DoRA |
-| --- | --- | --- | --- | --- |
-| 解决什么 | 参数量/存储 | **训练显存** | 高 rank 梯度塌缩 | 表达力逼近 FT |
-| 基座精度 | 16-bit | **4-bit NF4** | 16-bit（可叠加 4-bit） | 16-bit（QDoRA 可叠加） |
-| 改什么 | ΔW=BA | 存储/计算分离 + 三组件 | γ=α/√r | W=m·(W0+BA)/‖·‖c |
-| 正交性 | — | 可与 rsLoRA/DoRA/LoRA+ 叠加 | 可与 QLoRA 叠加 | QDoRA 论文已验证叠加增益 |
-
-实践组合：**QLoRA（省显存）+ 铺满所有层（追平 FT）+ rsLoRA（高 rank 稳定）+ LoRA+（A/B 异学习率）** 是当前开源社区常见的「四件套」起点。
-
----
-
-## 6. 实践清单（复现/迁移到本仓库训练）
-
-1. **量化配置**：`bitsandbytes` 4-bit NF4 + `double_quant=True`，compute dtype `bf16`；块 64（权重）/256（二级常数）。
-2. **LoRA 配置**：**target 所有线性层**（q/k/v/o + gate/up/down），不要只挂 q/v；r 起步 64；α 经典取 16（或 α=2r，配合 rsLoRA 时按 √r 缩放）。
-3. **优化器**：`paged_adamw_32bit`；梯度 checkpointing 必开（尖峰由分页兜底）。
-4. **基线纪律**：比较「QLoRA vs 全量」时，先把全量基线的 lr/batch 调强，否则结论不可信（§4 教训）。
-5. **数据策略**：指令/偏好数据**质量优先**；先确定评测目标（知识型 MMLU 还是对话型），再选数据配比。
-6. **评测纪律**：Elo/GPT-4 评判可用但需人评抽检；报告训练显存时区分稳态与尖峰。
-
----
-
-## 7. 历史地位与影响
-
-- **工程拐点**：QLoRA 是「单卡微调大模型」时代的开端，bitsandbytes + PEFT + transformers 的组合成为 2023 年后开源微调的事实栈；
-- **方法论拐点**：把「量化」从推理技术升格为**训练技术**，启发了 LoftQ（量化感知初始化）、LQ-LoRA、QA-LoRA 等一整支后续工作；
-- **实证遗产**：>1000 个模型的系统微调研究，「数据质量 > 数据量」「MMLU ≠ 对话能力」成为后续指令微调论文的标配对照；
-- **争议与后续**：Guanaco 的 Vicuna/Elo 结论被后续工作指出基准过窄、评判有偏；3-bit 无损微调至今没有完全解决。
-
----
-
-## 8. 参考文献
-
-- Dettmers, T., Pagnoni, A., Holtzman, A., & Zettlemoyer, L. **QLoRA: Efficient Finetuning of Quantized LLMs.** arXiv:2305.14314, 2023. 代码：[artidoro/qlora](https://github.com/artidoro/qlora)、[bitsandbytes](https://github.com/TimDettmers/bitsandbytes)
-- Hu, E. et al. **LoRA: Low-Rank Adaptation of Large Language Models.** arXiv:2106.09685, 2021.
-- Dettmers, T. et al. **LLM.int8(): 8-bit Matrix Multiplication for Transformers at Scale.** arXiv:2208.07339.
-- Dettmers, T. & Zettlemoyer, L. **The Case for 4-bit Precision: k-bit Inference Scaling Laws.** arXiv:2212.09720.
-- Frantar, E. et al. **GPTQ: Accurate Post-Training Quantization for Generative Pre-trained Transformers.** arXiv:2210.17323.
-- Chiang, W.-L. et al. **Vicuna: An Open-Source Chatbot Impressing GPT-4 with 90% ChatGPT Quality.** 2023.
-- Kalajdzievski, D. **A Rank Stabilization Scaling Factor for Fine-Tuning with LoRA (rsLoRA).** arXiv:2312.03732, 2023.
-- Liu, S.-Y. et al. **DoRA: Weight-Decomposed Low-Rank Adaptation.** arXiv:2402.09353, ICML 2024.
-- Li, Y. et al. **LoftQ: LoRA-Fine-Tuning-Aware Quantization for Large Language Models.** arXiv:2310.08659.
+- [LoRA 技术总章](../LoRA技术深度调研报告.md)：跨论文理解 rank、alpha、目标权重、训练与部署。

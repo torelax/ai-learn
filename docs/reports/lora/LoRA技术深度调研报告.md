@@ -1,824 +1,203 @@
-# LoRA 技术深度调研报告
-## PEFT / LoRA 族：原理、谱系、工程实践与选型
+# LoRA 技术总章：原理、权重选择、超参数与部署
 
-> **版本**: v1.0  
-> **日期**: 2026-07-29  
-> **范围**: 参数高效微调（PEFT），以 LoRA 为主线，覆盖 Adapter→Prefix/Prompt→LoRA→AdaLoRA→QLoRA→VeRA→rsLoRA→LoRA+→DoRA 等；量化、推理 serving、与本仓库训练实践  
-> **关联专题**: [VeRA详解.md](VeRA/VeRA详解.md) · [LoRA+详解.md](LoRA+/LoRA+详解.md) · [资料清单_论文与博客.md](资料清单_论文与博客.md)
+> **简述**：用可训练的低秩增量适配冻结模型；实际效果由适配位置、秩容量、缩放与优化共同决定。<br>
+> **范围**：LLM 微调 / PEFT；跨论文原理与实践。<br>
+> **主要依据**：[LoRA](https://arxiv.org/abs/2106.09685)、[QLoRA](https://arxiv.org/abs/2305.14314)、[QA-LoRA](https://arxiv.org/abs/2309.14717)、[LoRA Without Regret](https://thinkingmachines.ai/blog/lora/)、[PEFT 官方文档](https://huggingface.co/docs/peft/en/developer_guides/lora)。<br>
+> **模型 / 模态**：以 Transformer 文本模型为主；多模态与 MoE 需按模块结构调整。**更新**：2026-10-19。
 
----
+## 技术简介
 
-## 目录
+LoRA 将任务变化写成低秩矩阵乘积，减少梯度、优化器状态和每个任务的存储，并可在浮点合并后沿用原模型结构。但少量参数能否完成任务，取决于增量的容量和作用位置，不能仅由“用了 LoRA”判断。本章从线性层和注意力/MLP 的作用解释目标矩阵选择，梳理 rank、alpha、学习率与初始化的关系，再比较 LoRA、QLoRA 和 QA-LoRA 在训练内存及部署合并上的差别。原始论文提供机制与实验依据，后续博客和框架文档补充现代后训练经验。文中的数值配方是小规模验证的起点；最优配置仍需在同一数据、预算和目标指标上比较。
 
-1. [执行摘要（关键结论）](#1-执行摘要关键结论)
-2. [问题背景：全量微调的成本与部署困境](#2-问题背景全量微调的成本与部署困境)
-3. [PEFT 范式全景与三大家族](#3-peft-范式全景与三大家族)
-4. [LoRA 核心原理与数学形式](#4-lora-核心原理与数学形式)
-5. [经典论文谱系时间线](#5-经典论文谱系时间线)
-6. [逐方法对比表](#6-逐方法对比表)
-7. [量化与内存：QLoRA / NF4 / bitsandbytes](#7-量化与内存qlora--nf4--bitsandbytes)
-8. [缩放与优化：rsLoRA、LoRA+、AdaLoRA 预算](#8-缩放与优化rslora-lora-adalora-预算)
-9. [表达力增强：DoRA、全层适配](#9-表达力增强dora全层适配)
-10. [工程生态：HF PEFT、ms-swift、Axolotl、vLLM / TGI](#10-工程生态hf-peftms-swiftaxolotlvllm--tgi)
-11. [实践选型指南与超参决策树](#11-实践选型指南与超参决策树)
-12. [开放问题与前沿](#12-开放问题与前沿)
-13. [对本仓库训练实践的启示](#13-对本仓库训练实践的启示)
-14. [参考文献](#14-参考文献)
+## LoRA 在模型里究竟改了什么
 
-**附录**
-
-- [附录 A：术语表](#附录-a术语表)
-- [附录 B：参数量估算公式](#附录-b参数量估算公式)
-
----
-
-## 1. 执行摘要（关键结论）
-
-**LoRA（Low-Rank Adaptation）** 自 2021 年提出以来，已成为大语言模型（LLM）与多模态模型 **参数高效微调（PEFT）** 的事实标准：冻结预训练权重 $W_0$，只训练低秩增量 $\Delta W = BA$，在 **<1% 可训练参数** 下逼近全量微调（Full Fine-Tuning, FFT）效果。2023–2026 年，围绕 LoRA 形成了 **量化（QLoRA）→ 缩放修正（rsLoRA）→ 优化修正（LoRA+）→ 表达力（DoRA）→ 极致压缩（VeRA）** 的方法谱系，并与 HuggingFace PEFT、ms-swift、vLLM multi-LoRA serving 等工程栈深度耦合。
-
-### 1.1 五条关键结论
-
-| # | 结论 | 实践含义 |
-| --- | --- | --- |
-| 1 | **LoRA 默认训练配方偏 suboptimal** | 启用 **LoRA+（ηB≈16ηA）** 与 **rsLoRA（α/√r）** 几乎零成本，应作为默认 |
-| 2 | **QLoRA 把 65B 级微调拉到单卡 48GB** | NF4 量化基座 + bf16 LoRA；质量损失通常 <1% vs bf16 FFT |
-| 3 | **rank 与 target_modules 比「多训几层」更敏感** | LLM 常 **r=8–64**；Embedding/检索可 **r=32–128** + 全 linear |
-| 4 | **DoRA / 全层 LoRA 缩小与 FFT 差距** | 任务难、数据少时考虑 DoRA 或 `all-linear` |
-| 5 | **Multi-tenant 看 VeRA / multi-LoRA serving** | 千级 adapter 用 VeRA 降存储；推理用 vLLM/TGI batch 多 adapter |
-
-### 1.2 2026 年推荐默认栈
-
-```text
-基座: bf16 或 QLoRA 4-bit (NF4, double quant)
-PEFT: LoRA r=16, alpha=16, target=all-linear 或 q/k/v/o + gate/up/down
-优化: LoRA+ λ=16, rsLoRA 缩放, AdamW, cosine, warmup 3%
-推理: merge_lora 单租户 / vLLM multi-LoRA 多租户
-```
-
-### 1.3 报告结构说明
-
-本报告按 **背景 → 原理 → 谱系 → 对比 → 子专题（量化/优化/表达力）→ 工程 → 选型 → 前沿 → 本仓实践** 组织，与 [知识蒸馏技术深度调研报告](../distillation/知识蒸馏技术深度调研报告.md)、[Embedding调研报告](../embedding/Embedding调研报告.md) 体例对齐。
-
----
-
-## 2. 问题背景：全量微调的成本与部署困境
-
-### 2.1 全量微调（FFT）的成本
-
-对参数量 $N$ 的 Transformer，FFT 需要：
-
-| 资源 | 量级（7B 模型示意） |
-| --- | --- |
-| 可训练参数 | **7B（100%）** |
-| 优化器状态（Adam） | ~**2×** 参数量（fp32 m/v） |
-| 激活 + 梯度 | 与 batch、seq、并行策略相关；常 **> 权重** |
-|  checkpoint | 每步存 **完整 7B×2**（bf16）≈ 14GB+ |
-
-多任务、多租户场景下，**每个任务一份完整 FFT 权重** 在存储、版本管理、GPU 显存上均不可扩展。
-
-### 2.2 部署困境
-
-1. **单模型多技能**：同一基座需切换「客服 / 代码 / 检索增强」等行为 → 需要 **轻量 adapter** 而非整模复制。
-2. **边缘与端侧**：无法存放多份 7B+ 全量权重。
-3. **推理并发**：SaaS 需 **batch 内不同用户不同 adapter**（multi-LoRA）。
-4. **合规与迭代**：仅上传 **MB 级 delta** 而非全权重，便于审计与回滚。
-
-### 2.3 PEFT 的目标函数
-
-在冻结 $W_0$ 的前提下，学习 $\Delta\theta$ 使：
+对冻结线性层 $W_0\in\mathbb R^{d_{out}\times d_{in}}$，加入
 
 $$
-\min_{\Delta\theta} \mathcal{L}\big(W_0 \oplus \Delta\theta;\, \mathcal{D}_\text{task}\big), \quad |\Delta\theta| \ll |W_0|
+y=W_0x+sBAx,\qquad
+A\in\mathbb R^{r\times d_{in}},\quad
+B\in\mathbb R^{d_{out}\times r},\quad
+s=\frac{\alpha}{r}.
 $$
 
-其中 $\oplus$ 表示插入/低秩叠加等结构。理想 PEFT 应满足：
+$A$ 先将输入映射到 $r$ 维，$B$ 再映射回输出维；训练的是整个网络中这些增量分支。低秩限制针对 $\Delta W=sBA$，并不要求原始 $W_0$ 低秩。不同任务可以共享同一基座，分别保存自己的适配器。
 
-- **参数效率**：$|\Delta\theta|/|W_0| < 1\%$
-- **训练效率**：显存 ≤ QLoRA 单卡可训
-- **推理效率**：可 **merge** 或 **低开销切换**
-- **效果**：下游任务 ≥ 95% FFT 性能（依任务）
+![LoRA 原论文图 1：主干与低秩增量](LoRA/figs/S1-F1-01.png)
 
----
+蓝色主干保存预训练变换，橙色分支学习任务变化。两者相加说明 LoRA 仍然在改变模型的计算结果；冻结基座既不意味着模型不会遗忘，也不意味着适配器只能“读取知识”。关闭未合并适配器可恢复对应原基座路径，适配状态下的通用能力仍需评测。
 
-## 3. PEFT 范式全景与三大家族
+每个被适配的矩阵新增 $r(d_{in}+d_{out})$ 个参数。主干不维护权重梯度与 Adam 状态，但它的权重、反向传播所需激活和算子仍占资源。长序列时，减少适配器参数不一定能解决显存瓶颈；梯度检查点、序列长度、batch 与注意力实现是另外的调节维度。
 
-### 3.1 分类轴
+## rank、alpha 和学习率分别控制什么
 
-| 轴 | 选项 |
-| --- | --- |
-| 修改对象 | 权重 / 激活 / 输入 prompt |
-| 插入位置 | Attention / FFN / Embedding |
-| 是否改结构 | 外挂模块 vs 低秩增量 |
-| 推理开销 | 零开销（merge）vs 额外 latency |
+| 参数 | 直接控制的对象 | 调整时需要同时观察什么 |
+|---|---|---|
+| rank $r$ | 每层增量的最大秩、适配器容量和参数量 | 覆盖位置、数据规模、训练步数、缩放约定 |
+| alpha $\alpha$ | 前向增量的缩放系数 $s$ | 学习率、初始化、是否使用 rsLoRA |
+| 学习率 $\eta$ | 训练过程中 A/B 的更新步长 | 优化器、调度、batch、梯度裁剪 |
+| 目标模块 | 哪些线性变换能够学习任务变化 | 总参数预算、架构、任务与部署支持 |
 
-### 3.2 三大家族
+### rank 是容量预算，不能按模型大小机械查表
 
-#### 3.2.1 **Additive（加性低秩 / 侧路）**
+更高的 $r$ 提供更多独立更新方向，训练成本与适配器体积也随之增加。小秩对窄任务可能足够，但大数据、较长训练、复杂行为或更大分布变化，可能需要更大容量。只看很早的训练 loss，容易错过小秩在后期才出现的差距。
 
-- **LoRA**、VeRA、DoRA、AdaLoRA
-- 形式：$W = W_0 + \Delta W$
-- 优点：可 merge；实现简单
-- 代表场景：LLM SFT、Embedding 微调
+原始 LoRA 在 GPT-3 的 WikiSQL/MNLI 上观察到很小的秩已经有效；Thinking Machines 在 Tulu3、OpenThoughts3 等现代 SFT 数据上，则发现低秩方案可能随训练推进逐渐落后，较高秩更接近全量微调。两者的任务、模型、优化与训练量不同，不能把某个结论当成 rank 的普遍上限。
 
-#### 3.2.2 **Selective（选择性微调）**
+在一个已能正常训练的配置上，可用 $r=8,16,32,64$ 作为第一轮候选，只运行其中符合预算的点；若验证效果仍随容量改善，再向上扩展。这个范围是搜索示例，不是来自单篇论文的统一最优值。若训练和验证都不足，应先检查损失掩码、学习率、目标模块和训练量，再判断是否需要加秩；训练提升而验证下降则更像泛化问题。
 
-- **BitFit**（只训 bias）、**IA³**（逐通道缩放）、**VeRA 的 d/b 向量**
-- 参数量极小
-- 表达力通常弱于 LoRA
+### alpha 是训练参数化中的缩放，不是“风格强度”
 
-#### 3.2.3 **Reparameterization / 外挂（Adapter / Prefix / Prompt）**
+原始 LoRA 使用 $s=\alpha/r$。例如 $r=32,\alpha=32$ 时 $s=1$，改为 $\alpha=64$ 时 $s=2$。在给定 A/B 的瞬间，增量输出确实翻倍；但若重新训练，A/B 的梯度和后续轨迹也随之变化，最终结果不会简单翻倍。
 
-- **Adapter**（Houlsby / Pfeiffer）：层间瓶颈 MLP
-- **Prefix-Tuning / P-Tuning v2**：可学习 prefix KV
-- **Prompt Tuning**：只训 soft prompt embedding
-- 优点：不改权重；缺点：推理 **序列变长** 或 **额外 forward**，延迟增加
-
-### 3.3 家族选型速览
-
-```text
-要 merge 部署、最低推理开销     → LoRA 族
-要最少参数、千租户              → VeRA / IA³
-要动 attention 行为不改权重      → Prefix / P-Tuning
-Encoder NLU 经典强基线          → Adapter（现多被 LoRA 取代）
-```
-
----
-
-## 4. LoRA 核心原理与数学形式
-
-### 4.1 基本公式
-
-对线性层 $y = W_0 x$，LoRA 改为：
+用最简单的 SGD 说明其耦合：设 $G=\partial\mathcal L/\partial\Delta W$，初始化 $B_0=0$，第一步有
 
 $$
-y = W_0 x + \frac{\alpha}{r} B A x
+\nabla_B\mathcal L=sGA_0^\top,\qquad
+\Delta W_1=-\eta s^2GA_0^\top A_0.
 $$
 
-- $W_0 \in \mathbb{R}^{d_\text{out} \times d_\text{in}}$：**冻结**
-- $A \in \mathbb{R}^{r \times d_\text{in}}$，$B \in \mathbb{R}^{d_\text{out} \times r}$：**可训练**
-- $r \ll \min(d_\text{in}, d_\text{out})$：秩
-- $\alpha$：缩放超参（常见 $\alpha = r$ 或 $2r$）
+这已说明训练中的缩放不仅出现在最终相加处。Adam/AdamW 的归一化、A/B 共同更新和正则又会改变关系，所以不能普遍用“alpha 翻倍等于学习率翻倍”替换实验。推理时给一个已训练适配器再乘系数是另一种操作，可能同时改变风格、事实和格式表现。
 
-### 4.2 初始化与 inductive bias
+调参可以先固定一个有明确定义的 alpha 策略。例如在原始缩放下保持 $\alpha/r=1$ 或 2，比较几个秩；随后在选定秩上比较缩放与学习率。保持比值只固定了显式乘数，不能保证不同秩有完全相同的更新统计或优化速度。跨论文复用配置时应同时记录 $r,\alpha,s$，只记 alpha 的数值没有可比性。
 
-- $A$：随机高斯（Kaiming / N(0, σ²)）
-- $B$：**零初始化** → 训练初 $\Delta W = 0$，不破坏预训练
+### rsLoRA 改的是缩放约定，不能无条件沿用 alpha
 
-### 4.3 为何低秩有效？
-
-1. **内在维度（Intrinsic Dimension）**：Li et al. 表明微调有效自由度远低于参数量。
-2. **过参数化网络的低秩更新**：任务增量常落在少数奇异方向。
-3. **正则化效应**：限制 rank 抑制 catastrophic forgetting。
-
-### 4.4 注入位置（LLM）
-
-| 模块 | 张量 | 常见默认 |
-| --- | --- | --- |
-| Self-Attn | q_proj, k_proj, v_proj, o_proj | q,v 或 q,k,v,o |
-| MLP | gate_proj, up_proj, down_proj | 难任务加 MLP |
-| Embedding | embed_tokens | 少训 / 不训 |
-
-**经验**：只训 Q/V 为 **省参**；**all-linear** 更接近 FFT。
-
-### 4.5 Merge 与 Unmerge
-
-训练后：
+[rsLoRA](https://arxiv.org/abs/2312.03732) 使用
 
 $$
-W_\text{merged} = W_0 + \frac{\alpha}{r} B A
+s=\frac{\alpha}{\sqrt r}
 $$
 
-推理单租户时可 merge，**零 adapter 开销**。多租户则 **不 merge**，运行时加载 $\Delta W$ 或 cache BA。
+来改善其分析和实验条件下的高秩稳定性。相同 $r,\alpha$ 下，它与原始缩放相差 $\sqrt r$ 倍：例如 $r=64,\alpha=32$，原始 $s=0.5$，rsLoRA 为 4。直接切换开关不是一次只改“稳定性”的对照，应该重新考虑 alpha 和学习率。
 
-### 4.6 与 Conv / 多模态
+Thinking Machines 的文章则在原始 $1/r$ 参数化、其初始化和优化设置下，观察并分析了不同秩早期学习曲线相近、最优学习率变化不大的现象。这与 rsLoRA 的渐近稳定性问题并非完全相同的实验命题。两条证据都提示：比较秩时必须写清初始化、优化器和缩放，而不是据一条口号排除另一种配置。
 
-LoRA 可扩展到 Conv2d（Stable Diffusion 常用）与 VLM **投影层**；视觉 backbone 常 **更大 rank** 或 **全层**。
+### 学习率需要单独搜索，A/B 也未必应共用一个值
 
-### 4.7 Embedding 模型中的 LoRA
+Thinking Machines 在其所测设置中发现，高秩 LoRA 的较优学习率约为全量微调的十倍，且 $r=4$ 至 512 的最优学习率变化小于两倍；这不能自动推广成所有模型使用 $10^{-4}$。其模型、数据、alpha=32、恒定学习率与比较损失的协议都属于结果条件。
 
-文本 Embedding 微调与对话 SFT 有显著差异，LoRA 配置需单独考虑：
+对某个现代指令模型，可以围绕框架已有稳定配方，以 $5\times10^{-5},10^{-4},2\times10^{-4}$ 这类对数尺度候选作小范围搜索；这里只提供实验起点，不声称已在当前数据上验证。提示微调论文中的 0.3 也不能移植为 LoRA 默认值。
 
-| 维度 | 对话 SFT | Embedding / 检索 |
-| --- | --- | --- |
-| 目标 | 条件生成 | 句向量几何（InfoNCE / Cosent） |
-| 池化 | 不适用 | last-token / mean / CLS |
-| 注意力 | 因果即可 | 常需 **双向** 或 soft-mask |
-| rank | r=8–32 常见 | **r=32–128** 更稳 |
-| target | q,v 可起步 | **all-linear**（含 MLP） |
-| 模板 | chat template | **Instruct 对齐** 训练/评测一致 |
+[LoRA+](https://arxiv.org/abs/2402.12354) 进一步对 A/B 使用不同学习率。它说明矩阵乘积的两部分存在优化不对称，但某个实验中的比值（如 16）仍是候选，而非任意模型必须启用的常数。初轮比较最好先建立稳定的普通 LoRA 基线，再逐个加入缩放、初始化或优化变体，避免同时改动太多因素。
 
-**常见坑**（见 modelforge `cloud_emb` 评测）：裸训 LoRA 用 Instruct 模板评测 → 分布错配，MRR 远低于 Base+Instruct。修复路径是 **训练数据加 instruction**，而非单纯增大 rank。
+## 训练哪些权重矩阵：先理解每一条路径
 
-LoRA 在 Embedding 上的表达力上限仍低于 **全参双向微调**（QZhou、gte-Qwen2 等）；工程上应先把 **LoRA+ + rsLoRA + all-linear + r↑** 调满，再决定是否 FFT。
-
-### 4.8 分布式训练中的 LoRA
-
-| 策略 | LoRA 行为 | 注意点 |
-| --- | --- | --- |
-| **DDP** | 仅 adapter 梯度同步 | 基座无梯度，通信量小 |
-| **DeepSpeed ZeRO-2/3** | LoRA 参数可 shard | quantized 基座 + ZeRO-3 需版本匹配 |
-| **FSDP** | wrap LoRA 层 | `use_orig_params=True` 时分 param group 更稳 |
-| **多卡 ms-swift** | `--deepspeed zero2` 常见 | checkpoint 默认 **仅 adapter** |
-
-保存策略：PEFT 训练结束通常只有 `adapter_model.safetensors`（数 MB–数百 MB），便于 artifact 管理与多实验对比。
-
----
-
-## 5. 经典论文谱系时间线
-
-### 5.1 总览时间轴
-
-```text
-2019 ─ Adapter (Houlsby et al.) ★ NLP PEFT 先驱
-2019 ─ BitFit — 只训 bias
-2021 ─ Prefix-Tuning (Li & Liang)
-2021 ─ LoRA (Hu et al.) ★★ 低秩增量成为主流
-2022 ─ P-Tuning v2 — 深层 prompt
-2022 ─ AdaLoRA — 自适应 rank 预算
-2023 ─ QLoRA (Dettmers et al.) ★★ 4-bit + LoRA 单卡训 65B
-2023 ─ VeRA — 共享随机基 + 向量缩放
-2023 ─ IA³ / 各类 selective 方法并行发展
-2024 ─ rsLoRA — α/√r  rank 稳定缩放
-2024 ─ LoRA+ (Hayou et al.) — A/B 异学习率
-2024 ─ DoRA — 幅度-方向分解
-2024 ─ PiSSA — SVD 初始化 LoRA
-2024 ─ LoRA-GA — 梯度对齐初始化
-2025 ─ GaLore — 低秩梯度投影（非 LoRA 但相关）
-2025+ ─ Multi-adapter routing、RLHF/DPO + LoRA 标配
-```
-
-### 5.2 各节点一句话
-
-| 年份 | 工作 | 贡献 |
-| --- | --- | --- |
-| 2019 | **Adapter** | 层间 down-up MLP；参数量 ~3–5% |
-| 2021 | **Prefix-Tuning** | 可学习 prefix 影响 KV cache |
-| 2021 | **LoRA** | 低秩 $\Delta W$；可 merge |
-| 2022 | **AdaLoRA** | SVD 式参数化 + 重要性剪枝 rank |
-| 2023 | **QLoRA** | NF4 基座 + LoRA；Paged Optimizer |
-| 2023 | **VeRA** | 共享 $A_0B_0$，训 $\mathbf{b,d}$ |
-| 2024 | **rsLoRA** | 修正 $\alpha/r$ → $\alpha/\sqrt{r}$ |
-| 2024 | **LoRA+** | $\eta_B \gg \eta_A$，λ≈16 |
-| 2024 | **DoRA** | $W = m \cdot \frac{W_0 + BA}{\|W_0 + BA\|_\text{row}}$ 方向 + 幅度 |
-| 2024 | **PiSSA** | 用 $W_0$ 主奇异向量初始化 $A,B$ |
-
-### 5.3 范式演进逻辑
-
-```text
-外挂模块 (Adapter/Prefix)
-    ↓ 推理开销大
-低秩增量 (LoRA) — 可 merge
-    ↓ 显存仍紧
-量化 + LoRA (QLoRA)
-    ↓ 训练 suboptimal
-rsLoRA + LoRA+ — 优化层
-    ↓ 表达力瓶颈
-DoRA / 全层 / 高 rank
-    ↓ 多租户存储
-VeRA — 参数再压缩
-```
-
----
-
-## 6. 逐方法对比表
-
-### 6.1 主表
-
-| 方法 | 可训练参数（7B 量级） | 训练显存 | 推理延迟（不 merge） | 可 merge | 典型场景 |
-| --- | --- | --- | --- | --- | --- |
-| **FFT** | 7B (100%) | 极高 | 基线 | — | 数据大、要极致 |
-| **Adapter** | ~0.5–3% | 中高 | +5–15% | 否 | 老 NLU 基线 |
-| **Prefix/Prompt** | ~0.01–0.1% | 中 | +（长 KV） | 否 | 少样本 prompt |
-| **LoRA r=8** | ~4–8M | 低 | +1–3% | **是** | **默认首选** |
-| **LoRA r=64** | ~30–60M | 中 | +2–5% | **是** | 难任务 |
-| **QLoRA** | 同 LoRA | **最低** | 同左或 4bit 基座 | **是** | 单卡大模型 |
-| **AdaLoRA** | 预算 B | 中 | 同 LoRA | 是 | 固定参数预算 |
-| **VeRA r=256** | ~LoRA/10 | 低 | 同 LoRA | 是 | **multi-tenant** |
-| **DoRA** | LoRA + 幅度 | 中 | 略高于 LoRA | 是 | 贴近 FFT |
-| **BitFit** | <<0.1% | 低 | 基线 | 是 | 极省参、弱表达 |
-| **IA³** | ~0.01% | 低 | 低 | 部分 | 与 VeRA 类似思路 |
-
-*参数量随 target_modules、层数、rank 变化；7B LLaMA 全 linear r=8 约 4.7M 为社区常引数字。*
-
-### 6.2 效果–效率象限
-
-```text
-          效果高
-            │
-     DoRA   │   FFT
-     全层LoRA│
-            │
-  ──────────┼────────── 参数/显存高
-            │
-   LoRA+    │   QLoRA
-   rsLoRA   │
-     VeRA   │   BitFit
-            │
-          效果低
-     参数/显存低
-```
-
-### 6.3 方法组合兼容性
-
-| 组合 | 是否推荐 |
-| --- | --- |
-| QLoRA + LoRA+ + rsLoRA | **强烈推荐** |
-| DoRA + LoRA+ | 推荐 |
-| VeRA + QLoRA | 可行 |
-| AdaLoRA + DoRA | 少见，需自行验证 |
-| LoRA + Prefix 同时 | 一般二选一 |
-
----
-
-## 7. 量化与内存：QLoRA / NF4 / bitsandbytes
-
-### 7.1 QLoRA 架构
-
-**QLoRA** = **4-bit 量化冻结基座** + **bf16 LoRA adapter** + **分页优化器**
-
-```text
-Forward:  W0 (NF4) ──dequant──► fp16/bf16  ×  x
-          +  BA (bf16 trainable)
-Backward: 仅 LoRA + 必要 buffer；基座权重不存 fp32 master
-```
-
-### 7.2 NF4（Normal Float 4）
-
-- 针对 **正态分布权重** 优化的 4-bit 非均匀量化码本
-- **Double Quantization**：对量化常数再量化，进一步省显存
-- 典型配置：`load_in_4bit=True`, `bnb_4bit_quant_type="nf4"`, `bnb_4bit_compute_dtype=bfloat16`
-
-### 7.3 显存估算（经验）
-
-| 模型 | FFT bf16 | LoRA bf16 | QLoRA 4bit |
-| --- | --- | --- | --- |
-| 7B | ~60GB+ | ~24–32GB | **~12–16GB** |
-| 13B | OOM 单卡 | ~40GB | **~20–24GB** |
-| 65B | 多卡 | 多卡 | **1×48GB（论文）** |
-
-### 7.4 bitsandbytes 要点
-
-- `Linear4bit` 包装冻结层
-- `paged_adamw_8bit` / 32bit optimizer on LoRA only
-- 与 DeepSpeed ZeRO、FSDP **可组合**（需注意 quantized 参数 shard 策略）
-
-### 7.5 质量与坑
-
-| 现象 | 对策 |
-| --- | --- |
-| 4bit 基座略降 perplexity | 增大 LoRA rank；训 longer |
-| 量化 outlier 层敏感 | QLoRA 对 outlier 做 **fp16 保留**（部分实现） |
-| merge 后部署 | `merge_and_unload()` → 全 bf16 权重；或 **GPTQ/AWQ** 再压缩 |
-
-### 7.6 与训练栈
-
-- **HF TRL / PEFT**：`BitsAndBytesConfig` + `LoraConfig`
-- **ms-swift**：`--quantization_bit 4` 等 flags（以版本文档为准）
-- **Axolotl**：`load_in_4bit: true` in yaml
-
-### 7.7 训练后量化与 merge 流水线
-
-QLoRA 解决 **训练显存**；上线常走 **merge → 再量化**：
-
-```text
-QLoRA 训练 checkpoint (adapter only)
-    ↓ merge_and_unload()
-bf16 全量权重 (单任务)
-    ↓ AutoRound / GPTQ / AWQ
-INT4/INT8 部署权重
-```
-
-本仓 `vlm_train/scripts/board_qwen35_2b_autoround_3die.sh` 即此路径：先 merge LoRA 到 `MERGED`，再 AutoRound 量化上板。**merge 前后必须同一 eval 集对比**，避免 merge 数值误差或 template 不一致导致线上回退。
-
-| 阶段 | 格式 | 适用 |
-| --- | --- | --- |
-| 训练 | NF4 基座 + bf16 LoRA | 单卡 24–48GB |
-| 实验 | bf16 merge 或未 merge adapter | dev 评测 |
-| 生产 | INT4/INT8 全量 | 延迟 / 显存 |
-
----
-
-## 8. 缩放与优化：rsLoRA、LoRA+、AdaLoRA 预算
-
-### 8.1 原始缩放的问题
-
-LoRA 使用 $\frac{\alpha}{r}$ 缩放 $BA$。当 **rank 增大** 时，$\Delta W$ 幅度 **随 r 线性放大**（若 $A,B$ 范数稳定），导致：
-
-- 高 rank 训练 **不稳定**
-- 不同 rank 之间 **超参不可迁移**
-
-### 8.2 rsLoRA（Rank-Stabilized LoRA）
-
-Kalajdzievski 提出：
+标准注意力写为
 
 $$
-W = W_0 + \frac{\alpha}{\sqrt{r}} B A
+Q=XW_Q,\quad K=XW_K,\quad V=XW_V,
+\qquad O=\operatorname{softmax}\left(\frac{QK^\top}{\sqrt{d_h}}\right)VW_O.
 $$
 
-**效果**：跨 rank 更稳定；**LoRA+ 与 rsLoRA 正交**，建议同时启用。详见 [资料清单](资料清单_论文与博客.md) arXiv:2312.03732。
+Q/K 改变位置之间的匹配和信息路由，V 改变被聚合的内容表示，O 改变注意力结果如何回到残差流。这只是解释矩阵作用的视角，并不是“改某一种能力只需训练对应单个矩阵”的严格分工。
 
-### 8.3 LoRA+
-
-- $\eta_B = \lambda \eta_A$，**λ≈16**
-- 零额外参数；详见 [LoRA+详解.md](LoRA+/LoRA+详解.md)
-
-### 8.4 AdaLoRA：参数预算分配
-
-**AdaLoRA** 将 LoRA 参数化为 SVD 形式并按 **重要性分数** 动态增减 rank：
-
-1. 训练初期：各层较高 rank
-2. 周期性：评估奇异值重要性
-3. 剪枝：全局预算 $B$ 下保留重要方向
-
-| 对比 | LoRA | AdaLoRA |
-| --- | --- | --- |
-| rank | 固定 | **动态** |
-| 适用 | 简单 | **固定 GPU 预算、要榨性能** |
-| 工程 | PEFT 原生 | 配置略复杂 |
-
-### 8.5 三件套默认
-
-```yaml
-lora_r: 16
-lora_alpha: 16          # 配合 rsLoRA 时 alpha 不需随 r 线性增
-use_rslora: true
-lorap_lr_ratio: 16      # LoRA+
-learning_rate: 1.0e-4   # 作用于 A；B 自动 ×16
-```
-
----
-
-## 9. 表达力增强：DoRA、全层适配
-
-### 9.1 DoRA（Weight-Decomposed LoRA）
-
-将权重分解为 **幅度（magnitude）** 与 **方向（direction）**：
+典型门控 MLP 则可写为
 
 $$
-W = m \cdot \frac{W_0 + BA}{\|W_0 + BA\|_\text{row}}
+\operatorname{MLP}(x)=W_{down}\big[\sigma(W_{gate}x)\odot W_{up}x\big].
 $$
 
-- $m$：可训练 **幅度向量**（逐输出通道）
-- 方向：LoRA 扰动 + 归一化
+它对每个位置的特征作非线性变换，通常占大量模型参数。训练 MLP 的低秩增量会改变特征变换和组合方式，不能把它看成注意力之后一个可忽略的附属模块。
 
-**动机**：LoRA 对 **幅度与方向耦合更新**，与 FFT 谱不匹配；DoRA 解耦后 **更接近 FFT**。
+| 目标集合 | 常见收益或用途 | 主要取舍 |
+|---|---|---|
+| Q、V | 原始 LoRA 中有效、适配器较小的基线 | 限制更新接口，现代 SFT 可能容量不足 |
+| Q、K、V、O | 更完整地改变注意力路径 | 仍不直接适配 MLP，参数比 Q/V 多 |
+| gate、up、down 等 MLP 投影 | 直接适配逐位置特征变换，现代 SFT 值得重点比较 | MLP 矩阵较宽，同秩不等于同参数预算 |
+| 注意力 + MLP / all-linear | 提供较全面的更新路径 | 参数、状态和适配计算增加；需核对实际命中的模块 |
+| 部分层 / 按层分配 rank | 在紧预算下选择层深和容量 | 最优分配依赖任务，易过拟合调参集 |
+| embedding、lm_head、任务头 | 新词、输出空间或任务接口确实需要变化时 | 大词表可能明显增大 checkpoint；需要单独保存和部署 |
 
-| 项 | LoRA | DoRA |
-| --- | --- | --- |
-| 额外参数 | — | + $d_\text{out}$ per layer |
-| GLUE/LLaMA | 强 | **+0.5–2 pt 常见** |
-| 推理 | merge 可行 | merge 可行 |
+### 为什么不能只给 Q/V 加大 rank
 
-PEFT：`use_dora=True` in `LoraConfig`。
+原始 LoRA 将注意力作为研究范围，并不证明 MLP 无用。QLoRA 在 LLaMA/Alpaca 上发现，覆盖全部线性层是建立强十六位基线的重要因素；Thinking Machines 在其 SFT/RL 设置中发现，MLP-only 已经接近 MLP+attention，而 attention-only 即使提高秩、匹配参数预算仍落后。
 
-### 9.2 全层适配（All-Linear LoRA）
+![QLoRA 原论文图 2：学习率、batch 与目标层消融](QLoRA/figs/S4-F2-01.png)
 
-对 **所有 Linear**（Attn + MLP，有时含 lm_head）注入 LoRA：
+原图强调适配位置与训练配方共同影响分数。它与后续博客的证据支持将 MLP 纳入对照，但不构成所有模型上固定的排序“MLP+注意力 > MLP > 注意力”。当输入编码、跨模态投影或特定对齐任务不同，这个排序可能改变。
 
-- 参数量 ↑（仍 << FFT）
-- **难任务、小数据** 收益大
-- modelforge Embedding stage2 等 **表示学习** 任务常需 MLP 参与
+### 同秩比较与同预算比较应分别回答
 
-### 9.3 更高 rank
+以 32 层、隐藏维 4096、MLP 中间维 11008、标准多头注意力的模型为示意，每层有 Q/K/V/O 四个 $4096\times4096$ 矩阵，以及 gate/up/down 三个宽 MLP 矩阵。在 $r=8$ 时：
 
-- **r=64, 128**：接近 FFT 的子空间；配合 QLoRA 仍可控
-- 与 **VeRA r=256** 不同：VeRA 是 **共享基**，LoRA 是 **独立 A,B**
+| 目标集合 | 约新增参数 | 在相同 rank 下比较的含义 |
+|---|---:|---|
+| Q/V | 4.19M | 最窄的更新接口 |
+| 全注意力 | 8.39M | 相比 Q/V 增加 K/O |
+| 三个 MLP 投影 | 11.60M | 直接适配非线性特征变换 |
+| 注意力 + MLP | 19.99M | 同时扩展接口和总容量 |
 
-### 9.4 何时上 DoRA / 全层
+这些数值来自形状估算，不是实测模型 checkpoint；GQA、不同 FFN 宽度、共享权重和模型包装会改变结果。比较 all-linear/r=8 与 QV/r=8，混合了位置和参数量两种变化；同预算实验则应调整各组 rank，并在每组内重新检查学习率。即使参数量相近，更新空间也不等价。
 
-```text
-LoRA 默认配方 + LoRA+ + rsLoRA 仍明显欠拟合？
-  ├─ 是 → 先 all-linear + r↑
-  │       仍不足 → DoRA
-  └─ 否 → 保持省参配置
-```
+### 在实际框架中确认“训练了什么”
 
----
+PEFT 支持 `target_modules="all-linear"`、显式模块后缀及按层的 `rank_pattern` / `alpha_pattern`。`all-linear` 是框架的匹配规则：不能仅凭这个字符串就认为 embedding、所有输出头、MoE 参数或跨模态模块全部被适配。标准模型输出层可能被排除；专家权重有时直接存为参数，需使用受支持的 `target_parameters` 或专门实现。
 
-## 10. 工程生态：HF PEFT、ms-swift、Axolotl、vLLM / TGI
+模型接入后，应查看实际匹配的模块名、形状、可训练参数与保存对象。QKV 融合层可能将三类投影放进一个矩阵；LLaMA 类模块名也不能直接复制给 GPT、视觉骨干或不同 MoE。`modules_to_save` 表示额外训练/保存的完整模块，与 LoRA 低秩分支不是同一类参数；新建分类头、词表变化和权重绑定需要单独处理。
 
-### 10.1 HuggingFace PEFT
+## 初始化、dropout、batch 与数据的相互影响
 
-| 能力 | API / 说明 |
-| --- | --- |
-| LoRA / AdaLoRA / VeRA / DoRA | `LoraConfig`, `AdaLoraConfig`, `VeraConfig` |
-| QLoRA | `prepare_model_for_kbit_training` + bnb |
-| Merge | `merge_and_unload()` |
-| 多 adapter | `load_adapter`, `set_adapter`, `add_weighted_adapter` |
+原始论文令 A 随机高斯、B 为零；PEFT 常用 Kaiming-uniform 初始化 A、B 为零。两者都让起始增量为零，但不是同一个随机分布。两者同时置零会让基本 LoRA 的梯度无法启动。PiSSA、EVA、LoftQ 等改变初始化或与量化误差的关系，也会改变对照条件，不能与默认初始化的训练结果直接混在一起。
+
+LoRA dropout 作用在适配分支的输入路径，用于正则；是否有用取决于数据量、模型和训练长度。0、0.05、0.1 可以构成候选集，但不是每个任务都必须加。过拟合时还需检查重复样本、epoch、学习率与验证拆分。
+
+有效 batch 由每卡 batch、梯度累积和数据并行规模共同决定，但不同序列长度下，样本数相同并不意味着 token 数相同。Thinking Machines 在部分设置中观察到 LoRA 对大 batch 更敏感，而且增秩不能消除差距；遇到优化不足，减少 batch、增加更新次数可能比只增加 rank 更值得尝试。短试验的最优学习率也可能不同于完整训练，不能只用几个早期 step 选最终配方。
+
+数据和损失定义常常比超参更先决定结果。回答格式、特殊 token、截断、padding、是否只在助手回复上计损失，都需要与任务一致。训练 loss 下降并不证明目标能力改善；还应固定任务评测、通用能力回归和必要的长输入测试。LoRA 训练的是何种行为，取决于数据和目标，它本身不是某种特定的 SFT、DPO 或 RL 算法。
+
+## LoRA、QLoRA 与 QA-LoRA 如何选择
+
+![QLoRA 原论文图 1：冻结权重与可训练状态的存储区别](QLoRA/figs/S1-F1-01.png)
+
+图中的绿色梯度仍经过冻结主干；四位基座降低权重存储，适配器和优化器仍使用较高精度。分页缓解峰值，不能替代激活管理，也不会无代价地消除显存上限。
+
+| 路线 | 适合优先考虑的瓶颈 | 部署时的关键问题 |
+|---|---|---|
+| 浮点基座 + LoRA | 训练状态、任务 checkpoint 与多适配器复用 | 可浮点合并；未合并的多适配器需要运行时支持 |
+| QLoRA | 冻结基座权重本身放不下 | 可保留量化基座 + 浮点分支；再量化合并可能有误差 |
+| QA-LoRA | 希望训练后直接得到特定分组低位合并表示 | 需要匹配分组量化、池化及浮点偏移约定，后端兼容性更关键 |
+
+QLoRA 的 NF4、双重量化和分页优化器分别针对表示误差、尺度开销与峰值状态。QA-LoRA 通过限制组内更新形式，将适配器吸收到量化偏移，并不等于任何 NF4/INT4 模型都能直接无损合并普通 LoRA。三者的详细原理和原论文实验分别在对应 Paper 阅读页展开。
+
+若浮点基座已经可训练，先建立浮点 LoRA 基线有利于分清量化误差和适配能力；如果必须量化，再用相同目标层和评测检查精度变化。显存报告至少写清上下文长度、有效 token batch、激活检查点和优化器。训练省显存也不保证推理加速，反量化、未合并分支及服务内核都可能影响吞吐。
+
+## 一个可解释的实验起点
+
+以下只展示参数含义和搜索顺序，不是已运行的训练配方：
 
 ```python
-from peft import LoraConfig, get_peft_model
-from transformers import AutoModelForCausalLM
+from peft import LoraConfig, TaskType, get_peft_model
 
 config = LoraConfig(
-    r=16, lora_alpha=16, target_modules="all-linear",
-    use_rslora=True, use_dora=False,
+    task_type=TaskType.CAUSAL_LM,
+    r=16,
+    lora_alpha=32,          # 原始缩放下 s = 2
+    lora_dropout=0.05,
+    target_modules="all-linear",
+    bias="none",
+    use_rslora=False,
 )
-model = get_peft_model(model, config)
+model = get_peft_model(base_model, config)
+model.print_trainable_parameters()
 ```
 
-### 10.2 ms-swift（vlm_train 主栈）
+先确保模型、数据格式与损失正确，再用小预算比较 Q/V、MLP、all-linear 等位置；在可接受的位置上比较若干 rank，并明确 alpha 随 rank 如何变化；之后联合检查 alpha 与学习率，最后才引入新的初始化、A/B 异学习率或分层预算。每轮优先回答一个具体问题，保留表现稳定且可解释的对照。
 
-- 统一 CLI：`swift sft` / `swift rlhf`
-- 常见 flags：`--tuner_type lora`, `--lora_rank`, `--lora_alpha`, `--target_modules`
-- 多模态：VLM 项目（Qwen-VL 等）同样走 LoRA
-- **建议**：确认版本是否支持 **LoRA+ / rsLoRA / DoRA**；若无则 param group patch
+若目标主要是格式、风格或窄任务，不必因为大模型就直接上高秩；若训练量增加后低秩持续落后，则应扩大容量或比较全量微调。评测差距如果来自目标层不覆盖关键路径、数据掩码错误或低位误差，提高 rank 无法一并解决。
 
-**本仓脚本示例**（`vlm_train/scripts/platform/train_cloud_reid_0.8b_2gpu.sh`）：
+## 合并与多适配器服务
 
-```bash
---tuner_type lora \
---lora_rank 8 \
---lora_alpha 32 \
-```
+浮点部署可计算 $W_{merge}=W_0+sBA$，删除独立适配分支；其线性层形状不变，额外 LoRA 乘法消失。多租户服务通常保留共享基座与各自适配器，用专门内核执行不同请求的更新；这时 rank、目标模块与并发模式都会影响实际延迟和显存。
 
-可在此基础上加 **λ=16** 与 **rsLoRA** 做 A/B。
+合并后应检查基座版本、tokenizer、特殊 token、任务头与量化约定。相同浮点表示下的合并只是代数等价，数值舍入仍可能有微小差异；重新量化则可能产生更明显误差。训练结束、适配器加载、合并模型和生产推理的评测最好使用同一组代表输入，发现差异时先定位是哪一步发生变化。
 
-### 10.3 Axolotl / LLaMA-Factory
+## 论文研读与参考资料
 
-- YAML 驱动：`adapter: lora`, `lora_r`, `load_in_4bit`
-- 社区 recipe 丰富（Alpaca、ShareGPT）
-- 适合 **快速复现论文** 与 **多数据集编排**
-
-### 10.4 vLLM Multi-LoRA Serving
-
-- **PagedAttention** + **动态 LoRA 加载**
-- 同一 batch **不同 request 不同 adapter**
-- API：`enable_lora=True`, `max_loras`, `max_lora_rank`
-- 权重：**base 一份 + N 个 LoRA delta**
-
-```text
-Client A ──adapter_1──┐
-Client B ──adapter_2──┼──► vLLM batch ──► GPU
-Client C ──adapter_1──┘
-```
-
-### 10.5 TGI / SGLang
-
-- **Text Generation Inference**：支持 adapter 热加载
-- **SGLang**：RadixAttention + LoRA batching，高并发场景
-
-### 10.6 部署路径选择
-
-| 场景 | 路径 |
-| --- | --- |
-| 单租户、最低延迟 | **merge_lora** → 标准推理 |
-| 多租户 SaaS | **vLLM multi-LoRA** |
-| 端侧 | merge + GPTQ/AWQ |
-| 训练平台 | ms-swift 产出 checkpoint → 注册 adapter 元数据 |
-
-### 10.7 checkpoint 管理
-
-```text
-checkpoint/
-  adapter_config.json   # r, alpha, target, peft_type
-  adapter_model.safetensors
-  README.md
-```
-
-VeRA 额外依赖 **seed** 重建共享矩阵；merge 后仅留 `model.safetensors`。
-
-### 10.8 VLM / 多模态 LoRA 要点
-
-VLM（Qwen-VL、LLaVA 等）LoRA 注入点除 LLM 侧 linear 外，还包括：
-
-| 模块 | 是否常训 | 说明 |
-| --- | --- | --- |
-| LLM q/k/v/o + MLP | **是** | 与纯文本相同 |
-| Vision projector | **视任务** | 图文检索常训 |
-| ViT backbone | 少训 | 数据少时易过拟合；可 freeze ViT 只训 projector+LLM |
-| Embedding 层 | 少训 | 词表扩展场景除外 |
-
-ms-swift 对 VLM 统一 `--tuner_type lora`；rank 可 **LLM 侧 r=16、projector r=32** 分组（若框架支持多 config）。多模态 SFT 数据格式（`<image>` token 位置）错误比 LoRA rank 更常导致训练失败。
-
-### 10.9 ms-swift LoRA 参数速查（vlm_train）
-
-| CLI 参数 | 典型值 | 说明 |
-| --- | --- | --- |
-| `--tuner_type` | `lora` | PEFT 类型 |
-| `--lora_rank` | 8–64 | 云侧 reid 脚本现用 8 |
-| `--lora_alpha` | 16–32 | 与 r 同阶或 2× |
-| `--target_modules` | `ALL` / 模块名 | 省参 vs 效果权衡 |
-| `--learning_rate` | 1e-4 ~ 2e-4 | LoRA+ 时需拆 A/B 组 |
-
-当前 `train_cloud_reid_0.8b_*.sh` 使用 `r=8, alpha=32`，未启用 LoRA+/rsLoRA；作为 **低成本 A/B** 值得在相同数据上试 `λ=16` 与 `r=16`。
-
----
-
-## 11. 实践选型指南与超参决策树
-
-### 11.1 决策树（文本）
-
-```text
-START: 需要微调 LLM/VLM
-│
-├─ 显存够 + 数据大 + 要 SOTA？
-│   └─ YES → 考虑 FFT 或 DoRA + all-linear + 高 rank
-│
-├─ 单卡 24–48GB，模型 ≥7B？
-│   └─ YES → QLoRA + LoRA (r=16~64)
-│
-├─ 多租户 / adapter 数 >100？
-│   └─ YES → VeRA 或 LoRA + vLLM multi-LoRA
-│
-├─ 任务类型？
-│   ├─ NLU / 分类 → LoRA q,v 或 all-linear, r=8~32
-│   ├─ SFT / 对话 → all-linear, r=16~64, LoRA+
-│   ├─ Embedding / 检索 → all-linear, r=32~128, 注意 instruct 对齐
-│   └─ 扩散 / 视觉 → UNet attention + conv, r=4~32
-│
-└─ 默认配方 → §1.2
-```
-
-### 11.2 超参表（起点）
-
-| 超参 | 7B SFT | 7B QLoRA | Embedding 4B |
-| --- | --- | --- | --- |
-| r | 16 | 16–64 | 32–64 |
-| alpha | 16 | 16 | 32–64 |
-| rsLoRA | on | on | on |
-| LoRA+ λ | 16 | 16 | 16 |
-| lr (ηA) | 1e-4 | 2e-4 | 5e-5 ~ 1e-4 |
-| epochs | 1–3 | 1–3 | 1–5 |
-| batch | 最大能塞 | 同上 | 对比学习需大 batch |
-| target | all-linear | all-linear | all-linear |
-| warmup | 3% | 3% | 3% |
-
-### 11.3 rank 选择
-
-| r | 参数量 | 适用 |
-| --- | --- | --- |
-| 4–8 | 最小 | 简单 NLU、资源极紧 |
-| 16–32 | **甜点** | 多数 SFT |
-| 64–128 | 较大 | Embedding、难推理 |
-| 256+ | VeRA 常用 | 共享基场景 |
-
-### 11.4 LoRA vs QLoRA vs DoRA vs 全参
-
-| 你的情况 | 选择 |
-| --- | --- |
-| 第一次微调、省显存 | **QLoRA + LoRA+ + rsLoRA** |
-| 单卡 80GB、要最好 | **bf16 LoRA all-linear r=64** 或 **DoRA** |
-| 评测接近 FFT 仍差 2pt+ | **DoRA** 或 **FFT last layers** |
-| 1000 个客户各一 adapter | **VeRA** + multi-LoRA serving |
-| Embedding 裸训 vs Instruct 错配 | **先对齐数据格式**，再调 rank（见 §13） |
-
-### 11.5 常见失败模式
-
-| 症状 | 可能原因 | 修复 |
-| --- | --- | --- |
-| loss 不降 | lr 过小 / 只训了 embedding | LoRA+、扩大 target |
-| 很快过拟合 | r 太大、数据太少 | dropout、减 r、早停 |
-| 训评不一致 | instruct 模板不一致 | 统一 query 格式 |
-| 高 rank 爆炸 | 未用 rsLoRA | 开 rsLoRA |
-| merge 后变差 | merge 精度 / 顺序错 | bf16 merge、测 merge 前后 |
-
-### 11.6 阶段化微调策略（SFT → DPO → 部署）
-
-许多生产流水线分阶段使用 LoRA，而非一次 FFT：
-
-```text
-Stage 0: 基座 (frozen, bf16 或 4bit)
-Stage 1: SFT LoRA (r=16, all-linear, LoRA++rsLoRA)
-Stage 2: 可选 DPO LoRA (同 adapter 继续训或新 adapter)
-Stage 3: merge + 量化  OR  vLLM multi-LoRA 热加载
-```
-
-| 阶段 | 建议 |
-| --- | --- |
-| SFT | 数据质量优先；epoch 1–3 防过拟合 |
-| DPO | 保持 reference 与 policy **同基座**；LoRA rank 不足时先 r↑ 再 DPO |
-| RLHF (PPO) | 几乎总是 QLoRA；reward model 可单独 LoRA |
-| 部署 | 单租户 merge；多租户保留 adapter + vLLM |
-
-Embedding 任务（modelforge cloud_emb）类似：**stage1 检索 warm-up → stage2 全任务 LoRA**，每阶段独立 checkpoint 与 `runs_registry.json` 登记，便于 COMPARISON_REPORT 横向对比。
-
----
-
-## 12. 开放问题与前沿
-
-### 12.1 初始化：PiSSA、LoRA-GA
-
-- **PiSSA**：用 $W_0$ SVD 主成分初始化 $A,B$，**更快收敛**
-- **LoRA-GA**：按第一步梯度对齐初始化
-- 与 LoRA+ **互补**；PEFT 部分版本已支持 `init_lora_weights="pissa"`
-
-### 12.2 梯度低秩：GaLore
-
-- **GaLore**：对 **梯度** 做低秩投影，**全参训练** 但 optimizer 状态低秩
-- 非 LoRA，但解决同一「省显存微调」问题；与 QLoRA 可对比选型
-
-### 12.3 Multi-Adapter Routing
-
-- **MoE 式 adapter**：按 token / 样本路由不同 LoRA
-- **LoRAHub / PEFT composition**：加权组合多个 LoRA 无再训练
-- 开放：**自动路由训练**、adapter 间干扰
-
-### 12.4 RLHF / DPO + LoRA
-
-- 对齐阶段 **几乎默认 LoRA/QLoRA**（省显存、防遗忘）
-- **问题**：reward hacking 时 LoRA 容量不足 → 增大 r 或 DoRA
-- **DPO**：偏好对数据 + LoRA 稳定；注意 **reference model** 与 policy 同基座
-
-### 12.5 理论
-
-- LoRA 与 FFT 的 **泛化界**
-- 最优 rank 与 **内在维度** 的数据依赖
-- **μP** 尺度下 LoRA+ 的 $\lambda$ 理论扩展
-
-### 12.6 安全与合规
-
-- LoRA **可能被提取 / 合并** 泄露微调知识
-- 多租户 **adapter 隔离**（vLLM 内存隔离仍待审计）
-
----
-
-## 13. 对本仓库训练实践的启示
-
-### 13.1 vlm_train
-
-| 现状 | 建议 |
-| --- | --- |
-| Qwen3.5 云侧脚本 `--tuner_type lora`, r=8, alpha=32 | 试 **LoRA+ λ=16**、**rsLoRA**；难任务 **r=16~32** |
-| merge LoRA 后量化部署（`board_qwen35_2b_autoround_3die.sh`） | 保持 **merge 前 eval**；merge 与 QLoRA 训练图一致 |
-| 多卡 DeepSpeed | LoRA param group 与 ZeRO 兼容；注意 checkpoint 只存 adapter |
-
-### 13.2 modelforge cloud_emb
-
-`tasks/cloud_emb/eval/COMPARISON_REPORT.md` 显示：
-
-- **Base + Instruct** 常强于 **裸训 LoRA + Instruct 评**（分布错配）
-- **LoRA Instruct 对齐**、**true_neg** 数据后可 **接近或略超** Base（MRR）
-- **启示**：
-  1. Embedding LoRA 优先 **all-linear + r≥32**
-  2. 训练/评测 **Instruct 模板必须一致**
-  3. 难负例质量 > 盲目加 rank
-  4. 可试验 **LoRA+ / DoRA** 在 stage2 checkpoint 上是否进一步缩 gap
-
-### 13.3 与 Embedding 调研的交叉
-
-- [Embedding调研报告](../embedding/Embedding调研报告.md) 指出 LLM 骨干 + LoRA 是主流路线之一
-- Conan-v2 等 **从零预训练** 路线攻击的是 LoRA **表达力上限**；工程上仍应先把 **LoRA 配方调满** 再考虑 FFT/自训底座
-
-### 13.4 与蒸馏的交叉
-
-- LoRA 训 **student** + 全参 **teacher** 蒸馏见 [知识蒸馏技术深度调研报告](../distillation/知识蒸馏技术深度调研报告.md)
-- Jasper 等压缩路线与 LoRA **正交**（训完再压 vs 训时 PEFT）
-
----
-
-## 14. 参考文献
-
-1. Hu et al. **LoRA: Low-Rank Adaptation of Large Language Models**. ICLR 2022. [arXiv:2106.09685](https://arxiv.org/abs/2106.09685)
-2. Houlsby et al. **Parameter-Efficient Transfer Learning for NLP**. ICML 2019. [arXiv:1902.00751](https://arxiv.org/abs/1902.00751)
-3. Li & Liang. **Prefix-Tuning: Optimizing Continuous Prompts for Generation**. ACL 2021. [arXiv:2101.00190](https://arxiv.org/abs/2101.00190)
-4. Zhang et al. **Adaptive Budget Allocation for Parameter-Efficient Fine-Tuning (AdaLoRA)**. ICLR 2023. [arXiv:2303.10512](https://arxiv.org/abs/2303.10512)
-5. Dettmers et al. **QLoRA: Efficient Finetuning of Quantized LLMs**. NeurIPS 2023. [arXiv:2305.14314](https://arxiv.org/abs/2305.14314)
-6. Kopiczko et al. **VeRA: Vector-based Random Matrix Adaptation**. ICLR 2024. [arXiv:2310.11454](https://arxiv.org/abs/2310.11454)
-7. Kalajdzievski. **A Rank Stabilization Scaling Factor for Fine-Tuning with LoRA (rsLoRA)**. ICLR 2024. [arXiv:2312.03732](https://arxiv.org/abs/2312.03732)
-8. Hayou et al. **LoRA+: Efficient Low Rank Adaptation of Large Models**. ICML 2024. [arXiv:2402.12354](https://arxiv.org/abs/2402.12354)
-9. Liu et al. **DoRA: Weight-Decomposed Low-Rank Adaptation**. ICML 2024. [arXiv:2402.09353](https://arxiv.org/abs/2402.09353)
-10. Meng et al. **PiSSA: Principal Singular Values and Singular Vectors Adaptation**. NeurIPS 2024. [arXiv:2404.02948](https://arxiv.org/abs/2404.02948)
-11. Wang et al. **LoRA-GA: Low-Rank Adaptation with Gradient Approximation**. NeurIPS 2024. [arXiv:2407.05000](https://arxiv.org/abs/2407.05000)
-12. Zhao et al. **GaLore: Memory-Efficient LLM Training by Gradient Low-Rank Projection**. ICML 2024. [arXiv:2403.03573](https://arxiv.org/abs/2403.03573)
-13. Zaken et al. **BitFit: Simple Parameter-efficient Fine-tuning**. ACL 2022. [arXiv:2106.10199](https://arxiv.org/abs/2106.10199)
-14. Liu et al. **Few-Shot Parameter-Efficient Fine-Tuning (IA³)**. NeurIPS 2022. [arXiv:2205.05638](https://arxiv.org/abs/2205.05638)
-15. HuggingFace **PEFT Documentation**. https://huggingface.co/docs/peft
-16. vLLM **LoRA Serving**. https://docs.vllm.ai/en/latest/models/lora.html
-
----
-
-## 附录 A：术语表
-
-| 术语 | 含义 |
-| --- | --- |
-| **PEFT** | Parameter-Efficient Fine-Tuning |
-| **FFT** | Full Fine-Tuning，全量微调 |
-| **LoRA** | 低秩适配 $W=W_0+BA$ |
-| **QLoRA** | 4-bit 量化基座 + LoRA |
-| **NF4** | Normal Float 4-bit 量化 |
-| **rsLoRA** | $\alpha/\sqrt{r}$ 缩放 |
-| **LoRA+** | A/B 异学习率 |
-| **DoRA** | 幅度-方向分解 LoRA |
-| **VeRA** | 共享随机基 + 向量缩放 |
-| **AdaLoRA** | 自适应 rank 分配 |
-| **merge** | 将 BA 并入 $W_0$ 推理 |
-
----
-
-## 附录 B：参数量估算公式
-
-对 hidden size $d$，层数 $L$，rank $r$，注入 **4 个 attention linear + 3 个 MLP linear**（LLaMA 风格，每层 7 矩阵）：
-
-$$
-|\Delta\theta|_\text{LoRA} \approx L \times 7 \times r \times 2d = 14 L r d
-$$
-
-例：$L=32, d=4096, r=8$ → $14 \times 32 \times 8 \times 4096 \approx 14.7\text{M}$。
-
-VeRA 单层约 $2d$，共享 $A_0,B_0$ 不计入每租户存储。
-
----
-
-> **专题深读**: [VeRA详解.md](VeRA/VeRA详解.md) · [LoRA+详解.md](LoRA+/LoRA+详解.md)  
-> **资料索引**: [资料清单_论文与博客.md](资料清单_论文与博客.md)
+- [LoRA 论文中文研读](LoRA/LoRA详解.md)：摘要译文、低秩形式、GPT-3 资源账、目标矩阵与秩消融、子空间分析。
+- [QLoRA 论文中文研读](QLoRA/QLoRA详解.md)：NF4/DQ/分页、数据配方、Guanaco、人工与模型评测边界。
+- [QA-LoRA 论文中文研读](QA-LoRA/QA-LoRA详解.md)：分组自由度、合并证明、低位实验与实现条件。
+- [提示微调综述](LLM提示微调综述_Prefix-Prompt-P-Tuning.md)：Prompt、Prefix、P-Tuning v1/v2 与其他 PEFT 接口。
+- [Thinking Machines Lab / John Schulman：LoRA Without Regret](https://thinkingmachines.ai/blog/lora/)，2025-09；现代 SFT/RL 中的位置、容量、学习率和 batch。
+- [PEFT LoRA 开发指南](https://huggingface.co/docs/peft/en/developer_guides/lora)、[LoraConfig API](https://huggingface.co/docs/peft/en/package_reference/lora)，2026-10-19 查阅；匹配规则、初始化、缩放和保存接口。
+- [rsLoRA](https://arxiv.org/abs/2312.03732)、[LoRA+](https://arxiv.org/abs/2402.12354)：进一步理解缩放和优化；本文不把单篇设置作为统一默认配方。
+- [Hugging Face：四位 bitsandbytes 与 QLoRA](https://huggingface.co/blog/4bit-transformers-bitsandbytes)，2023-05-24；存储类型、计算精度和量化配置。

@@ -80,6 +80,14 @@ python3 _shrink_pdf.py DINO/DINOv3 --quality printer
 
 **首次导入前必须询问用户** Notion 父页面 / 数据库落点；不得自行猜测。
 
+已确认采用论文与技术主题两层组织（2026-10-19）：
+
+- `docs/reports/lora/<Paper>/<方法名>详解.md` 是对应论文的中文译解与完整研读源，包含摘要译文、主文方法/实验/消融和必要的附录解释；保留该篇 PDF、原图及引用。原文译述与补充讲解分清，不把概要标为逐句全文翻译。
+- LoRA、QLoRA、QA-LoRA 等论文页归入全局 **Paper**（`collection://0391fb9a-5dfb-4b28-b7dc-84cb27713890`），`Type=Paper`、`DOMAIN` 含 `LLM`、`SubDomain` 含 `Fine-Tune`、`TAG` 含 `Fine-Tuning` / `Peft`；`Readed` 按用户实际状态。
+- **Fine-Tune**（page ID：`235a174cd8c68016b3d6c922d1a1d70e`）的 Ref 保留 Paper 链接视图，Paper tab 筛选论文类型及微调分类；技术总章在原页 LoRA 部分展开，用于跨论文讲解 rank、alpha、目标模块、优化、量化与部署，不局限于某篇原文。对应仓库源为 `docs/reports/lora/LoRA技术深度调研报告.md`。
+- 提示微调跨论文综述继续保留既有 Fine-Tune 子页。技术总章与各篇原文研读相互引用；已有页面可按用户授权移入 Paper，保留 URL，避免重复创建。
+- 本次及后续明确针对该总章的更新可局部替换 Fine-Tune 的 LoRA 技术内容；保留 Ref、其他技术章节和无关历史内容。已知落点无需重复询问。
+
 ### 3.3 Notion 删除禁令
 
 - **禁止删除**任何既有 Notion 页面或他人/历史内容
@@ -118,6 +126,7 @@ docs/reports/<topic>/figures/<短名>/fig01.png
 
 | 字段 | 说明 |
 |------|------|
+| 简述 | 一句话说明论文的方法思路或具体做了什么 |
 | paper | 论文 URL（arXiv / ACL / PDF） |
 | code / project | 官方仓库或项目页（若有） |
 | refs | 极少数经典前置工作链接（若有，1–3 条） |
@@ -126,7 +135,7 @@ docs/reports/<topic>/figures/<短名>/fig01.png
 | modality | 文本 / 图像 / 多模态等 |
 | languages | 支持语言（若可知） |
 
-可按主题追加短字段（如 pooling、开源协议、参数量），仍保持 callout **短小**，细节放正文。
+可按主题追加短字段（如 pooling、开源协议、参数量），仍保持 callout **短小**，细节放正文。Callout 后紧接约 200–350 个中文字的“论文简介”：背景/问题 → 核心方法步骤 → 代表性测试结果 → 主要局限。简介简洁、系统，后续正文仍完整展开。
 
 ### 4.3 Embedding 类正文必答
 
