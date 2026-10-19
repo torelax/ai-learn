@@ -27,6 +27,7 @@ Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + Mo
 | [BGE-Reranker详解.md](BGE/BGE-Reranker详解.md) | v2-m3 / v2-gemma / v2-minicpm-layerwise / **v2.5-gemma2-lightweight**（附录 D of BGE-EN-ICL 论文；深度+宽度双压缩） |
 | [Embedding蒸馏技术详解.md](Embedding蒸馏技术详解.md) | Embedding 蒸馏专题 |
 | [量化感知训练QAT详解.md](QAT/量化感知训练QAT详解.md) | QAT（Jacob/LSQ）vs 向量 QAT（Qwen3-VL）vs Jina v5 GOR；对齐文搜图索引 |
+| [Qwen3-VL-Embedding详解.md](QAT/Qwen3-VL-Embedding/Qwen3-VL-Embedding详解.md) | [arXiv:2601.04720v2](https://arxiv.org/abs/2601.04720v2)（多模态单向量召回与重排；数据合成、三阶段训练、MRL/QAT 与消融） |
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例工业闭环 |
 | [对比学习与InfoNCE精讲.md](对比学习与InfoNCE精讲.md) | 损失演化专题：Metric learning → InfoNCE → SimCSE/DPR/CLIP/SigLIP/蒸馏/BGE-M3/GritLM |
 | [InternLM2数据处理与过滤详解.md](InternLM2/InternLM2数据处理与过滤详解.md) | [arXiv:2403.17297](https://arxiv.org/abs/2403.17297)：LLM 预训练数据清洗流水线（Conan-v1 预训练引用的数据过滤方法） |
@@ -123,7 +124,7 @@ Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + Mo
 | [Jina-embeddings-v3详解.md](Jina/v3/Jina-embeddings-v3详解.md) | [arXiv:2409.10173](https://arxiv.org/abs/2409.10173) |
 | [jina-clip系列详解.md](Jina/clip/jina-clip系列详解.md) | [arXiv:2405.20204](https://arxiv.org/abs/2405.20204) / [2412.08802](https://arxiv.org/abs/2412.08802) |
 | [Jina-embeddings-v4详解.md](Jina/v4/Jina-embeddings-v4详解.md) | [arXiv:2506.18902](https://arxiv.org/abs/2506.18902) |
-| [Jina-embeddings-v5-text详解.md](Jina/v5-text/Jina-embeddings-v5-text详解.md) | [arXiv:2602.15547](https://arxiv.org/abs/2602.15547) |
+| [Jina-embeddings-v5-text详解.md](Jina/v5-text/Jina-embeddings-v5-text详解.md) | [arXiv:2602.15547v2](https://arxiv.org/abs/2602.15547v2)（学生空间蒸馏、四任务 LoRA、GOR 与二值化消融；附方法原图） |
 | [Jina-embeddings-v5-omni详解.md](Jina/v5-omni/Jina-embeddings-v5-omni详解.md) | [arXiv:2605.08384](https://arxiv.org/abs/2605.08384) |
 | [jina-reranker-v3详解.md](Jina/rerank-v3/jina-reranker-v3详解.md) | [arXiv:2509.25085](https://arxiv.org/abs/2509.25085)（LBNL 列表精排；共享因果上下文读出） |
 | [Jina-ColBERT-v2详解.md](Jina/colbert-v2/Jina-ColBERT-v2详解.md) | [arXiv:2408.16672](https://arxiv.org/abs/2408.16672)（多语迟交互；多线性头 MRL） |
