@@ -27,6 +27,7 @@ Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + Mo
 | [BGE-Reranker详解.md](BGE/BGE-Reranker详解.md) | v2-m3 / v2-gemma / v2-minicpm-layerwise / **v2.5-gemma2-lightweight**（附录 D of BGE-EN-ICL 论文；深度+宽度双压缩） |
 | [Embedding蒸馏技术详解.md](Embedding蒸馏技术详解.md) | Embedding 蒸馏专题 |
 | [量化感知训练QAT详解.md](QAT/量化感知训练QAT详解.md) | QAT（Jacob/LSQ）vs 向量 QAT（Qwen3-VL）vs Jina v5 GOR；对齐文搜图索引 |
+| [Jacob2018详解.md](QAT/Jacob2018/Jacob2018详解.md) | CVPR 2018 整数推理与 QAT 原论文：仿射量化、定点重缩放、BN 折叠与端侧实验；附英文全文和中文全译 |
 | [Qwen3-VL-Embedding详解.md](QAT/Qwen3-VL-Embedding/Qwen3-VL-Embedding详解.md) | [arXiv:2601.04720v2](https://arxiv.org/abs/2601.04720v2)（多模态单向量召回与重排；数据合成、三阶段训练、MRL/QAT 与消融） |
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例工业闭环 |
 | [对比学习与InfoNCE精讲.md](对比学习与InfoNCE精讲.md) | 损失演化专题：Metric learning → InfoNCE → SimCSE/DPR/CLIP/SigLIP/蒸馏/BGE-M3/GritLM |

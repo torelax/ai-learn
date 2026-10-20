@@ -1,5 +1,7 @@
 # 量化感知训练（QAT）详解
 
+Jacob 原论文的独立研读及完整英中版本见 [Jacob2018 详解](Jacob2018/Jacob2018详解.md)；本页保留跨方法的 QAT 技术总览。
+
 > paper: Jacob et al. [arXiv:1712.05877](https://arxiv.org/abs/1712.05877)（CVPR 2018，经典 QAT）；LSQ [arXiv:1902.08153](https://arxiv.org/abs/1902.08153)（ICLR 2020）；Qwen3-VL-Embedding [arXiv:2601.04720](https://arxiv.org/abs/2601.04720)（Embedding 向量上的 QAT）；GOR [arXiv:1708.06320](https://arxiv.org/abs/1708.06320)（Jina v5 用的几何正则，**不是** QAT）
 > code / 工程: [PyTorch QAT](https://docs.pytorch.org/docs/stable/quantization.html)；[Unsloth QAT](https://unsloth.ai/docs/blog/quantization-aware-training-qat)（权重量化）；Sentence-Transformers [GOR loss](https://github.com/huggingface/sentence-transformers/blob/main/sentence_transformers/sentence_transformer/losses/global_orthogonal_regularization.py)
 > refs: STE [arXiv:1308.3432](https://arxiv.org/abs/1308.3432)；MRL [arXiv:2205.13192](https://arxiv.org/abs/2205.13192)；Jina v5-text [arXiv:2602.15547](https://arxiv.org/abs/2602.15547)
