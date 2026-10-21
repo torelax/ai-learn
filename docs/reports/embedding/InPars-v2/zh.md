@@ -1,5 +1,5 @@
 > 原文: [arXiv:2301.01820](https://arxiv.org/abs/2301.01820)（v4，2023-05-26）
-> 说明: 中英对照供阅读。英文为论文原文（PDF 转写，公式按论文整理）；中文为对应翻译。图表编号与原文一致。caption 保留英文并附中译。数值原样，未改动。
+> 说明：全文中英逐段对照，英文段落后紧接中文，保留原文完整结果表、脚注、致谢与参考文献。英文依 v4 原文转写，中文为辅助阅读译稿；原始数值与引用编号保留。
 
 **预印本：** arXiv:2301.01820v4 [cs.IR]，2023 年 5 月 26 日。
 
@@ -29,7 +29,7 @@
 
 ---
 
-## 1 Introduction and Background / 引言与背景
+## Introduction and Background / 引言与背景（原文 §1）
 
 **EN.** Data augmentation has been a reliable tool to improve the effectiveness of AI models in the face of the scarcity of high-quality in-domain training data, which is a common problem in practical applications. Previous work by Bonifacio et al. [1] and Dai et al. [2] successfully leveraged the few-shot capabilities of LLMs to generate reliable synthetic training data for information retrieval models. These training data helped their models achieve state-of-the-art (SOTA) results on the BEIR benchmark [6].
 
@@ -45,7 +45,7 @@
 
 ---
 
-## 2 Methodology / 方法
+## Methodology / 方法（原文 §2）
 
 **EN.** In this section, we explain the experiments we performed and how they differ from InPars-v1 [1].
 
@@ -73,7 +73,7 @@
 
 ---
 
-## 3 Results / 结果
+## Results / 结果（原文 §3）
 
 **表 1 / Table 1.** nDCG@10 on BEIR. “Avg PrGator” is the average of datasets reported by Promptagator. / BEIR 上的 nDCG@10。“Avg PrGator” 是 Promptagator 所报告数据集上的平均。Promptagator uses a proprietary model, FLAN [9], to generate synthetic queries. The RankT5 model is a modified version of the monoT5 reranker, but its checkpoint and code are not published. In this work, we make the code, models, and data open-source and publicly available. / Promptagator 使用专有模型 FLAN [9] 生成合成查询。RankT5 是 monoT5 重排器的修改版，但其检查点与代码未发表。本文把代码、模型与数据开源并公开。
 
@@ -116,7 +116,7 @@
 
 ---
 
-## 4 Conclusion / 结论
+## Conclusion / 结论（原文 §4）
 
 **EN.** In this work, we presented InPars-v2, an improved version of InPars [1] that uses a publicly available language model to generate queries and a better query-document pair selection process. Our results show that we achieve effectiveness on par with the state of the art on BEIR. The synthetic data and finetuned models were publicly released.
 
