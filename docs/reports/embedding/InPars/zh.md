@@ -1,5 +1,5 @@
 > 原文: [arXiv:2202.05144](https://arxiv.org/abs/2202.05144)（v1，2022-02-10）
-> 说明: 中英对照供阅读。英文为论文原文（PDF 转写，公式按论文整理）；中文为对应翻译。图表编号与原文一致。caption 保留英文并附中译。数值原样，未改动。
+> 说明：全文中英逐段对照，英文段落后紧接中文译文，覆盖主文、图表、脚注、参考文献与附录。英文依原文转写，中文为辅助阅读译稿；本次重点校订了提示模板与图表说明。图表编号和原始数值保留，补充说明标作译注。
 
 **预印本：** arXiv:2202.05144v1 [cs.CL]，2022 年 2 月 10 日。
 
@@ -25,7 +25,7 @@
 
 ---
 
-## 1 Introduction / 引言
+## Introduction / 引言（原文 §1）
 
 **EN.** Language models (LMs) such as GPT-3 (Brown et al., 2020), FLAN (Wei et al., 2022), Gopher (Rae et al., 2021), and T0++ (Sanh et al., 2021) have demonstrated impressive performance on many NLP tasks. Additionally, when sufficient supervised information is not available for a task, they have been shown to be effective and at times yield compelling results (Winata et al., 2021; Schick and Schütze, 2021b).
 
@@ -45,9 +45,9 @@
 
 **中.** 若每篇候选文档含 250 个 token，朴素地用这个 API 做重排，大约每条查询要 15 美元。
 
-**EN.** Dense retrievers (Karpukhin et al., 2020; Khattab and Zaharia, 2020) avoid this expensive reranking step by precomputing vector representations for each document in the collection prior to retrieval. When a query comes in, only its vector representations are computed, and a fast vector search framework can be used to retrieve the nearest document vectors to the vector representation of the query (Johnson et al., 2019). Despite being computationally cheaper at inference time, dense retrievers need one inference pass to compute the vector representation of each document in the collection, which also makes billion-parameter neural models impracticable to be used as dense retrievers. For a more detailed cost estimation, check this blog post.
+**EN.** Dense retrievers (Karpukhin et al., 2020; Khattab and Zaharia, 2020) avoid this expensive reranking step by precomputing vector representations for each document in the collection prior to retrieval. When a query comes in, only its vector representations are computed, and a fast vector search framework can be used to retrieve the nearest document vectors to the vector representation of the query (Johnson et al., 2019). Despite being computationally cheaper at inference time, dense retrievers need one inference pass to compute the vector representation of each document in the collection, which also makes billion-parameter neural models impracticable to be used as dense retrievers. For a more detailed cost estimation, check [this blog post](https://medium.com/@nils_reimers/openai-gpt-3-text-embeddings-really-a-new-state-of-the-art-in-dense-text-embeddings-6571fe3ec9d9).
 
-**中.** 稠密检索器（dense retriever；Karpukhin et al., 2020; Khattab and Zaharia, 2020）在检索之前预先计算集合里每篇文档的向量，从而避开这步昂贵的重排。查询到来时，只计算查询自己的向量，再用快速向量搜索框架，取出与查询向量最近的文档向量（Johnson et al., 2019）。尽管推理时更便宜，稠密检索器仍要对集合中每篇文档做一次前向才能得到向量，这同样使十亿参数级神经模型不适合直接当稠密检索器用。更细的成本估计见作者脚注中的博文。
+**中.** 稠密检索器（dense retriever；Karpukhin et al., 2020; Khattab and Zaharia, 2020）在检索之前预先计算集合里每篇文档的向量，从而避开这步昂贵的重排。查询到来时，只计算查询自己的向量，再用快速向量搜索框架，取出与查询向量最近的文档向量（Johnson et al., 2019）。尽管推理时更便宜，稠密检索器仍要对集合中每篇文档做一次前向才能得到向量，这同样使十亿参数级神经模型不适合直接当稠密检索器用。更细的成本估计见[作者脚注中的博文](https://medium.com/@nils_reimers/openai-gpt-3-text-embeddings-really-a-new-state-of-the-art-in-dense-text-embeddings-6571fe3ec9d9)。
 
 **EN.** Another challenge in developing neural models for IR is the lack of domain-specific training data. Manually constructing high-quality datasets is difficult as it requires queries from real users. While there are a few general-purpose labeled data available (Nguyen et al., 2016; Kwiatkowski et al., 2019), they are not always effective in generalizing to out-of-domain datasets (Thakur et al., 2021). For this goal, zero-shot and few-shot learning models are in particular promising. However, a cost-effective manner of using large LMs in IR tasks is still an open question.
 
@@ -67,7 +67,7 @@
 
 ---
 
-## 2 Related Work / 相关工作
+## Related Work / 相关工作（原文 §2）
 
 **EN.** Data augmentation methods aim at increasing the amount of data to assist the learning process of data-driven models. To improve the performance of neural models in low-resource settings, small-scale LMs have been used to generate synthetic data in various NLP tasks (Fadaee et al., 2017; Kobayashi, 2018). Recent works show that large pretrained LMs are capable of generating data of reasonable quality (Anaby-Tavor et al., 2020; Papanikolaou and Pierleoni, 2020; Yang et al., 2020; Mohapatra et al., 2021; Kumar et al., 2020; Schick and Schütze, 2021a; Meng et al., 2022), sometimes leading to better transfer learning than human generated datasets (Liu et al., 2022).
 
@@ -83,7 +83,7 @@
 
 ---
 
-## 3 Our Method: InPars / 方法：InPars
+## Our Method: InPars / 方法：InPars（原文 §3）
 
 **EN.** In this section, we describe the proposed method, dubbed InPars (Inquisitive Parrots for Search), for generating synthetic training datasets for IR tasks. Given a document $d$ and a prefix $t$ consisting of $N$ pairs of questions and their relevant documents, i.e., $t = \{(q^{*}_{1}, d^{*}_{1}), \ldots, (q^{*}_{N}, d^{*}_{N})\}$, our method uses a language model $G(t, d)$ to generate a question $q$ that is likely to be relevant to $d$. The pair $(q, d)$ forms a positive training example that is later used to finetune our retrieval models.
 
@@ -101,7 +101,7 @@ $$
 p_q = \frac{1}{|q|}\sum_{i=1}^{|q|}\log p(q_i \mid t, d, q_{<i})
 $$
 
-**(1)**
+**Equation (1) / 公式 (1)**
 
 **EN.** where $p(q_i \mid t, d, q_{<i})$ is the probability assigned by $G$ when autoregressively generating the $i$-th token of $q$. We show in Section 6.3 that this filtering step largely improves IR metrics.
 
@@ -117,13 +117,13 @@ $$
 
 ---
 
-## 4 Experimental Setup / 实验设置
+## Experimental Setup / 实验设置（原文 §4）
 
 **EN.** In this section, we describe the datasets used in this work, the procedure to generate questions from the datasets in an few-shot manner, and finally, how we train retrievers on this synthetic data.
 
 **中.** 本节说明本文使用的数据集、以少样本方式从这些数据集生成问题的过程，以及如何在这份合成数据上训练检索器。
 
-### 4.1 Datasets / 数据集
+### Datasets / 数据集（原文 §4.1）
 
 **EN.** MS MARCO (Nguyen et al., 2016) is a large-scale ranking dataset with more than half million anonymized questions sampled from Bing’s search query logs. Its passage ranking version is formed by 8.8M passages and approximately 500k training pairs of queries and relevant documents. On average, there is one relevant passage per query, which were manually annotated. The development and test sets contain approximately 6,900 queries each and the test set is kept hidden from the public.
 
@@ -151,61 +151,59 @@ $$
 
 ![图 2：Vanilla 与 GBQ 两种少样本提示。](figs/fig02.png)
 
-![图 2：Vanilla 与 GBQ 两种少样本提示。](figs/fig02.png)
-
 **EN.** Example 1 (shared document). Document: We don't know a lot about the effects of caffeine during pregnancy on you and your baby. So it's best to limit the amount you get each day. If you are pregnant, limit caffeine to 200 milligrams each day. This is about the amount in 1½ 8-ounce cups of coffee or one 12-ounce cup of coffee.
 
 **中.** 例 1（两边共用的文档）。文档：我们对咖啡因在孕期对你和胎儿的影响了解不多。所以最好限制每天的摄入量。如果怀孕，每天把咖啡因限制在 200 毫克。这大约相当于 1.5 杯 8 盎司咖啡，或 1 杯 12 盎司咖啡。
 
-**EN.** Vanilla, Good Question: How much caffeine is ok for a pregnant woman to have?
+**EN.** GBQ, Good Question: How much caffeine is ok for a pregnant woman to have?
 
-**中.** Vanilla 的 Good Question：孕妇可以摄入多少咖啡因？
+**中.** GBQ 的 Good Question：孕妇可以摄入多少咖啡因？
 
-**EN.** Vanilla, Bad Question: Is a little caffeine ok during pregnancy?
+**EN.** GBQ, Bad Question: Is a little caffeine ok during pregnancy?
 
-**中.** Vanilla 的 Bad Question：孕期喝一点咖啡因可以吗？
+**中.** GBQ 的 Bad Question：孕期喝一点咖啡因可以吗？
 
-**EN.** GBQ, Relevant Query (the MS MARCO question used as the bad example on the right-hand prompt): Is a little caffeine ok during pregnancy?
+**EN.** Vanilla, Relevant Query (also used as the bad example in the GBQ prompt): Is a little caffeine ok during pregnancy?
 
-**中.** GBQ 的 Relevant Query（右侧提示里当作坏例子的 MS MARCO 问题）：孕期喝一点咖啡因可以吗？
+**中.** Vanilla 的 Relevant Query（也用作右侧 GBQ 提示的坏例子）：孕期喝一点咖啡因可以吗？
 
 **EN.** Example 2. Document: Passiflora herbertiana. A rare passion fruit native to Australia. Fruits are green-skinned, white fleshed, with an unknown edible rating. Some sources list the fruit as edible, sweet and tasty, while others list the fruits as being bitter and inedible.
 
 **中.** 例 2。文档：Passiflora herbertiana。一种原产澳大利亚的稀有百香果。果实绿皮、白瓤，可食性评级未知。有的资料说果实可食、甜而好吃，另一些则说果实苦、不可食。
 
-**EN.** Vanilla, Good Question: What is Passiflora herbertiana (a rare passion fruit) and how does it taste like?
+**EN.** GBQ, Good Question: What is Passiflora herbertiana (a rare passion fruit) and how does it taste like?
 
-**中.** Vanilla 的 Good Question：Passiflora herbertiana（一种稀有百香果）是什么，味道如何？
+**中.** GBQ 的 Good Question：Passiflora herbertiana（一种稀有百香果）是什么，味道如何？
 
-**EN.** Vanilla, Bad Question: What fruit is native to Australia?
+**EN.** GBQ, Bad Question: What fruit is native to Australia?
 
-**中.** Vanilla 的 Bad Question：哪种水果原产澳大利亚？
+**中.** GBQ 的 Bad Question：哪种水果原产澳大利亚？
 
-**EN.** GBQ, Relevant Query: What fruit is native to Australia?
+**EN.** Vanilla, Relevant Query: What fruit is native to Australia?
 
-**中.** GBQ 的 Relevant Query：哪种水果原产澳大利亚？
+**中.** Vanilla 的 Relevant Query：哪种水果原产澳大利亚？
 
 **EN.** Example 3. Document: The Canadian Armed Forces. 1 The first large-scale Canadian peacekeeping mission started in Egypt on November 24, 1956. 2 There are approximately 65,000 Regular Force and 25,000 reservist members in the Canadian military. 3 In Canada, August 9 is designated as National Peacekeepers' Day.
 
 **中.** 例 3。文档：加拿大武装部队。1 加拿大第一次大规模维和任务于 1956 年 11 月 24 日在埃及开始。2 加拿大军队约有 65,000 名正规部队和 25,000 名预备役成员。3 在加拿大，8 月 9 日被定为国家维和人员日。
 
-**EN.** Vanilla, Good Question: Information on the Canadian Armed Forces size and history.
+**EN.** GBQ, Good Question: Information on the Canadian Armed Forces size and history.
 
-**中.** Vanilla 的 Good Question：关于加拿大武装部队规模与历史的信息。
+**中.** GBQ 的 Good Question：关于加拿大武装部队规模与历史的信息。
 
-**EN.** Vanilla, Bad Question: How large is the Canadian military?
+**EN.** GBQ, Bad Question: How large is the Canadian military?
 
-**中.** Vanilla 的 Bad Question：加拿大军队有多大？
+**中.** GBQ 的 Bad Question：加拿大军队有多大？
 
-**EN.** GBQ, Relevant Query: How large is the Canadian military?
+**EN.** Vanilla, Relevant Query: How large is the Canadian military?
 
-**中.** GBQ 的 Relevant Query：加拿大军队有多大？
+**中.** Vanilla 的 Relevant Query：加拿大军队有多大？
 
-**EN.** Example 4, both prompts. Document: {document_text}. Vanilla asks for “Good Question:”. GBQ asks for “Relevant Query:”.
+**EN.** Example 4, both prompts. Document: {document_text}. Vanilla asks for “Relevant Query:”. GBQ asks for “Good Question:”.
 
-**中.** 例 4，两种提示相同位置。文档：{document_text}。Vanilla 要求续写 “Good Question:”。GBQ 要求续写 “Relevant Query:”。
+**中.** 例 4，两种提示相同位置。文档：{document_text}。Vanilla 要求续写 “Relevant Query:”。GBQ 要求续写 “Good Question:”。
 
-### 4.2 Training Data Generation / 训练数据生成
+### Training Data Generation / 训练数据生成（原文 §4.2）
 
 **EN.** Our training set comprises triples of a query, a positive, and a negative document. We first describe how pairs of query and positive documents are generated. We randomly sample 100,000 documents from the collection and generate one question per document using GPT-3’s Curie as our language model $G$. We prepend the document text with its title, when it is available. Documents with less than 300 characters are discarded and a new one is sampled. We use a temperature of 0, which defaults to greedy decoding. We tried other decoding algorithms such as sampling (with a temperature of 1.0) and top-p sampling (Holtzman et al., 2019) (with p=0.95) but did not notice significant differences in the final results.
 
@@ -231,7 +229,7 @@ $$
 
 **中.** 检索器是二分类器，因此还要选出与 $q$ 不相关的文档，构成负微调例 $(q, d^{-})$。作者采用一种已被证明对微调重排器有效的简单方法（Pradeep et al., 2021）。用 BM25、以 $q$ 为查询，从集合 $D$ 检索 1000 篇文档。从中随机选一篇作为 $d^{-}$，对 $(q, d^{-})$ 构成负例。
 
-### 4.3 Retrieval Methods / 检索方法
+### Retrieval Methods / 检索方法（原文 §4.3）
 
 **EN.** We use a multi-stage retrieval architecture (Matveeva et al., 2006; Wang et al., 2011; Chen et al., 2017; Liu et al., 2017) comprised of initial retrieval with bag-of-words BM25 (Robertson et al., 1995) followed by a neural reranker.
 
@@ -289,7 +287,7 @@ $$
 
 ---
 
-## 5 Results / 结果
+## Results / 结果（原文 §5）
 
 **EN.** The main results are shown in Table 1. We observe that unsupervised models finetuned using our method (rows 7-8), outperform models of equivalent size available in OpenAI’s Search API (rows 4-6). For instance, our monoT5 with 3B parameters (row 8) is significantly better than the larger Curie and Davinci models (rows 5 and 6). InPars also outperforms Contriever (Izacard et al., 2021) and cpt-text (Neelakantan et al., 2022), two unsupervised methods. Neelakantan et al. (2022) (row 3) also use large LMs, but their numbers are much lower than those achieved by InPars or OpenAI’s Search reranking documents from BM25 (rows 4-6).
 
@@ -326,17 +324,17 @@ $$
 
 ---
 
-## 6 Ablation Study and Analysis / 消融与分析
+## Ablation Study and Analysis / 消融与分析（原文 §6）
 
 **EN.** In this section we take a deeper look into the properties of our proposed approach.
 
 **中.** 本节更仔细地看所提方法的性质。
 
-### 6.1 Prompt Selection and Source Corpus / 提示选择与来源语料
+### Prompt Selection and Source Corpus / 提示选择与来源语料（原文 §6.1）
 
 **EN.** First, we investigate the impact of using different styles of prompts as well as using in-domain or ad hoc collections to generate synthetic data. We compare IR metrics obtained with different prompt templates in Table 2. The column “Input docs” refers to the collection used to generate the questions. Marco indicates that we sampled documents from the MS MARCO passage collection as input for generating questions since models trained on them have shown great generalization capabilities (Pradeep et al., 2020b; Thakur et al., 2021). In contrast, in-domain signifies that questions were generated from documents sampled from the same collections that the model is evaluated on. This approach can be regarded as zero-shot domain adaptation as we do not use any in-domain labeled data to finetune our retrievers. Since the MS MARCO development set and TREC-DL 2020 use the MS MARCO passage collection, this distinction of in-domain and Marco does not apply to these datasets.
 
-**中.** 首先考察不同风格的提示，以及用域内集合或即兴集合生成合成数据的影响。表 2 比较不同提示模板得到的 IR 指标。“Input docs” 列是用来生成问题的集合。Marco 表示从 MS MARCO 段落集合抽样文档作为生成问题的输入，因为在其上训练的模型已表现出很强的泛化能力（Pradeep et al., 2020b; Thakur et al., 2021）。相反，in-domain 表示问题由从模型评测所用的同一集合中抽样的文档生成。这一做法可以看作零样本领域适配，因为微调检索器时没有使用任何域内标注数据。由于 MS MARCO 开发集和 TREC-DL 2020 用的就是 MS MARCO 段落集合，域内与 Marco 的区分不适用于这两个数据集。
+**中.** 首先考察不同风格的提示，以及用域内集合或其他语料集合生成合成数据的影响。表 2 比较不同提示模板得到的 IR 指标。“Input docs” 列是用来生成问题的集合。Marco 表示从 MS MARCO 段落集合抽样文档作为生成问题的输入，因为在其上训练的模型已表现出很强的泛化能力（Pradeep et al., 2020b; Thakur et al., 2021）。相反，in-domain 表示问题由从模型评测所用的同一集合中抽样的文档生成。这一做法可以看作零样本领域适配，因为微调检索器时没有使用任何域内标注数据。由于 MS MARCO 开发集和 TREC-DL 2020 用的就是 MS MARCO 段落集合，域内与 Marco 的区分不适用于这两个数据集。
 
 **EN.** Column “Prompt” in Table 2 refers to the type of prompt fed to the language model during the question generation step. Preliminary experiments demonstrate that GBQ leads to better performance than the Vanilla prompt when used in combination with in-domain input documents. A marginal gain was observed when using the GBQ prompt on MS MARCO documents. Therefore, we combined Marco with the Vanilla prompt and in-domain with the GBQ prompt in our experiments.
 
@@ -350,7 +348,9 @@ $$
 
 **中.** MS MARCO 和 TREC-DL 2020 在 monoT5 220M 与 3B 上，都是用 Vanilla 提示得到最高分。对其余数据集（Robust04、NQ、TREC-COVID），最高分来自 GBQ 提示，以及从这些集合自身生成的问题。3B 模型从域内例子中受益最多，稳定超过 Marco 的结果。对更小的 monoT5 220M，提示类型与输入文档之间没有明确的胜者。
 
-### 6.2 Model Size Impact on IR Metrics / 模型规模对检索指标的影响
+> **译注**：上一段按原文翻译。Table 2 中，Robust04 的 3B 模型实际为 MARCO / Vanilla 的 nDCG@20 0.5478 高于域内 GBQ 的 0.5181；不能将文字中的“稳定超过”推广到所有迁移集合。
+
+### Model Size Impact on IR Metrics / 模型规模对检索指标的影响（原文 §6.2）
 
 **EN.** In Figure 3 we present the effectiveness on the MS MARCO development set of the monoT5-220M reranker trained on synthetic questions generated using different sizes of GPT-3. As we increase the model size, the IR metric keeps increasing, although very slowly. A hypothesis that explains this gain is that larger models can generate more relevant questions to a given passage, instead of broad and more general questions. Using more specific questions avoids confusing the reranker with questions that are relevant to many passages, which can lead to false-negative examples.
 
@@ -366,34 +366,23 @@ $$
 
 ![图 3：生成模型规模与 MS MARCO 开发集 MRR@10。](figs/fig03.png)
 
-![图 3：生成模型规模与 MS MARCO 开发集 MRR@10。](figs/fig03.png)
+**图示译注。** 横轴为参数量（十亿），使用对数尺度；圆点表示 InPars，三角形表示 cpt-text，虚线表示 BM25。图中显示生成器变大时检索效果上升，但后半段收益较小。曲线点位不作为四位小数的精确数据来源；Curie 的 0.2585 与 cpt-text Davinci 的 0.2270 可由表 1 回查。
 
-图 3 画的是三条曲线，横轴为参数量（十亿）：0.3、1.2、6、175。纵轴为 MRR@10。图中画出的点为：
-
-| 十亿参数 | InPars | cpt-text | BM25 |
-| ---: | ---: | ---: | ---: |
-| 0.3 | 0.2150 | 0.199 | 0.1874 |
-| 1.2 | 0.2515 | 0.206 | 0.1874 |
-| 6 | 0.2585 | 0.215 | 0.1874 |
-| 175 | 0.2701 | 0.227 | 0.1874 |
-
-其中 6B 的 InPars 点 0.2585 与表 1 第 7 行 MS MARCO MRR@10 相同；175B 的 cpt-text 点 0.227 与表 1 第 3 行 0.2270 对应；BM25 为水平线 0.1874，与表 1 第 1 行相同。PDF 纵轴刻度印成三位小数 0.187、0.215、0.252、0.270。
-
-### 6.3 Filtering by the Most Likely Questions / 按最可能的问题过滤
+### Filtering by the Most Likely Questions / 按最可能的问题过滤（原文 §6.3）
 
 **EN.** As mentioned in Section 3, we used only the top $K = 10{,}000$ pairs w.r.t to $p_q$ to finetune the rerankers. Finetuning on all 100,000 synthetic examples leads to a 4 MRR@10 points decrease on MS MARCO when compared to the top $K$ filtering approach. Thus, to avoid relying on the test sets and keep the method fully unsupervised, we only evaluated this difference on MS MARCO and applied the filtering approach to all other datasets.
 
 **中.** 如第 3 节所述，微调重排器时只用按 $p_q$ 最高的 $K = 10{,}000$ 对。若在全部 100,000 条合成例上微调，相对 top-$K$ 过滤，MS MARCO 上的 MRR@10 下降 4 个点。因此，为了不依赖测试集、并保持方法完全无监督，这一差异只在 MS MARCO 上评估，过滤做法则用到所有其他数据集。
 
-### 6.4 Was GPT-3 Trained on Supervised IR Data? / GPT-3 是否在有监督 IR 数据上训练过？
+### Was GPT-3 Trained on Supervised IR Data? / GPT-3 是否在有监督 IR 数据上训练过？（原文 §6.4）
 
 **EN.** The answer to this question is not disclosed to the public, but we tried to answer it by measuring the number of questions produced by GPT-3 that match those in the MS MARCO dataset. Of the 93,200 unique questions produced by the largest model (Davinci), 5,285 were also found in the 1M questions from MS MARCO, i.e., less than 5.7%. Most of these questions contain a single entity (e.g., “what is freedom of the press”, “what is the fda”, “who is gary young”) that are likely to be answered by multiple documents in the collection. Also, the Davinci model produced questions from 6,396 documents marked as relevant in either the training or development sets of MS MARCO. Of those synthetic questions, 725 were found in MS MARCO ground-truth, i.e., less than 12%. Similar numbers were found for smaller models. We argue that these low percentages are evidence that the models were not finetuned on MS MARCO, or at least, they did not memorize it.
 
-**中.** 这个问题的答案没有向公众披露。作者试图这样回答：统计 GPT-3 生成的问题里有多少与 MS MARCO 数据集中的问题重合。最大模型（Davinci）产出的 93,200 条不重复问题中，有 5,285 条也出现在 MS MARCO 的 100 万条问题里，即不到 5.7%。这些重合问题大多只含一个实体（例如 “what is freedom of the press”、“what is the fda”、“who is gary young”），集合里很可能有多篇文档都能回答。另外，Davinci 从 6,396 篇在 MS MARCO 训练集或开发集中被标为相关的文档上生成了问题。这些合成问题里，有 725 条出现在 MS MARCO 的标准答案中，即不到 12%。更小的模型得到类似数字。作者认为，这些很低的比例是证据：模型没有在 MS MARCO 上微调过，或者至少没有把它记住。
+**中.** 这个问题的答案没有向公众披露。作者试图这样回答：统计 GPT-3 生成的问题里有多少与 MS MARCO 数据集中的问题重合。最大模型（Davinci）产出的 93,200 条不重复问题中，有 5,285 条也出现在 MS MARCO 的 100 万条问题里，即不到 5.7%。这些重合问题大多只含一个实体（例如 “what is freedom of the press”、“what is the fda”、“who is gary young”），集合里很可能有多篇文档都能回答。另外，Davinci 从 6,396 篇在 MS MARCO 训练集或开发集中被标为相关的文档上生成了问题。这些合成问题里，有 725 条出现在 MS MARCO 的已标注查询中，即不到 12%。更小的模型得到类似数字。作者认为，这些很低的比例是证据：模型没有在 MS MARCO 上微调过，或者至少没有把它记住。
 
 ---
 
-## 7 Conclusion and Future Work / 结论与未来工作
+## Conclusion and Future Work / 结论与未来工作（原文 §7）
 
 **EN.** In this work, we presented InPars, a method to generate synthetic training data for IR tasks using large LMs in a few-shot manner. This allows one to harness the information learned by large models in a more efficient and effective way.
 
@@ -528,7 +517,7 @@ $$
 
 ---
 
-## A Appendix / 附录
+## Appendix / 附录（原文 A）
 
 ### Table 3 / 表 3
 
@@ -680,7 +669,7 @@ $$
 
 **中.** 好问题：关于阿根廷国家队及其历史的信息。
 
-**EN.** Document: American game show winnings records. In 1999, McKee was passed by Michael Shutterly, who was the biggest winner in the first airing of Who Wants to Be a Millionaire in the United States. Shutterly was the first contestant on the show to get to the 15th and final question, but elected to walk instead with $500,000 (equivalent to $719,000 in 2016),[1] which made him the biggest winner in American game show history at the time. Shutterly had previously won $49,200 as a 4 day champion on Jeopardy! in 1988, making his career winnings total $549,200. [12]
+**EN.** Document: American game show winnings records. In 1999, McKee was passed by Michael Shutterly, who was the biggest winner in the first airing of Who Wants to Be a Millionaire in the United States. Shutterly was the first contestant on the show to get to the 15th and final question, but elected to walk instead with \$500,000 (equivalent to \$719,000 in 2016),[1] which made him the biggest winner in American game show history at the time. Shutterly had previously won \$49,200 as a 4 day champion on Jeopardy! in 1988, making his career winnings total \$549,200. [12]
 
 **中.** 文档：美国游戏节目奖金纪录。1999 年，McKee 被 Michael Shutterly 超过。Shutterly 是美国版《谁想成为百万富翁》首播中的最大赢家。他是该节目第一个走到第 15 题、也就是最后一题的参赛者，但选择带走 500,000 美元（按 2016 年购买力约合 719,000 美元）［1］，从而成为当时美国游戏节目史上的最大赢家。Shutterly 此前在 1988 年《危险边缘》上作为四日冠军赢得 49,200 美元，生涯总奖金为 549,200 美元。［12］
 
