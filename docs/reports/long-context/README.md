@@ -1,7 +1,7 @@
 # 长上下文与位置编码
 
-单篇论文分别保留独立阅读笔记、英文全文、中文译稿、原图及体积合理的 PDF；Notion 使用已有全局 Paper 条目。
+单篇论文保留论文精炼版、独立补充解读、全文中英逐段对照、原图及体积合理的 PDF；Notion 使用已有全局 Paper 条目，补充解读作为入口置顶的子页，翻译仅在仓库保留。
 
 | 阅读笔记 | 论文 | 主题 |
 |---|---|---|
-| [YaRN 详解](YaRN/YaRN详解.md) | [YaRN](https://arxiv.org/abs/2309.00071)，ICLR 2024；按 arXiv v3 研读 | RoPE 分频插值、注意力温度、长度外推与评测边界 |
+| [YaRN 论文精炼版](YaRN/YaRN详解.md) · [补充解读](YaRN/YaRN解读.md) · [全文中英对照](YaRN/zh.md) | [YaRN](https://arxiv.org/abs/2309.00071)，ICLR 2024；按 arXiv v3 研读 | RoPE 分频插值、注意力温度、长度外推与评测边界 |

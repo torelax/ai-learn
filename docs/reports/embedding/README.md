@@ -87,8 +87,8 @@ Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + Mo
 | [Doc2Query++详解.md](Doc2Query++/Doc2Query++详解.md) | [arXiv:2510.09557](https://arxiv.org/abs/2510.09557)（主题覆盖；稠密双索引融合） |
 | [GPL详解.md](GPL/GPL详解.md) | [arXiv:2112.07577](https://arxiv.org/abs/2112.07577)（造查询 + cross-encoder margin 伪标签） |
 | [R-GPL详解.md](R-GPL/R-GPL详解.md) | [arXiv:2501.14434](https://arxiv.org/abs/2501.14434)（蒸馏中重挖难负例） |
-| [InPars详解.md](InPars/InPars详解.md) | [arXiv:2202.05144](https://arxiv.org/abs/2202.05144)（少样本 LLM 造查询，训 monoT5） |
-| [InPars-v2详解.md](InPars-v2/InPars-v2详解.md) | [arXiv:2301.01820](https://arxiv.org/abs/2301.01820)（GPT-J + monoT5 过滤） |
+| [InPars 论文精炼版](InPars/InPars详解.md) · [补充解读](InPars/InPars解读.md) · [全文中英对照](InPars/zh.md) | [arXiv:2202.05144](https://arxiv.org/abs/2202.05144)（少样本 LLM 造查询，训 monoT5） |
+| [InPars-v2 论文精炼版](InPars-v2/InPars-v2详解.md) · [补充解读](InPars-v2/InPars-v2解读.md) · [全文中英对照](InPars-v2/zh.md) | [arXiv:2301.01820](https://arxiv.org/abs/2301.01820)（GPT-J + monoT5 过滤） |
 | [Promptagator详解.md](Promptagator/Promptagator详解.md) | [arXiv:2209.11755](https://arxiv.org/abs/2209.11755)（≤8 例；一致性过滤后训双塔） |
 | [Longtail-Product-Retrieval详解.md](Longtail-Product-Retrieval/Longtail-Product-Retrieval详解.md) | [arXiv:2602.23620](https://arxiv.org/abs/2602.23620)（离线多奖励改写蒸馏进商品检索） |
 | [E5-Mistral合成数据详解.md](E5-Mistral/E5-Mistral合成数据详解.md) | [arXiv:2401.00368](https://arxiv.org/abs/2401.00368)（两步 prompt；全文中译见同目录 zh.md） |
