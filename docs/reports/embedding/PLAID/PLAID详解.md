@@ -1,17 +1,14 @@
-# PLAID：高效的后期交互检索引擎
+# PLAID：论文精炼研读
 
-> paper：[PLAID: An Efficient Engine for Late Interaction Retrieval](https://arxiv.org/abs/2205.09707v1)（CIKM 2022）
-> code / project：[ColBERT](https://github.com/stanford-futuredata/ColBERT)
-> 作者：Keshav Santhanam、Omar Khattab、Christopher Potts、Matei Zaharia
-> backbone：BERT 系 ColBERTv2；Wikipedia 实验使用 ColBERT-QA
-> date：2022-05-19，arXiv v1；modality：文本；languages：本文评测为英语
-> refs：[ColBERT](https://arxiv.org/abs/2004.12832)、[ColBERTv2](https://arxiv.org/abs/2112.01488)
+> 利用压缩索引里的质心提前筛选候选，减少残差读取、解压与完整 MaxSim 的计算。
+>
+> [原论文](https://arxiv.org/abs/2205.09707v1)
 
-## 摘要
+## 论文简介
 
-**PLAID（Performance-optimized Late Interaction Driver）解决的是多向量检索的执行效率。** ColBERT 用 token 级向量保留细粒度语义，ColBERTv2 用“质心 ID＋量化残差”压缩这些向量；PLAID 进一步发现：压缩表示中的质心还可以直接参与检索，提前筛掉低分段落，从而减少残差读取、解压和完整 MaxSim 打分。
+ColBERTv2 已经压缩了多向量索引，但候选读取和残差解压仍占据查询延迟。PLAID 将质心从存储码本变成在线筛选工具：共享查询—质心分数表，先做剪枝与完整质心交互，最后只对少量段落恢复残差，并用定制内核减少 padding 和访存。
 
-方法由**质心交互（centroid interaction）**、**质心剪枝（centroid pruning）**和优化内核组成。在 MS MARCO v1 的 `k=1000` 设置下，相对高召回的 vanilla ColBERTv2，GPU 检索延迟从 **259.6 ms 降到 38.4 ms（约 6.8×）**，8 线程 CPU 从 **4568.5 ms 降到 101.3 ms（约 45×）**，MRR@10 为 39.7→39.8。论文还评测了 Wikipedia、LoTTE 和约 1.384 亿段落的 MS MARCO v2。以下实验数值来自论文；计时排除了神经模型的查询编码。
+在 MS MARCO v1 的 k=1000 配置中，相对高召回 vanilla ColBERTv2，GPU 检索从 259.6 ms 到 38.4 ms，8 线程 CPU 从 4568.5 ms 到 101.3 ms，MRR@10 接近不变，但深召回略降。论文还检验域外和亿级语料；计时不含查询编码，不能直接当作服务端总延迟。
 
 ## 背景：为什么压缩了索引，检索仍然很慢
 
@@ -286,14 +283,6 @@ CPU 使用单线程或 8 线程；GPU 为 **TITAN V、12 GB 显存**，GPU 实�
 ![图 8（原文 Figure 8）：CPU 线程扩展](figs/fig08.png)
 
 **图 8：** 增加 CPU 线程能降低延迟，k=1000 时 16 线程相对单线程约快 4.9×。加速没有线性达到 16×，作者推测仍有候选生成开销，以及段落长度不均引起的负载不均；进一步 profiling 留待后续工作。
-
-## 实践理解
-
-**三个参数控制不同成本：** `nprobe` 决定质心倒排表的探测范围，`t_cs` 控制早期质心交互的稀疏程度，`ndocs` 控制多少段落进入后续更完整的计算。应固定模型和压缩设置，从候选覆盖、最终相关性指标、解压量和平均/尾部延迟共同选择预算。
-
-官方代码的后续版本可能与论文配置不同。例如核对的版本 `cc4f3dc91c0b45d2d08c251d9d95178285c65f1c` 中，`Searcher.dense_search` 使用 `ncells` 表示探测单元数，k>100 时 `ndocs` 默认取 `max(4k,4096)`；实际调用应以所用版本为准。
-
-对 ColPali、ColQwen 等视觉多向量检索，值得借鉴的是**先用便宜代理筛选，再做昂贵的完整多向量匹配**。视觉页的 patch 数量、重复纹理与质心分布不同，仍需重新验证候选覆盖和预算；本文实验范围是文本。模型蒸馏减少编码成本后，索引读取和解压也仍可能成为下一处瓶颈。
 
 ## 结论与局限
 
