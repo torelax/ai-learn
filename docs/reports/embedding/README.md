@@ -6,6 +6,46 @@
 
 Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + ModelCard mention；过程记录不创建子页。写作参照 [论文阅读笔记指南](../../paper-reading-guide.md)，权限与落点见根目录 [AGENTS.md](../../../AGENTS.md)。
 
+## 论文精炼版与补充解读
+
+精炼版按论文顺序覆盖方法、数据、实验和消融；补充解读讨论机制与工程取舍。`zh.md` 为英文段落后紧接中文的全文对照初译，已检查结构与术语，尚未逐句人工审定；Notion 仅展示精炼版与独立解读子页，已有内容之后追加。
+
+| 论文 / 模型报告 | 精炼版 | 补充解读 | 仓库全文对照 |
+| --- | --- | --- | --- |
+| DPR | [阅读](DPR/DPR详解.md) | [解读](DPR/DPR解读.md) | [中英对照](DPR/zh.md) |
+| ColBERT | [阅读](ColBERT/ColBERT详解.md) | [解读](ColBERT/ColBERT解读.md) | 待原文副本 / 译文许可 |
+| ColBERTv2 | [阅读](ColBERTv2/ColBERTv2详解.md) | [解读](ColBERTv2/ColBERTv2解读.md) | [中英对照](ColBERTv2/zh.md) |
+| PLAID | [阅读](PLAID/PLAID详解.md) | [解读](PLAID/PLAID解读.md) | [中英对照](PLAID/zh.md) |
+| ColPali | [阅读](ColPali/ColPali详解.md) | [解读](ColPali/ColPali解读.md) | [中英对照](ColPali/zh.md) |
+| CLIP | [阅读](CLIP/CLIP详解.md) | [解读](CLIP/CLIP解读.md) | [中英对照](CLIP/zh.md) |
+| SigLIP | [阅读](SigLIP/SigLIP/SigLIP详解.md) | [解读](SigLIP/SigLIP/SigLIP解读.md) | [中英对照](SigLIP/SigLIP/zh.md) |
+| SigLIP2 | [阅读](SigLIP/SigLIP2/SigLIP2详解.md) | [解读](SigLIP/SigLIP2/SigLIP2解读.md) | [中英对照](SigLIP/SigLIP2/zh.md) |
+| GME | [阅读](GME/GME详解.md) | [解读](GME/GME解读.md) | [中英对照](GME/zh.md) |
+| VLM2Vec | [阅读](VLM2Vec/VLM2Vec详解.md) | [解读](VLM2Vec/VLM2Vec解读.md) | [中英对照](VLM2Vec/zh.md) |
+| MegaPairs | [阅读](MegaPairs/MegaPairs详解.md) | [解读](MegaPairs/MegaPairs解读.md) | [中英对照](MegaPairs/zh.md) |
+| Jina-v1 | [阅读](Jina/v1/Jina-embeddings-v1详解.md) | [解读](Jina/v1/Jina-embeddings-v1解读.md) | 待原文副本 / 译文许可 |
+| Jina-v2 | [阅读](Jina/v2/Jina-embeddings-v2详解.md) | [解读](Jina/v2/Jina-embeddings-v2解读.md) | [中英对照](Jina/v2/zh.md) |
+| Jina-v3 | [阅读](Jina/v3/Jina-embeddings-v3详解.md) | [解读](Jina/v3/Jina-embeddings-v3解读.md) | [中英对照](Jina/v3/zh.md) |
+| Jina-CLIP | [阅读](Jina/clip/v1/Jina-CLIP详解.md) | [解读](Jina/clip/v1/Jina-CLIP解读.md) | [中英对照](Jina/clip/v1/zh.md) |
+| Jina-CLIP-v2 | [阅读](Jina/clip/v2/Jina-CLIP-v2详解.md) | [解读](Jina/clip/v2/Jina-CLIP-v2解读.md) | [中英对照](Jina/clip/v2/zh.md) |
+| Jina-ColBERT-v2 | [阅读](Jina/colbert-v2/Jina-ColBERT-v2详解.md) | [解读](Jina/colbert-v2/Jina-ColBERT-v2解读.md) | [中英对照](Jina/colbert-v2/zh.md) |
+| Jina-reranker-v3 | [阅读](Jina/rerank-v3/jina-reranker-v3详解.md) | [解读](Jina/rerank-v3/jina-reranker-v3解读.md) | [中英对照](Jina/rerank-v3/zh.md) |
+| Sentence-BERT | [阅读](Sentence-BERT/Sentence-BERT详解.md) | [解读](Sentence-BERT/Sentence-BERT解读.md) | [中英对照](Sentence-BERT/zh.md) |
+| SPLADE | [阅读](SPLADE/SPLADE/SPLADE详解.md) | [解读](SPLADE/SPLADE/SPLADE解读.md) | [中英对照](SPLADE/SPLADE/zh.md) |
+| SPLADE-v2 | [阅读](SPLADE/SPLADE-v2/SPLADE-v2详解.md) | [解读](SPLADE/SPLADE-v2/SPLADE-v2解读.md) | [中英对照](SPLADE/SPLADE-v2/zh.md) |
+| MRL | [阅读](MRL/MRL详解.md) | [解读](MRL/MRL解读.md) | 待原文副本 / 译文许可 |
+| GradCache | [阅读](GradCache/GradCache详解.md) | [解读](GradCache/GradCache解读.md) | [中英对照](GradCache/zh.md) |
+| FollowIR | [阅读](FollowIR/FollowIR详解.md) | [解读](FollowIR/FollowIR解读.md) | [中英对照](FollowIR/zh.md) |
+| HyDE | [阅读](HyDE/HyDE详解.md) | [解读](HyDE/HyDE解读.md) | [中英对照](HyDE/zh.md) |
+| LongEmbed | [阅读](LongEmbed/LongEmbed详解.md) | [解读](LongEmbed/LongEmbed解读.md) | [中英对照](LongEmbed/zh.md) |
+| DINOv2 | [阅读](DINO/DINOv2/DINOv2详解.md) | [解读](DINO/DINOv2/DINOv2解读.md) | [中英对照](DINO/DINOv2/zh.md) |
+| DINOv3 | [阅读](DINO/DINOv3/DINOv3详解.md) | [解读](DINO/DINOv3/DINOv3解读.md) | [中英对照](DINO/DINOv3/zh.md) |
+| ViDoRe-v2 | [阅读](ViDoRev2/ViDoRe-v2详解.md) | [解读](ViDoRev2/ViDoRe-v2解读.md) | [中英对照](ViDoRev2/zh.md) |
+| Qwen3-VL-Embedding | [阅读](QAT/Qwen3-VL-Embedding/Qwen3-VL-Embedding详解.md) | [解读](QAT/Qwen3-VL-Embedding/Qwen3-VL-Embedding解读.md) | [中英对照](QAT/Qwen3-VL-Embedding/zh.md) |
+| ColQwen | [阅读](ColQwen/ColQwen系列详解.md) | [解读](ColQwen/ColQwen系列解读.md) | [中英对照](ColQwen/zh.md) |
+
+ColQwen 对应官方模型卡报告与对照，未假定它有独立源论文。ColBERT、MRL 和 Jina v1 已完成精炼版与解读；仓库没有其原文副本，尚未确认可再发布全文译文的许可，因此不把摘要替代品命名为全文对照。
+
 ## 总览与规划
 
 | 文档 | 说明 |
@@ -107,6 +147,7 @@ Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + Mo
 
 | 文档 | 论文 / 来源 |
 |------|-------------|
+| [DPR详解.md](DPR/DPR详解.md) | [EMNLP 2020](https://aclanthology.org/2020.emnlp-main.550/)；双编码器、同批负例与 BM25 难负例，连接开放域问答和 RAG |
 | [E5详解.md](E5/E5详解.md) | [arXiv:2212.03533](https://arxiv.org/abs/2212.03533) |
 | [GTE系列详解.md](GTE/GTE系列详解.md) | GTE [2308.03281](https://arxiv.org/abs/2308.03281) → mGTE / gte-v1.5 [2407.19669](https://arxiv.org/abs/2407.19669) → [gte-Qwen2](https://huggingface.co/Alibaba-NLP/gte-Qwen2-7B-instruct)；文末有三代演变总结 |
 | [Nomic-Embed详解.md](Nomic-Embed/Nomic-Embed详解.md) | [arXiv:2402.01613](https://arxiv.org/abs/2402.01613) |

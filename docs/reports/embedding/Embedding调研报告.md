@@ -1268,7 +1268,7 @@ Client → Gateway → [Embed query] → Vector DB (ANN ± BM25)
 8. Gao et al. (2021). SimCSE: Simple Contrastive Learning of Sentence Embeddings. *EMNLP*.
 9. Kusupati et al. (2022). Matryoshka Representation Learning. *NeurIPS*.
 10. Xiao / Chen et al. (2024). M3-Embedding (BGE-M3). *arXiv:2402.03216*.（本仓库专题解读：《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》）
-11. Lee et al. (2024). NV-Embed: Improved Techniques for Training LLMs as Generalist Embedding Models. *arXiv:2405.17400*.
+11. Lee et al. (2024). NV-Embed: Improved Techniques for Training LLMs as Generalist Embedding Models. *arXiv:2405.17428*.
 12. Zhang et al. (2024). NV-Retriever: Hard-negative Mining. *arXiv:2407.15831*.
 13. Conan-Embedding (2024). Dynamic Hard Negative Mining. *arXiv:2408.15710*.
 
@@ -1378,3 +1378,17 @@ Client → Gateway → [Embed query] → Vector DB (ANN ± BM25)
 ---
 
 *本报告基于 2024–2026 年公开论文、MTEB Leaderboard、技术博客与开源项目整理，仅供研究参考。*
+
+
+## 按问题补齐阅读路线
+
+模型时间线之外，还需要覆盖表示形式、数据、训练效率与评测边界。统一来源已并入 [资料清单](资料清单_论文与博客.md)，具体阅读次序见 [调研规划](调研规划.md)。
+
+- 表示基础：Sentence-BERT 理解句向量的任务监督，DPR 理解问答检索；SPLADE/v2 补齐可用倒排索引的稀疏词项扩展；ColBERT/v2、PLAID 连接细粒度交互和高效检索。
+- 训练与压缩：GradCache 区分有效对比批量与梯度累积，MRL 理解可截断表示；TAS-B、SGPT、RepLLaMA 补充采样、decoder 表示及训练目标。
+- 查询与上下文：HyDE 研究推理时生成假想文档，FollowIR 检验改变相关性指令是否改变排序，LongEmbed 区分窗口扩展与长文档信息保留；CDE/ConTEB 补充语料上下文表示。
+- 评测：BEIR、MTEB/MMTEB 建立跨域与跨任务视角；BRIGHT、ReasonIR 补足推理检索；ViDoRe v2 与 MMEB 补齐视觉文档和多模态任务，比较时固定候选规模、任务集合和版本。
+- 高效多向量：XTR、WARP、MUVERA 讨论如何减少 token 匹配或候选评分成本；视觉侧结合 DINOv2/v3 的局部特征、ColPali/ColQwen 的页面检索，以及 GME、VLM2Vec、MegaPairs 的任务和数据构造。
+- 实用补充：DataComp 与 MobileCLIP 系列关注数据和轻量视觉表示，Sentence Transformers 官方训练/损失/量化文档与 Model2Vec 补充实现；EmbeddingGemma、Gemini、pplx、Voyage 等新报告作为后续跟踪项，不按厂商榜单直接认定优于所有旧方法。
+
+本轮对应论文的精炼版、解读和对照入口集中在 [报告索引](README.md#论文精炼版与补充解读)。后续阅读以补齐问题为目标，不要求按所有产品版本逐一展开。
