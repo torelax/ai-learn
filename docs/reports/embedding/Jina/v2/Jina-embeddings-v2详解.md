@@ -1,32 +1,18 @@
-# Jina Embeddings v2 技术详解
+# Jina-v2：论文精炼研读
 
-> 基于论文 [Jina Embeddings 2: 8192-Token General-Purpose Text Embeddings for Long Documents](https://arxiv.org/abs/2310.19923)（Günther et al., Jina AI；arXiv:2310.19923）。
-> v1 谱系：[Jina Embeddings](https://arxiv.org/abs/2307.11224)（arXiv:2307.11224）——T5 encoder + 两阶段对比微调，奠定数据清洗与双向 InfoNCE 配方。
-> 本文把 **双向 ALiBi BERT、从零 MLM、两阶段嵌入微调、InfoNCE / 难负例损失、MTEB / LoCo / NarrativeQA 长文评测** 写全。
+> 将双向 ALiBi 加入 BERT，在短序列上预训练并进行文本对、难负例训练，让单向量编码支持最长 8192 token。
+>
+> [原论文](https://arxiv.org/abs/2310.19923v4)
 
----
+## 论文简介
 
-## 1. 一句话定位
+多数 BERT 句向量只接受 512 token，直接截断会漏掉文档后部证据，切块则改变检索单元并增加索引记录。Jina embeddings v2 从头训练采用双向 ALiBi 与 GLU 的 JinaBERT，再进行文本对和难负例两阶段嵌入训练，以检验短序列训练能否支持更长输入。
 
-**Jina Embeddings v2** 是开源侧较早把 **8192-token 长上下文** 做成通用文本嵌入的系列：改 BERT 为 **双向 ALiBi**，在 C4 上从零预训练，再经 **文本对 → 难负例** 两阶段对比微调，MTEB 上接近当时闭源 `text-embedding-ada-002`。
+base 模型在 MTEB 平均得分约 60.37，接近当时 ada-002，并在 NarrativeQA、LoCo 等长文实验中显示更多上下文的收益。论文也观察到 WikiCities 等任务可能因加入噪声而退步：8K 是输入能力，不能等同于每类长文信息都能压进一个可靠向量。
 
+## 问题背景与 v1 谱系
 
-| 项 | 内容 |
-| --- | --- |
-| 规模 | Small **33M** / Base **137M** / Large **455M**（Jina BERT） |
-| 上下文 | **8192**（预训练与微调主程仍以 ≤512 为主，推理外推） |
-| 位置编码 | **双向 ALiBi**（无绝对位置嵌入） |
-| 池化 | **Mean pooling** |
-| 损失 | 双向 InfoNCE → 含 15 难负例的 $\mathcal{L}_{\mathrm{NCE}+}$ |
-| 宣称 | MTEB 上 base≈**60.37**；与 ada-002（≈60.99）同档；LoCo / NarrativeQA 长文有增益 |
-
-相对 v1（T5 encoder、短上下文）：v2 的核心卖点是 **「训短测长」**——用 ALiBi 把开源 BERT 系嵌入从 512 推到 8K，避免「切块 → 向量爆炸」的工程税。
-
----
-
-## 2. 问题背景与 v1 谱系
-
-### 2.1 为何要做长文档嵌入
+### 为何要做长文档嵌入
 
 实践中 BERT 系开源嵌入大多卡在 **512 tokens**。常见 workaround 是切段落分别编码：
 
@@ -36,7 +22,7 @@
 
 Press et al.（ALiBi）证明：去掉绝对位置嵌入、在 attention logits 上加 **线性距离偏置**，语言模型可「训短测长」。当时 ALiBi 多用于 **因果 LM**；v2 把 **对称编码器版 ALiBi** 嵌进 BERT，专门服务双向编码与句向量。
 
-### 2.2 与 v1 的继承关系
+### 与 v1 的继承关系
 
 v1（arXiv:2307.11224）已固定 Jina 嵌入训练范式的骨架：
 
@@ -47,7 +33,7 @@ v1（arXiv:2307.11224）已固定 Jina 嵌入训练范式的骨架：
 
 v2 **换底座、加长上下文**，嵌入阶段损失与数据哲学与 v1 / E5 / GTE 同属 **多阶段对比学习** 一族，但 backbone 从 T5 encoder 换成 **自研 Jina BERT + ALiBi**。
 
-### 2.3 三阶段总览
+### 三阶段总览
 
 ```text
 Stage I    从零预训练 Modified BERT（MLM，C4，序列≤512）
@@ -57,12 +43,9 @@ Stage III  难负例微调（每样本 1 正 + 15 负，$\mathcal{L}_{NCE+}$）
 
 Stage II/III 都是嵌入任务；论文强调 **III 对检索与分类** 尤为关键。
 
----
+## 模型架构：Jina BERT + 双向 ALiBi
 
-## 3. 模型架构：Jina BERT + 双向 ALiBi
-
-### 3.1 规格
-
+### 规格
 
 | 模型 | Layers | Hidden | Params | Head dim |
 | --- | --- | --- | --- | --- |
@@ -72,37 +55,31 @@ Stage II/III 都是嵌入任务；论文强调 **III 对检索与分类** 尤为
 
 注意力头数按 **每头 64 维** 选取。嵌入模型在预训练 BERT 上加 **mean pooling**（无额外可训池化参数），输出单向量。
 
-### 3.2 双向 ALiBi
+### 双向 ALiBi
+
+![原论文图 1：编码器使用双向对称距离偏置，不同头的斜率赋予不同距离偏好。](figs/S4-F1-02.png)
+
+原论文图 1：编码器使用双向对称距离偏置，不同头的斜率赋予不同距离偏好。
+
 
 标准绝对位置嵌入在外推到训练长度之外时失效。ALiBi **不训练位置嵌入**，而是在 softmax 前对 attention score 加与距离成正比的负偏置。因果版只偏置「看左侧」；编码器需要 **双向互看**，故采用 **镜像对称** 的 encoder ALiBi：每个 head 有独立斜率 $m_i$。
 
-对 $n$ 个注意力头，斜率按论文 Eq.(1)：
+以第 $h$ 个头为例，注意力 logits 可以写成：
 
 $$
-a = 2^{\lfloor \log_2 n \rfloor},\qquad
-b = 2^{-8 / 2^{\lceil \log_2 n \rceil}},
+A^{(h)}_{ij}=\frac{q_i^\top k_j}{\sqrt{d_h}}-m_h|i-j|,\qquad m_h>0.
 $$
 
-$$
-m_i =
-\begin{cases}
-b^{2i} & i < a \\
-b^{1 + 2(i-a)} & i \ge a
-\end{cases}.
-\tag{1}
-$$
+$m_h$ 为各头按预设规则确定的固定斜率。距离偏置左右对称，近位置受罚更小；多个头覆盖不同距离偏好。它使训练长度之外的位置仍有定义，但外推质量仍需实验检验。
 
-直觉：近邻 token 的 attention 偏置更小（更易互相注意），远距离被线性压制；不同 head 用不同 $m_i$ 覆盖多尺度距离偏好。**因无位置嵌入**，预训练可固定在 512，推理直接外推到 8192——这是 v2「8K 嵌入」的几何基础。
-
-### 3.3 GLU FFN 与 LayerNorm
+### GLU FFN 与 LayerNorm
 
 - FFN 侧采用 **Gated Linear Units**（Dauphin et al.；Shazeer GLU 变体）：
   - Small / Base：**GEGLU**（GELU 门控）；
   - Large：**ReGLU**（ReLU）——作者观察到 Large + GEGLU 虽早期 MLM 好看，但训练不稳。
 - LayerNorm：采用 Transformer 经典 **post-LN**；试过 pre-LN（Megatron / Nguyen–Salazar）未见稳定或效果收益，故未采用。
 
-### 3.4 与 RoBERTa / BERT 的差异小结
-
+### 与 RoBERTa / BERT 的差异小结
 
 | 设计点 | 经典 BERT/RoBERTa | Jina BERT v2 |
 | --- | --- | --- |
@@ -111,15 +88,13 @@ $$
 | NSP | BERT 有 / RoBERTa 无 | **无 NSP**（跟 RoBERTa） |
 | 序列打包 | 常多文档打包 | **单文档前 512，不跨文档打包** |
 
----
+## Stage I：预训练
 
-## 4. Stage I：预训练
-
-### 4.1 数据
+### 数据
 
 英文 **C4**（Colossal Cleaned Common Crawl）：约 **3.65 亿** 文档、约 **1700 亿** tokens；仅保留英文，过滤不当内容。留 **1%** 作 validation（MLM loss / accuracy）。→ 官方开源 v2-en 为 **单语英文**（后续有双语变体系列，不在本篇论文主文）。
 
-### 4.2 MLM 目标
+### MLM 目标
 
 掩码 **30%** tokens，**whole-word masking**：
 
@@ -127,43 +102,40 @@ $$
 - 10% → 随机词；
 - 10% → 保持原词。
 
-解码器 $f:\mathbb{R}^d\to\mathbb{R}^{|V|}$ 对掩码位置输出词表分布。设 $I(k)$ 为第 $k$ 个掩码位置的真词下标，论文 Eq.(2)（交叉熵形式，文中写作对预测概率取对数再求和）：
+MLM 输出层对被掩码位置预测词表概率。采用最小化损失的记号，目标为
 
 $$
-\mathcal{L}_{\mathrm{MLM}}(t) := \sum_{k=1}^{n} \ln f(e_i)_{I(k)},
-\tag{2}
+\mathcal L_{MLM}=-\sum_{k\in\mathcal M}\log p(w_k\mid x_{masked}).
 $$
 
-实践中等价于标准负对数似然 $-\sum\log p(w_k\mid\text{context})$。**不做 NSP**。
+原文式 (2) 将对数概率相加但称作 loss；这里明确负号与优化方向。不做 next-sentence prediction。
 
-### 4.3 序列与批策略
+### 序列与批策略
 
 - 全局 batch **4096**；序列上限 **512**；
 - 每文档只取 **前 512 tokens**，不采样多段、不跨文档拼装；
 - 因序列长度变化，每 batch 掩码 token 数不固定。
 
-无位置嵌入 → 「先短训、后长测」合法。作者在 C4 val 上扫序列长度做 MLM accuracy：Jina BERT **外推到 8192 时 MLM 不崩**；标准 BERT/RoBERTa 因绝对位置表无法算 >512。
+ALiBi 让训练长度之外的位置仍可参与计算。作者在 C4 val 上扫序列长度做 MLM accuracy：Jina BERT **外推到 8192 时 MLM 不崩**；标准 BERT/RoBERTa 因绝对位置表无法算 >512。
 
-### 4.4 优化
+### 优化
 
 - AdamW：$\beta_1=0.9,\ \beta_2=0.98,\ \epsilon=10^{-6}$，weight decay $0.01$，dropout / attn dropout $0.1$；
 - 线性 warmup 10k steps 到峰值 $\eta$，再线性降到 0（至 100k steps）；
 - $\eta$：Small $10^{-3}$ / Base $6\times10^{-4}$ / Large $4\times10^{-4}$；
 - **FP16** 动态混合精度 + DeepSpeed；试 BF16 在 MLM 与下游 GLUE 上不佳。
 
-### 4.5 Backbone GLUE 速览
+### Backbone GLUE 速览
 
 微调后提交 GLUE test：Jina BERT Base 平均约 **80.7**，Large **81.6**——低于 RoBERTa Large 峰值，但对「嵌入底座」够用；重点证据是 **长序列 MLM 外推曲线平坦**。
 
----
+## Stage II–III：嵌入微调
 
-## 5. Stage II–III：嵌入微调
-
-### 5.1 Mean pooling
+### Mean pooling
 
 对最后一层 token 隐状态做均值，得到固定维句向量。无额外池化参数，与 Sentence-BERT 系一致。
 
-### 5.2 Stage II：文本对 + 双向 InfoNCE
+### Stage II：文本对 + 双向 InfoNCE
 
 **数据**：约 **40** 个异构源（延续 v1 配比与采样）；**标题–摘要** 对显著利于聚类。用一致性过滤（Dai et al.；Wang et al. / E5）抬高质量。每个新 batch **先随机选一个数据源**，再抽满 batch；按质量/体量设不同采样率。
 
@@ -193,9 +165,9 @@ $$
 
 其中 $\mathcal{L}_{\overline{\mathrm{NCE}}}$ 把 $(q,p)$ 对调，用 $p$ 去对齐所有 $q_i$。经验上 $\tau=0.05$。
 
-这与 v1 的 $\mathcal{L}^{\mathrm{pairs}}$ 同构：in-batch 负例越多，对比信号越强 → **大 batch 几乎是硬需求**。
+这与 v1 的 $\mathcal{L}^{\mathrm{pairs}}$ 同构：in-batch 负例越多，对比信号越强 → **大 batch 扩大批内负例池，但效果也受负例质量影响**。
 
-### 5.3 Stage III：难负例 + $\mathcal{L}_{\mathrm{NCE}+}$
+### Stage III：难负例 + $\mathcal{L}_{\mathrm{NCE}+}$
 
 **数据**：MS MARCO、Natural Questions 等检索集 + NLI 等非检索集。每个样本形如 $(q,p,n_1,\ldots,n_{15})$：**1 正 + 15 负**。
 
@@ -228,7 +200,7 @@ $$
 
 其中 $r=(q,p,n_1,\ldots,n_{15})$。相对 Stage II：分母显式加入 **同 batch 其它正例 + 显式 hard negatives**，逼模型区分「相关」与「仅语义相近」。
 
-### 5.4 显存工程
+### 显存工程
 
 InfoNCE 的有效负例数随 batch 线性增。作者用：
 
@@ -238,14 +210,11 @@ InfoNCE 的有效负例数随 batch 线性增。作者用：
 
 以换更大 global batch，避免「小 batch 对比面太窄」。
 
----
+## 评测
 
-## 6. 评测
+### MTEB（短文为主）
 
-### 6.1 MTEB（短文为主）
-
-MTEB：8 类任务、58 数据集。论文 Table 3（节选）：
-
+MTEB：7 类任务、58 个数据集。论文 Table 3（节选）：
 
 | Model | Params | CF | CL | PC | RR | RT | STS | SM | Avg |
 | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
@@ -260,7 +229,12 @@ MTEB：8 类任务、58 数据集。论文 Table 3（节选）：
 - **small** 在检索上仍有竞争力，体现「Stage III 难负例」对检索的杠杆；
 - 相对未做二阶段精调的 `all-MiniLM` / `all-mpnet`，检索优势符合预期。
 
-### 6.2 长文任务：为何要自造集
+### 长文任务：为何要自造集
+
+![原论文图 3 的长文评测面板：放宽截断长度的收益取决于信息位置及任务目标。](figs/S6-F3-01.png)
+
+原论文图 3 的长文评测面板：放宽截断长度的收益取决于信息位置及任务目标。
+
 
 MTEB 文本普遍偏短，测不出 8K。作者补充：
 
@@ -271,23 +245,26 @@ MTEB 文本普遍偏短，测不出 8K。作者补充：
 
 扫 `max_length` 截断曲线（Figure 3）：
 
-- **NarrativeQA**：加长上下文收益极大——答案常不在文首，512 截断必败；
+- **NarrativeQA**：加长上下文收益极大——答案常不在文首，只取 512 token 容易遗漏证据；
 - **BigPatent** 聚类：长上下文通常更好；
 - **WikiCities**：更长有时略伤——国家信息多在首段，后文噪声干扰 mean pooling。
 
-结论：**「更长」不是单调增益**，取决于任务信息落点；但 NarrativeQA 类「全文理解」任务是 8K 的硬价值证明。
+结论：**「更长」不是单调增益**，取决于任务信息落点；但 NarrativeQA 类「全文理解」任务提供了更长上下文有用的实验证据。
 
-### 6.3 LoCo（论文 Table 11）
+### LoCo（论文 Table 11）
 
 `jina-base-v2`（137M, 8192）avg nDCG@10 **85.4**；`jina-small-v2` **83.4**。对比：M2-BERT-32768 微调后可更高，但 jina-base-v2 在 **未专门为 LoCo 微调** 的设定下已接近一众 512 模型的微调版，并远好于当时部分闭源长上下文 API 在该榜的表现（表内 ada / voyage 等分数需注意评测设定差异）。
 
-### 6.4 Backbone 长序列 MLM
+### Backbone 长序列 MLM
+
+![原论文图 2：在 C4 验证集上随输入长度变化的 MLM 准确率，检验位置外推是否破坏语言建模。](figs/S6-F2-01.png)
+
+原论文图 2：在 C4 验证集上随输入长度变化的 MLM 准确率，检验位置外推是否破坏语言建模。
+
 
 Figure 2：训练长度 512，推理到 8192，Jina BERT MLM accuracy 基本不掉——支撑「嵌入微调虽多在 ≤512 文本上，推理仍可喂长文」的工程叙事。
 
----
-
-## 7. 局限与使用注意
+## 局限与使用注意
 
 1. **预训练与微调长度仍短**：8K 能力主要靠 ALiBi 外推，而非大规模 8K 对比训练；极端长依赖任务仍可能弱于「真·长上下文对比训」模型。
 2. **英文主模型**：主文 C4 英；多语/双语是后续产品线，勿把本篇论文当成多语 SOTA 声明。
@@ -296,40 +273,6 @@ Figure 2：训练长度 512，推理到 8192，Jina BERT MLM accuracy 基本不�
 5. **与 E5-base**：MTEB 平均略逊 e5-base-v2；卖点是 **上下文长度与开源可复现**，不是全面碾压同尺寸短上下文模型。
 6. **评测缺口**：标准 MTEB 不能充分反映 8K；应用方应用 NarrativeQA / LoCo / 自有长 PDF 做回归。
 
----
-
-## 8. 谱系位置与后续
-
-```text
-v1 (2307.11224)  T5 encoder · 数据清洗 · 双向 InfoNCE · 难负例 / 否定
-        │
-        ▼
-v2 (2310.19923)  Jina BERT + 双向 ALiBi · 8192 · 同对比配方升级
-        │
-        ├─ 双语变体（zh/es/de 等，另文 Mohr et al.）
-        ▼
-v3 (2409.10173)  XLM-R + RoPE · Task LoRA · MRL · 多语 570M
-        ▼
-v4 (2506.18902)  Qwen2.5-VL-3B · 单/多向量 · 视觉文档 · 32K
-```
-
-v2 在谱系中的历史角色：**把「开源通用嵌入」的上下文上限从 512 拉到 8K**，并证明 ALiBi 编码器路线可行；对比损失与两阶段数据流被 v3/v4 继续继承并扩展为 Task LoRA / 多模态。
-
----
-
-## 9. 公式速查
-
-| 符号 | 含义 |
-| --- | --- |
-| $m_i$ | ALiBi 第 $i$ 头斜率（Eq.1） |
-| $\mathcal{L}_{\mathrm{MLM}}$ | 掩码语言模型损失（Eq.2） |
-| $\mathcal{L}^{\mathrm{pairs}}$ | 双向 InfoNCE（Eq.3–4） |
-| $\mathcal{L}_{\mathrm{NCE}+}$ | 含 15 hard negatives 的双向 InfoNCE（Eq.5） |
-| $s(\cdot,\cdot)$ | 余弦相似度 |
-| $\tau$ | 温度，常用 $0.05$ |
-
----
-
-## 10. 小结
+## 小结
 
 Jina Embeddings v2 = **双向 ALiBi BERT（训短测长）** + **v1 系两阶段对比微调**。它不是参数量最大的嵌入模型，但在 2023 开源生态里清晰回答了：「长文档能否进 **一个** 向量、且下游不崩？」——答案是可以，且 NarrativeQA / LoCo 显示 **上下文预算本身就是特征**。后续 v3 用 RoPE + Task LoRA 把多语与任务特化做深；v2 则是长上下文开源嵌入的关键里程碑。
