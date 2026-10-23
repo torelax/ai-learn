@@ -88,6 +88,12 @@ python3 _shrink_pdf.py DINO/DINOv3 --quality printer
 - 提示微调跨论文综述继续保留既有 Fine-Tune 子页。技术总章与各篇原文研读相互引用；已有页面可按用户授权移入 Paper，保留 URL，避免重复创建。
 - 本次及后续明确针对该总章的更新可局部替换 Fine-Tune 的 LoRA 技术内容；保留 Ref、其他技术章节和无关历史内容。已知落点无需重复询问。
 
+### DeepSeek 与 RLHF（已确认落点，2026-10-22）
+
+- `docs/reports/LLM/DeepSeek/`：DeepSeek 官方模型报告及相关基础研究；论文原页放全局 Paper，`Type=Paper`、`DOMAIN` 含 `LLM`、`TAG` 含 `DeepSeek`（不存在时新建选项）。LLM（`1082a8d3bde24834a7f69559635458e0`）的 Model Series → DeepSeek tab 按四级语义标题分为 LLM、OCR、多模态、数学/证明、架构与系统等类别，只放对应论文的原生引用。
+- `docs/reports/LLM/RLHF/`：DPO 原论文同样归 Paper；DPO、GRPO 技术精讲放 PostTrain（`350a174cd8c6809ba1adda653dd8807c`）的 RLHF 部分。
+- 新论文主阅读页的补充解读子页入口置顶；已有用户正文保留，首次补充接在后面，后续只原位更新已导入范围。翻译只在仓库保留，不同步到 Notion。
+
 ### 3.3 Notion 删除禁令
 
 - **禁止删除**任何既有 Notion 页面或他人/历史内容

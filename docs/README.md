@@ -9,5 +9,7 @@
 | [`reports/long-context/`](reports/long-context/) | 长上下文与位置编码：YaRN |
 | [`reports/distillation/`](reports/distillation/) | 知识蒸馏调研 |
 | [`reports/Qwen/`](reports/Qwen/) | Qwen 系列技术演进 |
+| [`reports/LLM/DeepSeek/`](reports/LLM/DeepSeek/README.md) | DeepSeek 模型、架构、多模态、数学及训练推理系统论文 |
+| [`reports/LLM/RLHF/`](reports/LLM/RLHF/README.md) | DPO 论文与 DPO／GRPO 技术精讲 |
 
 工程实现与训练数据在同级 **modelforge**（`scripts/embedding/`、`datasets/embedding/`、`tasks/cloud_emb/`）。
