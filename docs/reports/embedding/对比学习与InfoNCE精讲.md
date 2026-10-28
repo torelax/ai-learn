@@ -602,7 +602,7 @@ InfoNCE 与 sigmoid loss 都需要大 batch。分布式实现有几种：
 - 模型深读：[无监督对比检索三部曲：SimCSE / Contriever / Condenser+coCondenser](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md) · [CLIP 详解](CLIP/CLIP详解.md) · [SigLIP 与 SigLIP 2 详解](SigLIP/SigLIP与SigLIP2详解.md) · [E5 详解](E5/E5详解.md) · [BGE-M3 三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md) · [INSTRUCTOR 详解](INSTRUCTOR/INSTRUCTOR详解.md) · [LLM2Vec 详解](LLM2Vec/LLM2Vec详解.md)
 - 负例工业实践：[难负例挖掘工业实践](难负例挖掘工业实践.md) · [ANCE 详解](ANCE/ANCE详解.md) · [RocketQA 详解](RocketQA/RocketQA详解.md) · [NV-Retriever 详解](NV-Retriever/NV-Retriever详解.md) · [Conan-embedding 详解](Conan-embedding/v1/Conan-embedding详解.md)
 - 蒸馏损失：[Embedding 蒸馏技术详解](Embedding蒸馏技术详解.md) · [Jasper 详解](Jasper/Jasper-Token-Compression-600M详解.md)
-- 主文对应章节：见 [Embedding 调研报告](Embedding调研报告.md) §3.2「三种表示范式」、§5.2「核心损失函数」、§11「蒸馏与压缩」
+- 主文对应章节：见 [Embedding 调研报告](Embedding调研报告.md) “三种表示范式”、“核心损失函数”、“Embedding 蒸馏与压缩”
 
 ---
 

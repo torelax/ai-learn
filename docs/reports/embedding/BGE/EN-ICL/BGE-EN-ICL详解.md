@@ -320,7 +320,7 @@ MTEB 的一个已知问题是**训练分布可能覆盖评测**。作者补做 A
 - 对照：[LLM-Embedding 冲榜路线](../../LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md)（NV-Embed / GritLM / SFR 的架构对比）
 - 训练损失：[对比学习与 InfoNCE 精讲](../../对比学习与InfoNCE精讲.md)
 - 后续：Batch 3-4 [BGE-Reranker 详解]、Batch 4 [Qwen3-Embedding 详解]
-- 主文：[Embedding 调研报告](../../Embedding调研报告.md) §5.5「指令」与 §9.3「Decoder LLM 作 Bi-Encoder」
+- 主文：[Embedding 调研报告](../../Embedding调研报告.md) “指令编码与查询文档非对称”与 “机制族 C：Decoder LLM 作 Bi-Encoder”
 
 ---
 

@@ -1,6 +1,6 @@
 # Embedding 蒸馏技术详解
 
-> **读者前提**：已读 [主文 §3–§5](Embedding调研报告.md)（表示/交互、对比学习课表、难负例）。
+> **读者前提**：已读 [主文 “理论基础与表示范式”–“训练方法与数据工程”](Embedding调研报告.md)（表示/交互、对比学习课表、难负例）。
 > **读完收获**：能选蒸馏信号、组损失、排训练阶段，并搭一条「大 Teacher → ≤0.6B Student」可验证实验。
 > **与总论关系**：[`../distillation/知识蒸馏技术深度调研报告.md`](../distillation/知识蒸馏技术深度调研报告.md) §7 为 **Embedding 蒸馏索引**；本文是 **机制与课表专文**，不重复 LLM token-KD（MiniLLM/OPD/R1-Distill 等见总论 §5）。
 
@@ -40,7 +40,7 @@ $$\text{rank}(d \mid q) = \text{sort}_{d \in \mathcal{C}} \; s_\theta(q, d), \qu
 | 典型损失 | KL on vocab、SeqKD、OPD | KL/MSE on scores、cosine on vectors、InfoNCE+软标签 |
 | 学生任务 | 续写、对话 | 检索、STS、聚类（以检索为主本文） |
 | 能否黑盒 API | 可以（只要文本） | 可以（只要分数/embedding API） |
-| 负样本 | 生成多样性 | **检索质量核心**（§5 主文、难负例专题） |
+| 负样本 | 生成多样性 | **检索质量核心**（总览的“训练方法与数据工程”、难负例专题） |
 
 **错误用法**：把 MiniLLM 的 reverse-KL 直接套在 Bi-Encoder 上，却不构造 $(q,d)$ 候选集——优化目标与 ANN 检索无关。
 
@@ -52,7 +52,7 @@ $$\text{rank}(d \mid q) = \text{sort}_{d \in \mathcal{C}} \; s_\theta(q, d), \qu
 | **MRL 截维** | 向量维度 | 同一模型子空间 | 需要 MRL 训练或接受截断损失 |
 | **Embedding KD** | 参数量 + 架构 | Teacher 的排序/几何 | 训练成本高；需对齐模板与负例 |
 
-**≤0.6B 自训场景**（主文 §10.2）：常见路径是 **小 Student + 大 Teacher 蒸馏 + 领域难负例**，而不是把 Qwen3-Emb-8B 量化到端侧。
+**≤0.6B 自训场景**（主文 “图搜图 vs 文搜图（训练与索引）”）：常见路径是 **小 Student + 大 Teacher 蒸馏 + 领域难负例**，而不是把 Qwen3-Emb-8B 量化到端侧。
 
 ### 1.3 学生约束清单（设计实验前先填）
 
@@ -259,7 +259,7 @@ $$s_{\text{inter}} = w_1 s_{dense} + w_2 s_{lex} + w_3 s_{mul}$$
 
 ## 8. 多模态 Embedding 蒸馏
 
-主文 §10：图搜图 / 文搜图 / 视觉文档。蒸馏额外约束：**哪一塔对齐 Teacher**。
+主文 “多模态与专用 Embedding”：图搜图 / 文搜图 / 视觉文档。蒸馏额外约束：**哪一塔对齐 Teacher**。
 
 ### 8.1 CLIP / SigLIP Teacher → 小双塔 Student
 
@@ -273,7 +273,7 @@ $$s_{\text{inter}} = w_1 s_{dense} + w_2 s_{lex} + w_3 s_{mul}$$
 
 **图搜图**：可只蒸视觉塔（DINO Teacher → 小 ViT），但 **文搜图** 必须蒸文本塔或联合对比。
 
-**≤0.6B 配方要点**（与 `0.6B图搜图文搜图自训学习行动路线.md` 一致）：
+**≤0.6B 配方要点**（详见[图搜图与文搜图表示学习](图搜图与文搜图表示学习.md)）：
 
 1. Teacher：OpenCLIP/SigLIP 2 或 GME-7B（MLLM 单向量）。
 2. Student：0.3B–0.6B ViT + Text Encoder 或小型 MLLM。
@@ -351,9 +351,9 @@ Stage 4 (可选): MRL 截断维 / INT8 量化 — 部署压缩（非 KD）
 
 ## 11. 实验协议与常见翻车
 
-### 11.1 最小协议（与主文 §11.4 一致）
+### 11.1 最小协议（与主文 “蒸馏实验最小协议” 一致）
 
-1. **固定验证集**：Recall@K / nDCG；与 Teacher **同 instruct、同归一化**。
+1. **固定验证集**：Recall@K / nDCG；教师和学生表达同一任务，并分别遵循自身的指令模板与归一化约定。
 2. **对照组**：
    - Student 无蒸馏，只 MNRL
    - Student 只蒸 STS（预期：STS↑ Recall 平或↓）
@@ -438,7 +438,7 @@ Stage 4 (可选): MRL 截断维 / INT8 量化 — 部署压缩（非 KD）
 
 | 文档 | 关系 |
 |------|------|
-| [主文 §11](Embedding调研报告.md) | 蒸馏版图导读 |
+| [主文 “Embedding 蒸馏与压缩”](Embedding调研报告.md) | 蒸馏版图导读 |
 | [知识蒸馏总报告 §7](../distillation/知识蒸馏技术深度调研报告.md) | 索引与案例表 |
 | [BGE-M3 专题 §8](BGE/M3/BGE-M3三功能统一详解报告.md) | Self-KD 公式 |
 | [难负例专题](难负例挖掘工业实践.md) | CE→Bi 候选与刷新 |

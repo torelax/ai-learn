@@ -257,7 +257,7 @@ Recall@100 是**召回层核心指标**，bge-multilingual-gemma2 达到 97.2，
 - 配套精排：[BGE-Reranker 详解](BGE-Reranker详解.md)（Batch 3-4 已写）
 - 对照多语 SOTA：[LLM-Embedding 冲榜路线](../LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md) 里的 Arctic-Embed 2.0（同期多语路线的对手）
 - 训练损失：[对比学习与 InfoNCE 精讲](../对比学习与InfoNCE精讲.md)
-- 主文：[Embedding 调研报告](../Embedding调研报告.md) §9.2「弱监督课表 + 指令」与 §12「向量数据库与部署」（多语落地考虑）
+- 主文：[Embedding 调研报告](../Embedding调研报告.md) “机制族 B：弱监督课表 + 指令（E5 / BGE 主流）”与 “向量数据库与部署”（多语落地考虑）
 
 ---
 

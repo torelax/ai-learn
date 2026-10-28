@@ -7,7 +7,7 @@
 > modality: 推荐（user 特征 → video ID）
 > languages: 与语言无关（ID + 行为序列）
 
-> 主文 §7.3 已点过「推荐 Dual-Tower 与 Bi-Encoder 同构」。本文把 **候选生成 vs 精排、sampled softmax、曝光分布、example age** 写全，并对照文搜图双塔。领域课表见《[领域专用 Embedding 适配实践](../领域专用Embedding适配实践.md)》。
+> 主文 “FAQ、去重、推荐（短节）” 已点过「推荐 Dual-Tower 与 Bi-Encoder 同构」。本文把 **候选生成 vs 精排、sampled softmax、曝光分布、example age** 写全，并对照文搜图双塔。领域课表见《[领域专用 Embedding 适配实践](../领域专用Embedding适配实践.md)》。
 
 ---
 

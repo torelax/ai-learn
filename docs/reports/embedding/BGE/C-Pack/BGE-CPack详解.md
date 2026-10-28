@@ -308,7 +308,7 @@ C-Pack 是所有后续 BGE 变体的地基：
 - 训练损失：[对比学习与 InfoNCE 精讲](../../对比学习与InfoNCE精讲.md)
 - 后续变体：[BGE-M3 三功能统一详解报告](../M3/BGE-M3三功能统一详解报告.md) · Batch 3-2 [BGE-EN-ICL 详解]、Batch 3-3 [bge-multilingual-gemma2 详解]、Batch 3-4 [BGE-Reranker 详解]
 - 数据/负例：[难负例挖掘工业实践](../../难负例挖掘工业实践.md)
-- 主文对应：[Embedding 调研报告](../../Embedding调研报告.md) §5「训练与数据工程」与 §9.2「机制族 B：弱监督课表 + 指令」
+- 主文对应：[Embedding 调研报告](../../Embedding调研报告.md) “训练方法与数据工程”与 “机制族 B：弱监督课表 + 指令（E5 / BGE 主流）”
 
 ---
 

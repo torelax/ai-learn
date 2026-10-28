@@ -162,7 +162,7 @@ Jina 产品线 ────────┼── CLIP Dual-Tower ─── jina-
 | [jina-reranker-v3详解.md](rerank-v3/jina-reranker-v3详解.md) | [2509.25085](https://arxiv.org/abs/2509.25085) | 深读 |
 | [jina-reranker-v3.5详解.md](rerank-v3.5/jina-reranker-v3.5详解.md) | [2607.18152](https://arxiv.org/abs/2607.18152) | 深读 |
 
-总调研时间线亦见《[Embedding调研报告](../Embedding调研报告.md)》§2.1.7。
+总调研时间线亦见《[Embedding调研报告](../Embedding调研报告.md)》“Jina Embeddings 迭代链（v2 → v5，含 CLIP / Omni）”。
 
 ---
 

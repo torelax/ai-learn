@@ -276,7 +276,7 @@ v2-m3 (2024-02)：XLM-R Cross-Encoder，多语默认，BEIR 55.36
 
 **BGE-Reranker 定位**：**在 Bi-Encoder 召回 + Cross-Encoder 精排** 的两段式 pipeline 里担任第二段。Late Interaction（ColBERTv2）夹在中间，但工业上仍以「Bi + CE」两段式为主流——CE 的精度上限更高、且 K=100 的量级完全能承受。
 
-见主文 §8「检索 Pipeline 工程实践」的三段式讨论。
+见主文 “检索 Pipeline 工程实践”的三段式讨论。
 
 ---
 
@@ -287,7 +287,7 @@ v2-m3 (2024-02)：XLM-R Cross-Encoder，多语默认，BEIR 55.36
 - Late Interaction 对照：[ColBERT 详解](../ColBERT/ColBERT详解.md) · [ColBERTv2 详解](../ColBERTv2/ColBERTv2详解.md) · [ColPali 详解](../ColPali/ColPali详解.md) · [ColQwen 系列详解](../ColQwen/ColQwen系列详解.md)
 - 蒸馏配套：[Embedding 蒸馏技术详解](../Embedding蒸馏技术详解.md)（v2.5 的自蒸馏 + 教师蒸馏是核心信号）
 - 训练损失：[对比学习与 InfoNCE 精讲](../对比学习与InfoNCE精讲.md) 的「蒸馏损失家族」章节
-- 主文：[Embedding 调研报告](../Embedding调研报告.md) §3.3「三种交互架构」（Bi/Cross/Late 对比）与 §8.3「Reranker 放哪、选谁」
+- 主文：[Embedding 调研报告](../Embedding调研报告.md) “三种交互架构”（Bi/Cross/Late 对比）与 “Reranker 放哪、选谁”
 
 ---
 

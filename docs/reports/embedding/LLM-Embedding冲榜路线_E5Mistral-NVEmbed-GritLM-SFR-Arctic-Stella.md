@@ -578,7 +578,7 @@ Stella / Jasper 的详细机制见本仓库 [Jasper-Token-Compression-600M 详�
 - 数据 & 负例：[NV-Retriever 详解](NV-Retriever/NV-Retriever详解.md) · [难负例挖掘工业实践](难负例挖掘工业实践.md) · [InternLM2 数据处理与过滤详解](InternLM2/InternLM2数据处理与过滤详解.md)
 - 蒸馏与小模型：[Jasper-Token-Compression-600M 详解](Jasper/Jasper-Token-Compression-600M详解.md)（Stella 系）· [Embedding 蒸馏技术详解](Embedding蒸馏技术详解.md)
 - 后续（Batch 3 / Batch 4 会补）：BGE C-Pack、BGE-EN-ICL、BGE-multilingual-gemma2、Qwen3-Embedding、Seed1.5-Embedding
-- 主文对应：[Embedding 调研报告](Embedding调研报告.md) §9.3「Decoder LLM 作 Bi-Encoder」与 §11「Embedding 蒸馏与压缩」
+- 主文对应：[Embedding 调研报告](Embedding调研报告.md) “机制族 C：Decoder LLM 作 Bi-Encoder”与 “Embedding 蒸馏与压缩”
 
 ---
 

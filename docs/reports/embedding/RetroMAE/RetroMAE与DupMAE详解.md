@@ -314,7 +314,7 @@ Stage 3  监督微调（含 hard neg + 自蒸馏）
 
 - 前置：[Condenser + coCondenser](../无监督对比检索三部曲_SimCSE-Contriever-Condenser.md)（RetroMAE 的直系前身）
 - 后继：[BGE-M3 三功能统一详解报告](../BGE/M3/BGE-M3三功能统一详解报告.md)（Sparse 通道继承自 DupMAE 的 OT 思想）
-- 主文：[Embedding 调研报告 §5 训练与数据工程](../Embedding调研报告.md)（预训练→弱监督→监督的课表）
+- 主文：[Embedding 调研报告 “训练方法与数据工程” 训练与数据工程](../Embedding调研报告.md)（预训练→弱监督→监督的课表）
 - 蒸馏侧：[Embedding 蒸馏技术详解](../Embedding蒸馏技术详解.md)（RetroMAE 微调阶段的 CE→BE 蒸馏范式）
 
 ---

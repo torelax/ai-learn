@@ -675,7 +675,7 @@ out = model.encode(
 
 ### 本仓库关联文档
 
-- 总览与选型：[Embedding 调研报告](../../Embedding调研报告.md)（§2.1.6 BGE 全家桶、§3.2 三范式、§5 训练、§8 Hybrid）
+- 总览与选型：[Embedding 调研报告](../../Embedding调研报告.md)（“BGE 全家桶（勿只记 M3）” BGE 全家桶、“三种表示范式” 三范式、“训练方法与数据工程” 训练、“检索 Pipeline 工程实践” Hybrid）
 - 蒸馏视角：M3 的 Self-KD 与《[知识蒸馏技术深度调研报告](../../../distillation/知识蒸馏技术深度调研报告.md)》中 Embedding 自蒸馏条目互参
 
 ---

@@ -199,4 +199,4 @@ PQ / OPQ / RaBitQ 是 **索引算法**，一般不回传到 encoder；QAT/GOR �
 | Embedding 向量 QAT + 文搜图曲线 | [Qwen3-VL-Embedding 2601.04720](https://arxiv.org/abs/2601.04720) |
 | GOR 原式 | [1708.06320](https://arxiv.org/abs/1708.06320)；应用见 [Jina v5-text 详解](../Jina/v5-text/Jina-embeddings-v5-text详解.md) §7.3 |
 | 权重侧 QAT 工程 | [Unsloth QAT](https://unsloth.ai/docs/blog/quantization-aware-training-qat) |
-| 截维（常与 QAT 一起上） | MRL [2205.13192](https://arxiv.org/abs/2205.13192)；主文 §5.2.4 |
+| 截维（常与 QAT 一起上） | MRL [2205.13147](https://arxiv.org/abs/2205.13147)；主文 “MRL” |

@@ -286,7 +286,7 @@ super-NI 里 300 个任务的指令风格差异极大，训练时看过这么多
 
 INSTRUCTOR 的思路后来几乎被所有主流嵌入模型直接吸收：
 
-- **E5-mistral-7b-instruct** (2024)：查询前缀 `Instruct: <task> \n Query: <q>`，非对称，doc 侧无指令。见主文 §9.2 与 [E5 详解](../E5/E5详解.md)。
+- **E5-mistral-7b-instruct** (2024)：查询前缀 `Instruct: <task> \n Query: <q>`，非对称，doc 侧无指令。见主文 “机制族 B：弱监督课表 + 指令（E5 / BGE 主流）” 与 [E5 详解](../E5/E5详解.md)。
 - **BGE-en-icl** (2024)：在 INSTRUCTOR 指令基础上进一步加 **ICL 示例**，让 embedding 也能做上下文学习。
 - **gte-Qwen2 / QZhou-Embedding / Conan-embedding-v2**：查询侧一律带指令；训练时对称/非对称任务被 instruct 区分。
 - **NV-Embed-v2 / Snowflake Arctic-Embed v2 / Stella / Jasper**：两阶段训练里 stage 2 一定包含带指令的多任务微调。
@@ -298,7 +298,7 @@ INSTRUCTOR 的思路后来几乎被所有主流嵌入模型直接吸收：
 
 ## 与本仓库既有报告的挂接
 
-- 主文 §5.5 与 §7.1「指令 / 对称非对称」相关章节：见 [Embedding 调研报告](../Embedding调研报告.md)。
+- 主文 “指令编码与查询文档非对称” 与 “任务 × 表示 × 交互（比模型名单有用）”相关章节：见 [Embedding 调研报告](../Embedding调研报告.md)。
 - 与 E5 的指令化血脉：见 [E5 详解](../E5/E5详解.md)。
 - LLM 骨干指令化实践：见 [LLM2Vec 详解](../LLM2Vec/LLM2Vec详解.md)、[Conan-embedding-v2 详解](../Conan-embedding/v2/Conan-embedding-v2详解.md)、[QZhou-Embedding 详解](../QZhou-Embedding/QZhou-Embedding详解.md)。
 - 前置：GTR + Sentence-T5 —— 见 [GTE系列详解](../GTE/GTE系列详解.md) 中的谱系讨论。
