@@ -11,9 +11,10 @@ Notion：Embedding&Rerank → Paper 库，一篇论文一个完整阅读页 + Mo
 | 要学习的内容 | 入口与分工 |
 | --- | --- |
 | 表示、训练、评测与部署的完整框架 | [Embedding 总览](Embedding调研报告.md)，同时承接稀疏检索、Late Interaction、指令非对称编码、污染防控和向量压缩的跨论文解释 |
+| 技术演进、系列节点与代表性成绩 | [发展趋势](Embedding调研报告.md#发展趋势与代表性结果)、[逐项时间线](Embedding调研报告.md#逐项时间线方法系列与发布节点)；同时保留阶段概览和模型规格卡，区分论文首发、模型发布与正式发表 |
 | 图文架构与交互方式 | [图文技术综述](图文Embedding模型技术综述.md)：双塔、融合、MLLM 与视觉文档路线；模型规格需结合各篇报告核对 |
 | 图搜图／文搜图的数据与训练 | [图搜图与文搜图表示学习](图搜图与文搜图表示学习.md)：实例／语义标签、图文损失、多教师蒸馏、≤0.6B 约束和部署 |
-| 对比损失、温度与有效 batch | [InfoNCE 精讲](对比学习与InfoNCE精讲.md)，结合 [GradCache](GradCache/GradCache详解.md) 区分大候选集合与梯度累积 |
+| Embedding 损失、监督组织与梯度 | [Embedding 损失函数精讲](对比学习与InfoNCE精讲.md)：Triplet／N-pair／MS／Circle、InfoNCE／NT-Xent／SupCon、alignment／uniformity、回归／类别代理／蒸馏；结合 [GradCache](GradCache/GradCache详解.md) 区分大候选集合与梯度累积 |
 | 假负例、难例和动态刷新 | [难负例实践](难负例挖掘工业实践.md)；具体算法看 ANCE、RocketQA、NV-Retriever |
 | 分数、排序与特征蒸馏 | [Embedding 蒸馏专题](Embedding蒸馏技术详解.md)，结合 [Margin-MSE](Margin-MSE/Margin-MSE研读笔记.md) 与 [多语 SBERT](Multilingual-SBERT/Multilingual-SBERT研读笔记.md) |
 | 领域标签和适配课表 | [领域适配实践](领域专用Embedding适配实践.md)，按科学、生物、代码、法律与推荐回查案例 |
@@ -75,7 +76,7 @@ ColQwen 对应官方模型卡报告与对照，未假定它有独立源论文。
 | [Jacob2018详解.md](QAT/Jacob2018/Jacob2018详解.md) | CVPR 2018 整数推理与 QAT 原论文：仿射量化、定点重缩放、BN 折叠与端侧实验；附英文全文和中文全译 |
 | [Qwen3-VL-Embedding详解.md](QAT/Qwen3-VL-Embedding/Qwen3-VL-Embedding详解.md) | [arXiv:2601.04720v2](https://arxiv.org/abs/2601.04720v2)（多模态单向量召回与重排；数据合成、三阶段训练、MRL/QAT 与消融） |
 | [难负例挖掘工业实践.md](难负例挖掘工业实践.md) | 难负例工业闭环 |
-| [对比学习与InfoNCE精讲.md](对比学习与InfoNCE精讲.md) | 损失演化专题：Metric learning → InfoNCE → SimCSE/DPR/CLIP/SigLIP/蒸馏/BGE-M3/GritLM |
+| [Embedding 损失函数精讲](对比学习与InfoNCE精讲.md) | 度量／对比／排序／回归／蒸馏大章：定义、样本与候选、InfoNCE 分母及梯度、多正例、MS／Circle、alignment／uniformity 与工程取舍 |
 | [InternLM2数据处理与过滤详解.md](InternLM2/InternLM2数据处理与过滤详解.md) | [arXiv:2403.17297](https://arxiv.org/abs/2403.17297)：LLM 预训练数据清洗流水线（Conan-v1 预训练引用的数据过滤方法） |
 | [ANCE详解.md](ANCE/ANCE详解.md) | 全局 ANN 难负例 + 异步刷新 |
 | [RocketQA详解.md](RocketQA/RocketQA详解.md) | CE 去噪 hard + 伪标；v2 动态 listwise |
