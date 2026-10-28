@@ -24,13 +24,60 @@
 
 ### 主要表示路线
 
-| 代际                  | 时期       | 代表                               | 核心特征              | 局限                 |
+| 路线                  | 时期       | 代表                               | 核心特征              | 局限                 |
 | --------------------- | ---------- | ---------------------------------- | --------------------- | -------------------- |
 | **词项统计** | 长期使用 | BoW、TF-IDF、BM25 | 词项匹配、倒排友好、可解释 | 词汇不匹配与语义泛化受限 |
 | **静态稠密**    | 2013–2018 | Word2Vec, GloVe, FastText          | 低维稠密、语义相似    | 一词一向量，无上下文 |
 | **上下文/序列** | 2018– | ELMo、BERT、SBERT、E5、BGE | 上下文表示与任务训练 | 预训练隐藏状态未必适合直接计算句间距离 |
 | **LLM 骨干** | 2023– | E5-Mistral、NV-Embed、Qwen3-Embedding | 用 Decoder 骨干学习检索表示 | 编码与部署成本需单独评估 |
 | **图文及多模态** | 2021– | CLIP、SigLIP、GME、ColPali | 图文对齐、融合输入或页面多向量 | 任务、输入预算和索引形态不同 |
+
+### 发展趋势与代表性结果
+
+模型演进同时发生在骨干、监督、表示与部署四个层面。下面结合具体模型和实验说明这些变化；数值保留对应的时间、任务与比较条件，便于回查。
+
+#### LLM 骨干扩大了能力上限，Encoder 与小模型仍有重要位置
+
+E5-Mistral 将指令和 LLM 合成任务用于检索表示；NV-Embed 改进双向注意力、读出和训练课表；Qwen3-Embedding 把多语、多任务合成、监督训练与模型合并组织成完整配方。它们说明生成式预训练可为表示学习提供强底座，但最终模型仍需针对检索训练，不能把任意 LLM 的最后一个隐藏状态直接当成成熟 embedding。
+
+| 模型 | 发布材料中的结果 | 时间与口径 | 能说明什么 |
+| --- | --- | --- | --- |
+| NV-Embed-v2 | MTEB 总分 **72.31**，检索子类 **62.65** | 官方模型卡记录截至 **2024-08-30** 的 56 项文本任务、其中 15 项检索任务 | 读出、训练课表与 positive-aware 难负例共同构成较强的通用表示配方 |
+| Qwen3-Embedding-8B | MTEB Multilingual **70.58** | 技术报告和 **2025-06-05** 发布材料中的多语言评测 | 开源模型可在当时的多语言协议下与领先 API 模型竞争；0.6B／4B／8B 提供不同容量选择 |
+
+来源：[NV-Embed-v2 官方模型卡](https://huggingface.co/nvidia/NV-Embed-v2)、[Qwen3-Embedding 技术报告](https://arxiv.org/abs/2506.05176)。两行来自不同任务集合和时间快照，**72.31 与 70.58 不能直接比较大小来排列模型能力**。同一协议内的具体对照仍有价值，应连同基线、语言和输入预算保留。
+
+Encoder 路线也持续发展：Arctic-Embed 用数据和训练配方提高小模型检索质量，Jina v3 以任务 LoRA 分化空间，Jasper／Stella 及 Jina v5-text 用蒸馏迁移教师能力。因此更准确的趋势是“大骨干提高上限，数据与训练决定能力如何落到不同容量”，而非“Encoder 已被淘汰”。
+
+#### BGE-M3 将三种表示放进同一模型，价值在于可组合
+
+[BGE-M3](BGE/M3/BGE-M3三功能统一详解报告.md) 用约 **568M** 参数、**8192 token** 输入窗口，统一多语言的 Dense、Sparse 和 ColBERT 式多向量表示，并利用多头评分提供自知识蒸馏信号。它让同一个文本骨干同时服务向量召回、词项匹配和细粒度交互，减少维护独立表示模型的负担。
+
+这使其适合作为多语、长文及混合检索的实验基线，但“支持三种头”不表示线上必须全部启用。只建 Dense 索引不会自动获得 Sparse 或 MaxSim 的收益；三路索引、融合、存储和延迟也有额外成本。是否成为某个业务的优先方案，应由同库对照决定，而不是从参数量和功能数量直接推出。
+
+#### Hybrid 与重排解决互补问题，组合要对应失败类型
+
+Dense 可缓解同义表述和词汇不匹配，BM25／学习式 Sparse 可补实体、型号与词面证据；Cross-Encoder 或多向量评分进一步检查候选中的细粒度匹配。由此形成的“多路召回 → 融合 → 精排”是重要工程路线，其意义是把不同证据放到合适的计算阶段。
+
+但融合并不保证提升：低质量稀疏通道会引入噪声，领域错配的 reranker 可能把正确候选排低；增加候选还会提高延迟。应比较 Dense、词法、融合及加入精排后的增量，并分别报告 Recall、排序指标和成本。机制见本文检索 Pipeline，实验背景可对照 [DPR](DPR/DPR详解.md)、[SPLADE v2](SPLADE/SPLADE-v2/SPLADE-v2详解.md)、[BGE-M3](BGE/M3/BGE-M3三功能统一详解报告.md) 与 [BEIR](https://arxiv.org/abs/2104.08663)。
+
+#### MRL 将输出维度变成可调预算，不能与模型压缩混为一谈
+
+[MRL](MRL/MRL详解.md) 同时优化多个嵌套前缀，使同一模型的短向量也能执行任务。Nomic v1.5、Jasper／Stella、Qwen3 等将它用于表示训练；OpenAI embedding-3 通过 `dimensions` 暴露缩短输出的接口，例如 large 的默认 3072 维可按接口生成 1024 维。参见 [Nomic 官方说明](https://www.nomic.ai/news/nomic-embed-matryoshka) 和 [OpenAI 发布说明](https://openai.com/index/new-embedding-models-and-api-updates/)。
+
+收益主要落在向量存储、传输和相似度计算。它不意味着编码骨干参数同步减少，也不意味着任何未经嵌套训练的向量都能任意截断而保持质量。短向量召回后再用长向量评分时，候选上限与额外存储仍要计入。
+
+#### 多模态正在分化为图文对齐、通用输入和页面细粒度匹配
+
+CLIP／SigLIP 双塔学习图像与文本的可比较表示；GME、VLM2Vec、MegaPairs 等进一步组织单模态、跨模态、融合输入及任务指令；ColPali／ColQwen 保留页面局部视觉 token，以 MaxSim 匹配文本查询。Jina v4 和 Qwen3-VL-Embedding 则展示了 VLM 骨干与不同检索表示、精排器的结合方式。
+
+ColPali 可以绕过显式 OCR 管道，但仍需核算图像编码、页面分辨率、多向量存储和评分开销；单向量多模态模型较易接 ANN，也可能压缩细粒度证据。Cohere Embed v4、Gemini Embedding 2 和 Seed1.6 等 API 扩展了多模态服务选择；其输入覆盖、上下文和评测不能用一个“支持多模态”标签替代。
+
+#### 小模型蒸馏与兼容空间让部署出现新的组合方式
+
+Jasper／Stella 的多教师训练、Jina v5-text 的任务靶向蒸馏，说明小学生可以学习大模型的排序与空间结构，但容量、任务覆盖和教师错误仍限制可迁移程度。**参数应按实际导出模型核算**：例如 Jina v5-text 的论文总参数约为 nano 239M、small 677M，不能只因后者使用 0.6B 底座就将整模认定为不超过 0.6B。
+
+另一条路线是让不同编码器保持兼容：Jina v5-omni 用锁定文本塔保留既有文本路径；Voyage 4 官方明确支持同系列大小模型的共享空间，可用小查询模型检索大文档模型的库。两种兼容机制不同，但都把“是否需要重建库”变成技术问题。它们不是所有模型天然具备的性质，任意两个同维度 checkpoint 仍不能混用。参见 [Jina v5-text](Jina/v5-text/Jina-embeddings-v5-text详解.md)、[Jina v5-omni](https://arxiv.org/abs/2605.08384) 与 [Voyage 4 官方说明](https://blog.voyageai.com/2026/01/15/voyage-4/)。
 
 ### 贯穿各章节的结论
 
@@ -46,12 +93,12 @@
 
 ### 完整时间线
 
-本节先给**总览时间轴**，再按时代展开 **model card**（架构 / 模态 / 参数量级 / 维度 / 上下文 / 交互范式 / 要点）。
+本节分三层：**总览时间轴**定位范式，**逐项时间线**保留具体工作、先后和技术定位，**model card** 对照骨干、模态、规模、维度、窗口与交互。短表用于导读，不能替代详细记录。
 「BERT 之后」是重点：从句向量、Dense Retrieval，到指令化、LLM 骨干、系列化产品线（BGE / Jina / GTE / E5…）与多模态通用嵌入（Seed / Qwen3-VL-Emb / ColPali…）。表中参数/分数为公开文档与论文报道的**量级参考**，以厂商更新为准。
 
 #### 总览时间轴
 
-按首次提出的时期理解方法，预印本和正式发表可能跨年；精确版本与出处见[资料清单](资料清单_论文与博客.md)。这里保留范式变化，系列规格在后面的 model card 中回查。
+按首次提出的时期理解方法，预印本和正式发表可能跨年；精确版本与出处见[资料清单](资料清单_论文与博客.md)。这里概括范式变化，后面的逐项时间线给出具体节点与来源，model card 再集中比较规格。
 
 | 时期 | 代表工作 | 解决或暴露的问题 |
 | --- | --- | --- |
@@ -69,57 +116,200 @@
 | 2024 | BGE-M3、ColPali、VLM2Vec、GME、MegaPairs | 三种表示共同训练、页面视觉检索、通用任务转换与关系数据合成 |
 | 2025–2026 | Qwen3-Embedding、SigLIP 2、DINOv3、Jina v4/v5、Qwen3-VL-Embedding 等 | 指令、多语、多模态、小学生与部署压缩继续交汇；各系列并不采用同一配方 |
 
+#### 逐项时间线：方法、系列与发布节点
+
+表中“预印本”采用 arXiv 首次提交时间，“发布”采用官方公告或项目记录；正式会议年份另注。只确认年份的系列保留年份，不把模型卡更新时间或编号后缀当成首发日期。每个节点保留方法定位，参数与完整实验继续在后面的卡片及独立研读中回查。
+
+##### 统计语义与神经词表示的前史
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 1954，论文 | [Harris：Distributional Structure](https://doi.org/10.1080/00437956.1954.11659520) | 以分布关系研究语言结构，为“上下文提供语义线索”建立基础；它不是一个已经训练好的向量检索模型。 |
+| 1980 年代起，项目 | [WordNet](https://wordnet.princeton.edu/) | 人工词义集合及词汇关系构成另一种语义资源；它提供知识结构，与统计共现学习并行发展。 |
+| 1990，论文 | LSA／LSI：Indexing by Latent Semantic Analysis | 对词项—文档矩阵做低秩分解，在神经网络普及前已用稠密潜在空间缓解词汇不匹配；不能归为“无语义的高维稀疏表示”。 |
+| 1990 年代，检索系统 | [BM25／Okapi](https://www.microsoft.com/en-us/research/publication/okapi-at-trec-3/) | 概率检索中的词频饱和、文档长度与逆文档频率加权；后来的 Dense 并未使词法通道失去价值。 |
+| 2003，JMLR | [Bengio 等：A Neural Probabilistic Language Model](https://www.jmlr.org/papers/v3/bengio03a.html) | 联合学习连续词表示和语言模型，以共享统计强度缓解离散组合问题；早于 Word2Vec 的神经表示起点之一。 |
+
+##### 静态词向量到上下文与句子表示
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 2013-01，预印本；同年后续论文 | [Word2Vec](https://arxiv.org/abs/1301.3781) | CBOW／Skip-gram 提升大语料词向量训练效率；负采样与短语组合见[后续工作](https://arxiv.org/abs/1310.4546)，不能把两篇方法细节都归给首篇。 |
+| 2013，CIKM | [DSSM](https://www.microsoft.com/en-us/research/publication/learning-deep-structured-semantic-models-for-web-search-using-clickthrough-data/) | 用点击监督学习查询—文档语义匹配，说明双塔搜索早于 BERT；监督来源和文本表示与后来的 DPR 不同。 |
+| 2014，EMNLP | [GloVe](https://aclanthology.org/D14-1162/) | 用全局词共现统计学习词表示，与局部上下文预测形成对照；仍是一词一向量。 |
+| 2016-07，预印本 | [FastText](https://arxiv.org/abs/1607.04606) | 将词分解成字符 n-gram 组合，缓解未登录词和形态变化；不是句子级检索训练的替代品。 |
+| 2017-05，预印本；EMNLP 2017 | [InferSent](https://aclanthology.org/D17-1070/) | 用自然语言推断监督训练可迁移句向量，连接 NLI、句子表示与后来的 SBERT。 |
+| 2017-06，预印本 | [Transformer](https://arxiv.org/abs/1706.03762) | 以注意力构建序列模型，成为后续 Encoder、Decoder 与 VLM 骨干的共同构件；本身不规定检索表示与损失。 |
+| 2018，论文 | [ELMo](https://aclanthology.org/N18-1202/) | 用双向语言模型产生随上下文变化的词表示，突破静态词向量的一词一义限制。 |
+| 2018-03，预印本 | [Universal Sentence Encoder](https://arxiv.org/abs/1803.11175) | Transformer／DAN 句编码路线，把可迁移的句子表示做成通用接口；与后来 Sentence-T5 是不同工作。 |
+| 2018-10，预印本；NAACL 2019 | [BERT](https://aclanthology.org/N19-1423/) | MLM 等预训练提供通用上下文特征；原始 CLS／mean 并不因此就适合用余弦距离做句子检索。 |
+| 2019-08，预印本；EMNLP 2019 | [Sentence-BERT](Sentence-BERT/Sentence-BERT详解.md) | 共享编码器配合池化和句子级监督，将联合句对计算转为可预计算的句向量；速度优势取决于候选规模与比较任务。 |
+| 2019-10，预印本 | [DistilBERT](https://arxiv.org/abs/1910.01108) | 将 BERT 的语言建模与中间表示知识迁入较小学生，是骨干蒸馏案例；它没有直接定义检索排序蒸馏。 |
+
+##### 开放域检索、多向量与跨模态双塔
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 2020-02，预印本 | [REALM](https://arxiv.org/abs/2002.08909) | 将潜变量知识检索纳入语言模型预训练，研究外部文档与参数知识的配合，也引入索引更新问题。 |
+| 2020-04，预印本；EMNLP 2020 | [DPR](DPR/DPR详解.md) | 查询／段落双编码器、同批负例和 BM25 难负例形成开放域问答的可复用稠密检索基线。 |
+| 2020-04，预印本 | [SPECTER](SPECTER/SPECTER系列详解.md) | 用科学论文引用图构造相关性监督，说明“文本相似”可由领域关系重新定义。 |
+| 2020-04，预印本；SIGIR 2020 | [ColBERT](ColBERT/ColBERT详解.md) | 保留 token 多向量并用 MaxSim 后交互，兼顾文档预计算和细粒度匹配；索引与评分代价随之上升。 |
+| 2020-05，预印本 | [RAG](https://arxiv.org/abs/2005.11401) | 将文档检索与生成概率结合；原论文的 RAG-Sequence／Token 比今天泛称的“检索再拼 prompt”更具体。 |
+| 2020-07，预印本；ICLR 2021 | [ANCE](ANCE/ANCE详解.md) | 从全库 ANN 召回难负例并异步刷新索引，补充局部 batch 负例的覆盖不足。 |
+| 2020，预印本；EACL 2021 | [FiD](https://aclanthology.org/2021.eacl-main.74/) | 分别编码检索段落，再在解码器融合多段证据；回答的是如何利用候选，而非怎样编码检索库。 |
+| 2021-01，预印本 | [GradCache](GradCache/GradCache详解.md) | 缓存表示梯度并分块重算，让大对比候选集合与编码器激活内存解耦；与普通梯度累积不同。 |
+| 2021-01，官方发布；同年预印本 | [CLIP](CLIP/CLIP详解.md) | 大规模图文配对和对称对比目标学习共同空间，支持零样本分类与跨模态匹配；不是实例图搜图的统一答案。 |
+| 2021-02，预印本 | [ALIGN](https://arxiv.org/abs/2102.05918) | 用约 18 亿噪声图文对训练图像／文本双塔，展示弱配对规模与数据处理的价值；“十亿级”描述的是数据，不是参数。 |
+| 2021-04，预印本 | [SimCSE](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md) | 用 dropout 产生句子正视图，并研究 NLI 监督版本；STS 与查询—段落检索的目标不能直接等同。 |
+| 2021-07／09，预印本 | [SPLADE](SPLADE/SPLADE/SPLADE详解.md)／[SPLADE v2](SPLADE/SPLADE-v2/SPLADE-v2详解.md) | MLM 词表上的学习式扩展、稀疏约束、聚合及改进训练，为神经表示保留倒排检索形态。 |
+| 2021-08，预印本；Findings ACL 2022 | [Sentence-T5](https://aclanthology.org/2022.findings-acl.146/) | 系统研究如何从 T5 得到句子向量及扩大编码器规模；与 2018 年的 Universal Sentence Encoder 分开理解。 |
+| 2021-12，预印本；NAACL 2022 | [ColBERTv2](ColBERTv2/ColBERTv2详解.md) | 去噪监督与残差压缩提高后交互的质量和存储效率；引擎执行仍由后续工作继续优化。 |
+| 2021-12，预印本；EMNLP 2022 | [GTR](https://arxiv.org/abs/2112.07899) | 用 T5 Encoder 扩展双编码器规模并研究跨域检索；属于 Encoder-Decoder 家族的检索化，不等于推理时生成文本。 |
+| 2021-12，预印本 | [Contriever](无监督对比检索三部曲_SimCSE-Contriever-Condenser.md) | 无监督对比训练用于稠密检索与跨域迁移，为依赖人工检索标注的路线提供对照。 |
+
+##### 指令、维度弹性与检索预训练
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 2022-02，预印本 | [SGPT](https://arxiv.org/abs/2202.08904) | 探索 GPT 系模型用于语义搜索；其双编码器的重要设计是位置加权 mean pooling，不能简单概括为所有版本都用 last-token。 |
+| 2022-04，预印本 | [DiffCSE](https://arxiv.org/abs/2204.10298) | 引入对文本改动的差异感知目标，补充 dropout 视图的句向量对比学习。 |
+| 2022-05，预印本；CIKM 2022 | [PLAID](PLAID/PLAID详解.md) | 利用质心近似和多阶段剪枝减少残差读取、解压及完整评分，是执行引擎改进，不是新骨干。 |
+| 2022-05，预印本 | [RetroMAE](RetroMAE/RetroMAE与DupMAE详解.md) | 通过非对称掩码重建训练检索导向编码器，连接语言预训练与后续对比微调。 |
+| 2022-05，预印本；NeurIPS 2022 | [MRL](MRL/MRL详解.md) | 联合优化嵌套维度，让短前缀也携带任务信息；后续 Nomic、Jasper、Qwen 等采用相关训练方式。 |
+| 2022-12，预印本 | [E5](E5/E5详解.md) | 大规模弱监督文本对预训练，再做监督适配；query／passage 前缀成为模型输入契约的一部分。 |
+| 2022-12，官方发布 | [OpenAI text-embedding-ada-002](https://openai.com/index/new-and-improved-embedding-model/) | 以统一 API 模型覆盖多类文本与代码匹配用途，提供较长输入窗口；闭源发布不公开全部骨干与训练细节。 |
+| 2022-12，预印本 | [INSTRUCTOR](INSTRUCTOR/INSTRUCTOR详解.md) | 将任务指令与文本一起编码，用 MEDI 多任务数据学习按任务产生表示；不是只加一个字符串就自动获得指令能力。 |
+
+##### 开源系列化与 LLM 嵌入的起步
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 2023-03，预印本 | [SigLIP](SigLIP/SigLIP/SigLIP详解.md) | 用逐对 sigmoid 取代全 batch softmax 归一化，改变图文配对损失及分块计算方式。 |
+| 2023-04，预印本 | [DINOv2](DINO/DINOv2/DINOv2详解.md) | 视觉自监督与数据筛选产生可迁移全局／局部特征，补充依赖图注的 CLIP 视觉语义。 |
+| 2023-07，预印本 | [Jina embeddings v1](Jina/v1/Jina-embeddings-v1详解.md) | 从句向量数据、训练与模型规模建立系列起点；后续 v2 的长上下文和 v3 的任务适配是不同增量。 |
+| 2023-08，模型发布；09，C-Pack 预印本 | [BGE v1／C-Pack](BGE/C-Pack/BGE-CPack详解.md) | 将中文数据、C-MTEB 与中英模型系列组织成开放资源；模型发布与论文日期分开记录。 |
+| 2023-08，预印本 | [GTE](GTE/GTE系列详解.md) | 多阶段对比训练整合不同质量的文本对，为后续长上下文、多语及 Qwen 骨干系列打基础。 |
+| 2023-09，项目发布 | [BGE v1.5](https://github.com/FlagOpen/FlagEmbedding) | 改进相似度分布与可用性；small／base／large、中英文权重各有适用输入约定。 |
+| 2023，系列发布 | [BGE reranker base／large](BGE/BGE-Reranker详解.md) | 联合编码查询和候选输出标量相关性，与可建库的 embedding 分工；不是再增加一条单向量召回通道。 |
+| 2023-10，预印本 | [Jina embeddings v2](Jina/v2/Jina-embeddings-v2详解.md) | JinaBERT 与位置机制支持 8192 token，随后发展分语言模型；需区分窗口长度与实际长文检索质量。 |
+| 2023-11，官方发布 | [Cohere Embed v3](https://cohere.com/blog/introducing-embed-v3) | 英文／多语及轻量版本，通过 `search_query`／`search_document` 等输入类型区分用途；并非 2023 年 3 月发布。 |
+| 2023–2024，早期产品系列 | [Voyage 早期 lite／large、voyage-2 系列](https://docs.voyageai.com/docs/embeddings) | 保留商业检索向 API 的演进支线；`voyage-lite-02-instruct` 等型号有特定用途，不能统称一个无版本的“Voyage-lite”。 |
+| 2023-12-31，首次提交；arXiv 编号属 2024-01 | [E5-Mistral](E5-Mistral/zh.md) | Mistral-7B、任务指令与 LLM 合成检索数据结合，以较短微调把生成式底座转为强句向量；解释了论文年、编号月和模型发布可跨年。 |
+
+##### LLM、混合表示和视觉文档共同发展
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 2024-01，官方发布 | [OpenAI embedding-3-small／large](https://openai.com/index/new-embedding-models-and-api-updates/) | 改进文本与多语表示，并通过 `dimensions` 提供可缩短输出；small 默认 1536 维、large 默认 3072 维。 |
+| 2024-01-30，项目发布；02，预印本 | [BGE-M3](BGE/M3/BGE-M3三功能统一详解报告.md) | 统一 Dense／Sparse／Multi-Vector、多语与 8192 token，通过跨头监督提升表示；三路收益需配套索引与融合。 |
+| 2024-02，发布与预印本 | [Nomic Embed Text v1](Nomic-Embed/Nomic-Embed详解.md) | 强调开放数据、训练可复现与 8K 输入，使数据和训练条件可以回查，而非只发布一个分数。 |
+| 2024-02，官方发布 | [Nomic Embed Text v1.5](https://www.nomic.ai/news/nomic-embed-matryoshka) | 在 v1 基础上引入 MRL，支持可变维度；后来 Vision 分支再研究与文本空间的对齐。 |
+| 2024-02，预印本 | [GritLM](LLM-Embedding冲榜路线_E5Mistral-NVEmbed-GritLM-SFR-Arctic-Stella.md) | 在同一模型里联合生成与表示任务；“统一用途”不等于两种目标没有权衡。 |
+| 2024-03，项目发布 | [BGE reranker v2](BGE/BGE-Reranker详解.md) | M3、Gemma、MiniCPM 等不同骨干形成多语和 LLM 精排器；需按模型区分输入长度、层数与计算成本。 |
+| 2024-04，预印本 | [LLM2Vec](LLM2Vec/LLM2Vec详解.md) | 双向注意力、掩码下一 token 预测与无监督对比三个步骤，研究 Decoder 如何转为文本编码器。 |
+| 2024，系列模型；05，v1 预印本 | [Arctic-Embed v1／v1.5](https://arxiv.org/abs/2405.05374) | 用数据、负例和训练细节提高小 Encoder 的检索质量；v1.5 的维度／量化增强应与原始 v1 分开看。 |
+| 2024-05，预印本 | [NV-Embed v1](https://arxiv.org/abs/2405.17428) | 双向编码、latent attention 读出和分阶段指令训练，展示 LLM embedding 的改进不只是换大骨干。 |
+| 2024-05，预印本 | [Jina-CLIP v1](Jina/clip/v1/Jina-CLIP详解.md) | 将图文对齐与文本检索训练结合，研究同一文本塔如何兼顾两类用途。 |
+| 2024-06-27，首次提交；ICLR 2025 | [ColPali](ColPali/ColPali详解.md) | 页面渲染图经 PaliGemma 产生局部向量，与查询 token 做后交互，减少显式 OCR／切块的信息损失。 |
+| 2024-07，模型发布；09，预印本 | [BGE-EN-ICL](BGE/EN-ICL/BGE-EN-ICL详解.md) | 在查询编码中加入任务相关示例，令文本嵌入器具备 few-shot 输入适配能力；示例占用编码预算。 |
+| 2024-07，项目发布 | [BGE multilingual Gemma2](BGE/BGE-multilingual-gemma2详解.md) | 用 Gemma-2-9B 做多语检索表示，与 BGE-M3 的共享多头 Encoder 是不同路线。 |
+| 2024-07，项目发布 | [BGE reranker v2.5 Gemma2 lightweight](BGE/BGE-Reranker详解.md) | 在精排中研究层数与 token 压缩，目标是减少联合编码成本；不能与向量截维混为一谈。 |
+| 2024-07，mGTE 预印本；同年模型系列 | [mGTE／gte-v1.5／gte-Qwen2](GTE/GTE系列详解.md) | 将长上下文、多语编码、重排与 Decoder 骨干分化成产品系列；gte-Qwen2 是同年明确的 LLM 双编码器支线。 |
+| 2024-08，模型卡结果快照 | [NV-Embed-v2](https://huggingface.co/nvidia/NV-Embed-v2) | 延续读出与课表设计，结合 positive-aware 难负例处理；56 任务 MTEB 72.31 对应 2024-08-30 快照。 |
+| 2024，模型系列；12，合写预印本 | [Stella／Jasper](Jasper/Jasper-Token-Compression-600M详解.md) | 多教师蒸馏、MRL 与高效表示强调容量约束下的质量；两个系列具体骨干和压缩机制仍须分别回查，不能由合写日期推断同时发布。 |
+| 2024-09，预印本 | [Jina embeddings v3](Jina/v3/Jina-embeddings-v3详解.md) | 多语共享骨干、任务 LoRA 与 MRL，让 retrieval、classification、clustering 等用途有不同适配。 |
+| 2024-09，官方发布 | [Voyage-3／3-lite](https://blog.voyageai.com/2024/09/18/voyage-3/) | 将检索质量、上下文和成本分档；模型发布中的自建评测应保留候选和基线条件。 |
+| 2024，模型卡 | [ColQwen2](ColQwen/ColQwen系列详解.md) | 将页面后交互接到 Qwen2-VL；属于 ColPali 路线的模型迭代，不应另造一篇独立源论文。 |
+| 2024-10，预印本 | [VLM2Vec／MMEB](VLM2Vec/VLM2Vec详解.md) | 将分类、问答、定位等转为候选匹配，指令化对比训练 VLM，并用 MMEB 研究跨任务迁移。 |
+| 2024-10，官方功能发布 | [Cohere Embed v3 图像扩展](https://docs.cohere.com/changelog/embed-v3-is-multimodal) | 既有 v3 文本空间增加图像输入能力；这是模型功能扩展节点，与 v3 文本模型首发分开记录。 |
+| 2024-12，官方发布 | [Cohere Rerank 3.5](https://docs.cohere.com/changelog/rerank-v3.5) | 对候选输出相关性排序。它属于 Rerank 精排产品线，不是 Embed v3 的新版本。 |
+| 2024-12，预印本 | [Arctic-Embed 2.0](https://arxiv.org/abs/2412.04506) | 从英文检索向多语能力扩展，关注跨语质量与英文能力之间的权衡。 |
+| 2024-12，预印本 | [Jina-CLIP v2](Jina/clip/v2/Jina-CLIP-v2详解.md) | 多语文本、视觉表示与 MRL 组合；仍是双塔图文对齐，并非 Jina v4 式 VLM 多向量模型。 |
+| 2024-12，预印本 | [MegaPairs／MMRet](MegaPairs/MegaPairs详解.md) | 在多个特征空间挖图像对并生成关系指令，规模化构造检索关系数据；与后续 BGE-VL checkpoint 按模型卡对应。 |
+| 2024-12，预印本 | [GME](GME/GME详解.md) | 用 Qwen2-VL 编码文本、图像和融合输入，混合任务数据与合成融合样本，并用 UMRB 评测覆盖。 |
+
+##### 多语、代码、视觉文档与通用多模态的继续扩展
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 2025-01／06，v1／v2 预印本 | [KaLM-Embedding](https://arxiv.org/abs/2501.01028)／[V2](https://arxiv.org/abs/2506.20923) | 从较干净、多样的数据和小 Qwen 底座出发，再研究训练技巧；不能把 KaLM 一概归成 EuroBERT 模型。 |
+| 2025-02，预印本 | [SigLIP 2](SigLIP/SigLIP2/SigLIP2详解.md) | 在 sigmoid 训练基础上加入多语、定位与自蒸馏等改进，并提供 NaFlex 变体；既服务图文匹配，也改善局部视觉特征。 |
+| 2025，模型卡 | [ColQwen2.5／社区 ColQwen3](ColQwen/ColQwen系列详解.md) | 延续页面多向量，更新骨干与模型训练；官方系列与社区换底座版本分别标明来源及许可。 |
+| 2025-03，技术报告 | [Gemini Embedding](https://arxiv.org/abs/2503.07891) | 把 Gemini 能力用于通用文本表示；报告日期、API 预览与正式可用日期不是同一事件，不能仅记为 2025 年 10 月。 |
+| 2025-04，官方发布 | [Cohere Embed v4](https://docs.cohere.com/changelog/embed-multimodal-v4) | 支持文本、图像及混合输入，面向企业多模态检索；其输入预算、输出维度和比较条件按官方文档核对。 |
+| 2025，模型系列 | [BGE-VL](https://github.com/VectorSpaceLab/MegaPairs) | 将通用视觉检索及关系合成数据落到公开权重，连接 CLIP／MLLM 两类骨干；不是把纯文本 BGE-M3 直接用于图片。 |
+| 2025-05，技术报告 | [BGE-Code-v1／CodeR](https://arxiv.org/abs/2505.12697) | 用大规模代码任务合成训练通用代码表示，关注自然语言—代码、代码—代码等不同检索关系。 |
+| 2025-06，官方发布与预印本 | [Qwen3-Embedding／Reranker](Qwen3-Embedding/zh.md) | 同底座提供 0.6B／4B／8B 的独立编码与联合精排模型，结合指令、MRL、多阶段数据训练和合并。 |
+| 2025，前代产品线 | [Seed1.5-Embedding](https://seed.bytedance.com/en/blog/introducing-seed1-5-embedding) | 保留豆包文本向量产品的前代入口；不能将它、Seed1.6 基础模型与 Seed1.6-Embedding 的能力和版本号混用。 |
+| 2025-06，官方发布 | [Seed1.6-Embedding](https://seed1-6-embedding.github.io/) | 基于 Seed1.6-Flash，支持文本、图像、视频及组合输入检索；维度、时长和序列预算依接口与版本确认。 |
+| 2025-06，预印本 | [Jina embeddings v4](Jina/v4/Jina-embeddings-v4详解.md) | VLM 骨干结合任务适配及单／多向量输出，连接通用多模态空间与后交互检索。 |
+| 2025-08，预印本 | [DINOv3](DINO/DINOv3/DINOv3详解.md) | 扩大视觉自监督训练并稳定局部特征，继续提供图搜图和视觉任务可用的表示；它不单独完成图文空间对齐。 |
+| 2025-09，预印本；论文另述此前模型快照 | [Conan-embedding-v2](Conan-embedding/v2/Conan-embedding-v2详解.md) | 从零训练约 1.4B 的嵌入向 LLM，并结合数据、soft-masking 与动态难例；不能只概括成一次中文 hard-negative 续训。 |
+| 2025-09，技术报告 | [EmbeddingGemma](https://arxiv.org/abs/2509.20354) | 约 300M 的多语文本表示路线，补充蒸馏、数据与小模型部署的比较；具体代码与评测仍以报告为准。 |
+
+##### 全模态、任务蒸馏与兼容空间
+
+| 时间及口径 | 工作与入口 | 方法增量与后续联系 |
+| --- | --- | --- |
+| 2026-01，预印本 | [Qwen3-VL-Embedding／Reranker](QAT/Qwen3-VL-Embedding/Qwen3-VL-Embedding详解.md) | 多模态 embedding 与精排统一组织，结合数据合成、分阶段训练、MRL／向量量化；查询编码与候选联合精排分别承担不同计算阶段。 |
+| 2026-01，官方发布 | [Voyage 4](https://blog.voyageai.com/2026/01/15/voyage-4/) | 同系列共享表示空间，支持大小查询／文档模型组合；large 使用 MoE，nano 提供开放权重，不能把全系列都称为闭源或都称为 MoE。 |
+| 2026-02，预印本 | [Jina embeddings v5-text](Jina/v5-text/Jina-embeddings-v5-text详解.md) | 任务靶向蒸馏、任务适配与几何正则；nano 与 small 的骨干、总参数和读出分别核算。 |
+| 2026-03，公开预览；04，GA；05，报告 | [Gemini Embedding 2](https://blog.google/innovation-and-ai/models-and-research/gemini-models/gemini-embedding-2/) | 将文本、图像、音频、视频及文档映到统一空间；[技术报告](https://arxiv.org/abs/2605.27295)晚于产品预览，产品首发与论文发表需分别记录。 |
+| 2026-05，预印本 | [Jina embeddings v5-omni](Jina/v5-omni/Jina-embeddings-v5-omni详解.md) | GELATO 锁定文本和模态塔，只训练轻量对齐部分，扩展图像／视频／音频同时保留原文本路径；与 v5-text 的二月报告分开记录。 |
+
+这些节点反映几条并行演进线：**表示与交互**（单向量／词项／后交互）、**监督与数据**（弱配对／指令／合成／难例／蒸馏）、**骨干与模态**（Encoder／Decoder／VLM）和**部署**（MRL／量化／兼容空间）。时间更晚不表示所有维度都更好；同一年也会同时存在适合不同任务和预算的方案。
+
 #### 前深度学习与静态词向量（简卡）
 
 | 模型 / 方法  | 年份       | 架构要点                       | 模态     | 典型维度   | 备注                   |
 | ------------ | ---------- | ------------------------------ | -------- | ---------- | ---------------------- |
 | BoW / TF-IDF | 1950s–    | 计数 / 加权                    | 文本     | \|V\| 稀疏 | 仍作 Hybrid 组件       |
-| LSA / LSI    | 1975 / 90s | SVD 降维                       | 文本     | ~100–300  | 早期「语义空间」       |
+| LSA / LSI    | 1990 | SVD 降维                       | 文本     | ~100–300  | 早期「语义空间」       |
 | Word2Vec     | 2013       | CBOW / Skip-gram + NegSampling | 词       | 100–300   | 类比运算里程碑         |
 | GloVe        | 2014       | 全局共现 + 最小二乘            | 词       | 50–300    | 统计 + 神经折中        |
 | FastText     | 2016       | 子词 n-gram                    | 词       | 300        | OOV / 形态丰富语言更强 |
 | ELMo         | 2018       | 双向 LSTM 层加权               | 上下文词 | ~1024      | 一词多义破冰           |
 | USE          | 2018       | Transformer / DAN              | 句       | 512        | 通用句嵌入工业开端     |
 
-#### BERT 之后：句向量与 Dense Retrieval（2019–2021）
+#### 从 BERT 到句向量与 Dense Retrieval（2018–2022）
 
 | 模型                    | 年份  | 骨干 / 架构                   | 模态            | 参数量级               | 维度          | 上下文         | 交互范式          | Model Card 要点                                                   |
 | ----------------------- | ----- | ----------------------------- | --------------- | ---------------------- | ------------- | -------------- | ----------------- | ----------------------------------------------------------------- |
-| **BERT**          | 2019  | Encoder Transformer；MLM+NSP  | 文本            | Base 110M / Large 340M | 隐层 768/1024 | 512            | —（预训练底座）  | 开启「预训练→微调」；原生非句向量，靠`[CLS]`/mean 勉强抽句向量 |
+| **BERT**          | 2018 预印本／2019 正式发表 | Encoder Transformer；MLM+NSP  | 文本            | Base 110M / Large 340M | 隐层 768/1024 | 512            | —（预训练底座）  | 开启「预训练→微调」；原生非句向量，靠`[CLS]`/mean 勉强抽句向量 |
 | **Sentence-BERT** | 2019  | Siamese BERT + pooling        | 文本            | ≈BERT                 | 768/1024      | 512            | Bi-Encoder        | NLI/三元组；句相似度速度 ×1000+；专用 Embedding 产业起点         |
-| **DistilBERT**    | 2019  | 6 层学生蒸馏 BERT             | 文本            | ~66M                   | 768           | 512            | Encoder / 可做 Bi | 早期大规模 Embedding 侧蒸馏实践                                   |
+| **DistilBERT**    | 2019  | 6 层学生蒸馏 BERT             | 文本            | ~66M                   | 768           | 512            | Encoder / 可做 Bi | 语言预训练骨干蒸馏；不是检索排序蒸馏                                   |
 | **DPR**           | 2020  | 双 BERT（Q/D 塔）             | 文本（Passage） | ~2×BERT-base          | 768           | 512            | Bi-Encoder        | Facebook；FAISS 稠密段落检索标准化                                |
 | **REALM**         | 2020  | 检索增强预训练                | 文本            | —                     | —            | —             | Bi + 检索         | 检索进预训练循环                                                  |
 | **ColBERT (v1)**  | 2020  | BERT + 每 token 向量          | 文本            | ~BERT                  | token×128    | 512            | Late Interaction  | MaxSim；精度/速度折中路线开创                                     |
 | **SPECTER**       | 2020  | SciBERT + 引用图对比          | 科学文本        | ~110M                  | 768           | 512            | Bi-Encoder        | 论文检索 / 推荐专用                                               |
 | **CLIP**          | 2021  | ViT + 文本 Transformer 双塔   | 图+文           | ViT-L/14 ≈400M 级     | 512/768       | 文本 77 tok 级 | Dual-/Bi-Encoder  | OpenAI；对比学习跨模态对齐；零样本分类                            |
-| **ALIGN**         | 2021  | EfficientNet + BERT           | 图+文           | 十亿级噪声对           | —            | —             | Dual-Encoder      | Google；弱标注图文规模红利                                        |
+| **ALIGN**         | 2021  | EfficientNet + BERT           | 图+文           | — | —            | —             | Dual-Encoder      | Google；约 18 亿弱配对，数据规模与参数量分开                                        |
 | **SimCSE**        | 2021  | BERT/RoBERTa + Dropout 自监督 | 文本            | ≈BERT                 | 768           | 512            | Bi-Encoder        | 无监督对比学习句向量里程碑                                        |
 | **Contriever**    | 2021  | BERT 无监督对比               | 文本            | ~110M                  | 768           | 512            | Bi-Encoder        | Meta；无标注稠密检索                                              |
 | **ANCE**          | 2021  | RoBERTa + ANN 动态负例        | 文本            | ~125M                  | 768           | 512            | Bi-Encoder        | 异步 hard negative 更新                                           |
-| **ColBERT v2**    | 2021  | BERT 多向量 + 蒸馏            | 文本            | ~110M                  | token×128    | 512            | Late Interaction  | 压缩索引 + 教师蒸馏，工程可用性上升                               |
+| **ColBERT v2**    | 2021 预印本／2022 正式发表 | BERT 多向量 + 蒸馏            | 文本            | ~110M                  | token×128    | 512            | Late Interaction  | 压缩索引 + 教师蒸馏，工程可用性上升                               |
 | **RetroMAE**      | 2022* | 编码器-解码重建预训练         | 文本            | Encoder 级             | —            | 512+           | 预训练底座        | BGE 系 Stage-0；提升表示质量                                      |
 
 \*RetroMAE 论文 2022，作为后续 BGE 预训练组件收录于此。
 
-#### 指令化、稀疏与多维自适应（2022）
+#### 指令化、稀疏与多维自适应（2021–2023）
 
 | 模型                    | 年份     | 骨干 / 架构              | 模态             | 参数量级                | 维度       | 上下文 | 交互范式                   | Model Card 要点                                 |
 | ----------------------- | -------- | ------------------------ | ---------------- | ----------------------- | ---------- | ------ | -------------------------- | ----------------------------------------------- |
 | **Instructor**    | 2022     | GTR/T5 系 + 任务指令前缀 | 文本             | 中等 Encoder            | 768        | 512    | Bi-Encoder                 | 330+ 任务统一指令嵌入；「Instruct: …」范式先导 |
 | **GTR**           | 2021–22 | T5 Encoder               | 文本             | Base→XXL               | 768        | 512    | Bi-Encoder                 | Google；Encoder-Decoder 家族的检索变体          |
-| **SGPT**          | 2022     | GPT 系 last-token        | 文本             | 125M–5.8B              | 随模型     | 2K 级  | Bi-Encoder（Decoder 骨干） | 证明 Decoder-only 也可做句向量                  |
-| **SPLADE v2**     | 2022     | BERT → 词表稀疏权重     | 文本             | ~BERT                   | \|V\| 稀疏 | 512    | Lexical/Sparse             | 可学习稀疏检索；与 Dense Hybrid                 |
+| **SGPT**          | 2022     | GPT 系；双编码器采用位置加权 mean        | 文本             | 125M–5.8B              | 随模型     | 2K 级  | Bi-Encoder（Decoder 骨干） | 证明 Decoder-only 也可做句向量                  |
+| **SPLADE v2**     | 2021 预印本 | BERT → 词表稀疏权重     | 文本             | ~BERT                   | \|V\| 稀疏 | 512    | Lexical/Sparse             | 可学习稀疏检索；与 Dense Hybrid                 |
 | **MRL**           | 2022     | 训练框架（非单模型）     | 任意             | —                      | 可截断     | —     | —                         | Matryoshka；一向量多尺度（64…4096）            |
 | **DiffCSE**       | 2022     | ELECTRA 式差异对比       | 文本             | ≈BERT                  | 768        | 512    | Bi-Encoder                 | 无监督句向量增强变体                            |
 | **E5-base/large** | 2022–23 | BERT/XLM-R               | 文本（多语大版） | Base~110M / Large~330M | 768/1024   | 512    | Bi-Encoder                 | MS：「弱监督十亿对 → 监督微调」流水线定型      |
 
-#### 2023：开源系与商业 API 同时爆发
+#### 开源文本系列与商业 API、LLM 骨干（2023–2024）
 
 | 模型                                               | 年份       | 骨干 / 架构             | 模态                  | 参数量级                | 维度                | 上下文        | 交互范式                | Model Card 要点                                   |
 | -------------------------------------------------- | ---------- | ----------------------- | --------------------- | ----------------------- | ------------------- | ------------- | ----------------------- | ------------------------------------------------- |
-| **OpenAI text-embedding-ada-002**            | 2022末–23 | 未公开 Decoder 系       | 文本                  | API                     | 1536                | 8K            | Bi-Encoder              | 长上下文 API Embedding 事实标准                   |
-| **OpenAI text-embedding-3-small/large**      | 2024.01*   | 未公开；支持 MRL        | 文本                  | API                     | 1536 / 3072（可截） | 8K            | Bi-Encoder              | 性价比与多语显著提升；`dimensions` API          |
+| **OpenAI text-embedding-ada-002**            | 2022末–23 | 未公开       | 文本                  | API                     | 1536                | 8K            | Bi-Encoder              | 长上下文 API Embedding 事实标准                   |
+| **OpenAI text-embedding-3-small/large**      | 2024.01*   | 未公开；支持缩短输出维度        | 文本                  | API                     | 1536 / 3072（可截） | 8K            | Bi-Encoder              | 性价比与多语显著提升；`dimensions` API          |
 | **Cohere embed-english / multilingual-v3.0** | 2023       | 私有 Encoder            | 文本                  | API                     | 1024                | 512           | Bi-Encoder              | 输入类型`search_query` / `search_document`    |
 | **E5-mistral-7b-instruct**                   | 2023       | Mistral-7B + 指令       | 文本                  | 7B                      | 4096                | 4K–32K 级    | Bi-Encoder（LLM）       | LLM 骨干嵌入早期标杆；Query 侧加 instruct         |
 | **GritLM-7B**                                | 2024*      | Mistral + 统一 Gen/Emb  | 文本                  | 7B                      | 4096                | 4K+           | Bi / 生成一体           | 「同一模型生成+表示」                             |
@@ -133,7 +323,7 @@
 | **UAE-Large-V1 / mxbai-embed**               | 2023–24   | BERT-large 系           | 文本                  | ~335M                   | 1024                | 512           | Bi-Encoder              | 社区蒸馏 / AnglE 损失路线                         |
 | **bge-reranker-base/large**                  | 2023       | Cross-Encoder           | 文本                  | Base~0.1B / Large~0.5B | 标量分数            | 512           | **Cross-Encoder** | 与 BGE 嵌入配套的精排                             |
 
-\*embedding-3 虽挂 2024 发布，常与 2023 ada 序列一起被产业对照，故列此表便于选型。
+同表按系列与架构组织，包含跨年迭代；各版本的精确日期见上面的逐项时间线，不用所在分组代替发布年份。
 
 #### BGE 全家桶（勿只记 M3）
 
@@ -145,9 +335,9 @@ BGE（BAAI General Embedding / FlagEmbedding）是**系列化**产品：中英�
 | **bge-small/base/large-en-v1.5**     | 2023    | BERT 英                    | 文本-英       | 33M / 109M / 335M | 384/768/1024 | 512          | Bi                   | 相似度分布校准；HF 高下载                                                                             |
 | **bge-m3**                           | 2024.01 | XLM-R 扩展                 | 文本·100+ 语 | **568M**    | 1024         | **8K** | Dense+Sparse+ColBERT | ★ Multi-Function / Lingual / Granularity；详见《[BGE-M3三功能统一详解](BGE/M3/BGE-M3三功能统一详解报告.md)》 |
 | **bge-m3-retromae / unsupervised**   | 2024    | 同系中间 ckpt              | 文本          | —                | —           | 8K           | 预训练/对比中间态    | 复现与二阶段训练用                                                                                    |
-| **bge-multilingual-gemma2**          | 2024.06 | Gemma-2-9B                 | 文本·多语    | ~9B               | 3584         | 4K+          | Bi（LLM）            | 大参数多语开源档                                                                                      |
+| **bge-multilingual-gemma2**          | 2024.07 | Gemma-2-9B                 | 文本·多语    | ~9B               | 3584         | 4K+          | Bi（LLM）            | 大参数多语开源档                                                                                      |
 | **bge-en-icl**                       | 2024    | LLM + few-shot 示例        | 文本-英       | LLM 级            | 高维         | 长           | Bi + ICL             | 提示中塞示例提升检索                                                                                  |
-| **bge-reranker-v2-m3**               | 2024    | 轻量 Cross / miniLM 变体等 | 文本·多语    | ~0.1–0.6B        | 分数         | 8K           | Cross                | 多语精排配套                                                                                          |
+| **bge-reranker-v2-m3**               | 2024.03 | XLM-RoBERTa 骨干 Cross-Encoder | 文本·多语 | 约 568M        | 分数         | 8K           | Cross                | 多语精排配套                                                                                          |
 | **bge-reranker-v2-gemma / minicpm**  | 2024    | LLM Cross-Encoder          | 文本          | 2B–9B 级         | 分数         | 长           | Cross                | 高精度重排                                                                                            |
 | **BGE-VL**（bge-vl-base / llava 系） | 2025    | CLIP / LLaVA-NeXT          | 图+文         | 0.4B–8B 级       | —           | —           | Dual / MLLM-Emb      | 视觉检索、截图搜                                                                                      |
 | **BGE-Code-v1**                      | 2025    | 代码专用骨干               | 代码+文       | —                | —           | —           | Bi                   | Code IR / CoIR 向                                                                                     |
@@ -156,19 +346,20 @@ BGE（BAAI General Embedding / FlagEmbedding）是**系列化**产品：中英�
 >
 > **专题深读**：若只熟悉 BERT / 稠密句向量、尚未建立 Sparse 直觉，请先读仓库专题《[BGE-M3三功能统一详解报告](BGE/M3/BGE-M3三功能统一详解报告.md)》（含 Sparse 从零讲解、三 Head 公式、自知识蒸馏与 Hybrid 工程用法）。
 
-#### Jina Embeddings 迭代链（v2 → v5，含 CLIP / Omni）
+#### Jina Embeddings 迭代链（v1 → v5，含 CLIP / Omni）
 
 | 模型                                            | 发布     | 骨干                      | 模态                  | 参数                                        | 维度（MRL）           | 上下文        | 范式                       | 要点                                                           |
 | ----------------------------------------------- | -------- | ------------------------- | --------------------- | ------------------------------------------- | --------------------- | ------------- | -------------------------- | -------------------------------------------------------------- |
+| **jina-embeddings-v1** | 2023.07 预印本 | T5 Encoder | 文本·英语 | 35M／110M／330M | 按规模 | 按模型卡 | Bi | 清洗文本对、三元组与否定样本，两阶段训练 |
 | **jina-embeddings-v2-base-en/de/es/zh…** | 2023–24 | JinaBERT                  | 文本（分语言）        | ~137–161M                                  | 768                   | 8K            | Bi                         | 长上下文 + 分语种卡                                            |
-| **jina-clip-v1 / v2**                     | 2024     | EVA02 + Jina-XLM-R        | 图+文                 | v2≈0.87B                                   | 1024（可截）          | 文本长 / 图像 | Dual-Encoder               | 标准 CLIP-style；多语+ MRL                                     |
+| **jina-clip-v1 / v2** | 2024.05／2024.12 预印本 | v1：JinaBERT + EVA02-base；v2：多语 Jina-XLM-R + EVA02-L/14 | 图+文 | v2 约 0.87B | v1 固定；v2 1024、支持 MRL | 按版本确认 | Dual-Encoder | v1 联合文文／图文；v2 增加多语、文档视觉与嵌套维度 |
 | **jina-embeddings-v3**                    | 2024.09  | jina-XLM-RoBERTa-24L      | 文本·89 语           | **570M**                              | 1024→32              | **8K**  | Bi +**任务 LoRA**    | retrieval / classification / clustering / text-matching 适配器 |
 | **jina-embeddings-v4**                    | 2025.06  | **Qwen2.5-VL-3B**   | 文+图+PDF             | **3.8B**                              | 2048（亦可多向量）    | **32K** | Bi + Late Interaction 可选 | 统一多模态；task LoRA；Qwen Research License                   |
 | **jina-embeddings-v5-text-nano**          | 2026.02  | EuroBERT-210M             | 文本·多语            | **239M**                              | 768→32               | 8K            | Bi + 任务适配              | 蒸馏自 Qwen3-Embedding-4B；小模型 SOTA 档                      |
 | **jina-embeddings-v5-text-small**         | 2026.02  | **Qwen3-0.6B-Base** | 文本·119+ 语         | **677M**                              | 1024→32              | **32K** | Bi + 任务适配              | MTEB/MMTEB 小模型顶尖；last-token；Query/Doc 前缀              |
-| **jina-embeddings-v5-omni-nano/small**    | 2026     | 锁定文本塔 + 视听投影     | **文/图/视/音** | nano≈文塔+编码器；small≈**1.7B** 级 | 与 text 对齐 768/1024 | 32K           | Locked Aligned Towers      | 文本索引、任意模态查询；几何保持对齐（arXiv:2605.08384）       |
+| **jina-embeddings-v5-omni-nano/small**    | 2026.05 预印本 | 锁定文本塔 + 视听投影     | **文/图/视/音** | nano≈**0.95B**；small≈**1.57B**（全模态加载） | 与 text 对齐 768/1024 | 32K           | Locked Aligned Towers      | 文本索引、任意模态查询；几何保持对齐（arXiv:2605.08384）       |
 
-> Jina 线索：**v2 长上下文 → v3 任务 LoRA → v4 MLLM 多模态 → v5 蒸馏小钢炮 + Omni 全模态**。选型时勿把 `jina-clip-v2`（双塔①类）与 `jina-embeddings-v4/v5-omni`（MLLM/后交互）混为一谈。
+> Jina 线索：**v2 长上下文 → v3 任务 LoRA → v4 MLLM 多模态 → v5 蒸馏小钢炮 + Omni 全模态**。其中 CLIP 是图文双塔，v4 是 VLM 单／多向量，v5-omni 是锁定塔的几何保持对齐，三者计算路径不同。
 
 #### 2024–2026：LLM / MLLM 通用嵌入与 API、文档检索
 
@@ -177,29 +368,30 @@ BGE（BAAI General Embedding / FlagEmbedding）是**系列化**产品：中英�
 | **NV-Embed-v1 / v2**                                         | 2024              | Mistral-7B；双向注意力 + Latent Attention pooling | 文本                          | 7B              | 4096                  | 512–4K+                 | Bi（LLM）        | v2 曾英 MTEB 领先（~72.31）；Hard Negative 工程强                                                         |
 | **Stella / Jasper**                                          | 2024              | 多 Teacher 蒸馏 + MRL                             | 文本                          | 0.4B–1.5B 级   | 可变                  | 8K                       | Bi               | 小尺寸高分；社区蒸馏范式                                                                                  |
 | **Snowflake arctic-embed-m-v1.5 等**                         | 2024–25          | 持续小模型迭代                                    | 文本                          | ≤330M          | 768+                  | 512                      | Bi               | 检索专用小模型持续刷分                                                                                    |
-| **Voyage-3 / 3-large / 4**                                   | 2024–26          | API；部分 MoE                                     | 文本 / 多模态分支             | API             | 512–2048             | 32K                      | Bi               | 检索向商业 SOTA 竞争者                                                                                    |
+| **Voyage-3 / 3-large / 4** | 2024–26 | 文本模型系列；Voyage 4-large 为 MoE | 文本；多模态另有产品线 | API／4-nano 开放权重 | 按型号，Voyage 4 支持 256–2048 | 按型号 | Bi | Voyage 4 同系列共享空间，大小编码器可组合；非所有版本均为 MoE |
 | **Cohere Embed v4**                                          | 2025              | 统一 Transformer                                  | **图+文**（原生）       | API             | 1024+                 | 长（官方称 128K 级能力） | Bi / 多模态      | 企业多模态检索 API                                                                                        |
 | **SigLIP / SigLIP 2**                                        | 2023 / 2025       | ViT + 文本塔；Sigmoid loss                        | 图+文                         | 视觉塔~0.4–2B  | —                    | —                       | Dual-Encoder     | CLIP 改进；SigLIP2 自蒸馏+多语，常作 VLM 视觉塔                                                           |
-| **ColPali**                                                  | 2025 ICLR         | PaliGemma-3B + ColBERT MaxSim                     | **页面图像**            | ~3B             | patch×128            | 页级                     | Late Interaction | 免 OCR 文档页检索；ViDoRe                                                                                 |
-| **ColQwen2 / ColQwen3**                                      | 2025              | Qwen2-VL / Qwen2.5-VL + MaxSim                    | 页面图像                      | ~2–3B          | 多向量                | 页级                     | Late Interaction | ColPali 族开源强跟随                                                                                      |
+| **ColPali**                                                  | 2024 预印本／ICLR 2025         | PaliGemma-3B + ColBERT MaxSim                     | **页面图像**            | ~3B             | patch×128            | 页级                     | Late Interaction | 免 OCR 文档页检索；ViDoRe                                                                                 |
+| **ColQwen2 / ColQwen2.5 / 社区 ColQwen3** | 2024–25 及后续模型卡 | Qwen2-VL／Qwen2.5-VL／社区 Qwen3-VL 等 | 页面图像 | 随 checkpoint | 多向量 | 页级，分辨率与 token 预算按版本 | Late Interaction | 官方系列与社区版本分开，逐一核对骨干、训练与许可 |
 | **VLM2Vec / V2**                                             | 2024–25          | LLaVA / Qwen2-VL 等                               | 图文交错                      | 2B–7B          | —                    | —                       | MLLM Bi-Encoder  | MMEB 路线开创者之一                                                                                       |
 | **GME / BGE-VL / E5-V**                                      | 2024–25          | Qwen2-VL / LLaVA-NeXT                             | 图+文                         | 2B–8B          | —                    | —                       | MLLM-Emb         | 通用多模态嵌入族                                                                                          |
 | **Qwen3-Embedding-0.6B/4B/8B**                               | 2025              | **Qwen3** Decoder                           | 文本·100+ 语                 | 0.6–8B         | 32–4096 MRL          | 32K                      | Bi（LLM）        | ★ 开源综合榜前列；指令前缀                                                                               |
-| **Qwen3-VL-Embedding**                                       | 2025–26          | Qwen3-VL                                          | 图文/视频文档                 | VL 级           | —                    | 长                       | MLLM Bi          | 通义多模态嵌入产品线                                                                                      |
+| **Qwen3-VL-Embedding**                                       | 2026.01 预印本          | Qwen3-VL                                          | 图文/视频文档                 | VL 级           | —                    | 长                       | MLLM Bi          | 通义多模态嵌入产品线                                                                                      |
 | **Seed-1.5-Embedding**                                       | 2025              | Seed 系                                           | 文为主（及演变）              | API             | —                    | —                       | Bi               | 豆包向量前代；C-MTEB 竞争                                                                                 |
 | **Seed-1.6-Embedding**（`doubao-embedding-vision-250615`） | **2025.06** | **Seed1.6-Flash**；双塔取 **[EOS]**   | **文+图+视频** 混合检索 | API（火山引擎） | **2048 / 1024** | 随底座                   | Dual/Bi（MLLM）  | ★ C-MTEB ~75.6 SOTA；MMEB-v2 Image 77.78 / Video 领先；见[官方说明](https://seed1-6-embedding.github.io/) |
-| **Conan-embedding-v2**                                       | 2025              | 中文向强检索                                      | 文本-中                       | —              | —                    | —                       | Bi               | C-MTEB 前列；动态 hard negative                                                                           |
-| **KaLM / gemma-embedding 等**                                | 2025–26          | 小 LLM / EuroBERT 系                              | 文本                          | <1B             | 可变                  | 8K–32K                  | Bi               | 与 jina-v5-nano 同档位竞赛                                                                                |
-| **Gemini Embedding / Embedding 2**                           | 2025–26          | Google 专有                                       | 文本（及多模态延伸）          | API             | —                    | —                       | Bi               | 检索子集高分；生态绑定 Google                                                                             |
+| **Conan-embedding-v2** | 2025.09 报告；含此前结果快照 | 从零训练嵌入向 LLM + soft-masking | 文本／跨语检索 | 约 1.4B | 3584 | 32K | Bi | 数据与动态难例共同训练                                                                           |
+| **KaLM-Embedding / V2** | 2025 | Qwen 系小 LLM，按版本区分 | 文本·多语 | 小于 1B 的系列版本 | 按 checkpoint | 按 checkpoint | Bi | 数据清洗、多样性与训练技巧；不是 EuroBERT 系                                                                                |
+| **Gemini Embedding / Embedding 2**                           | 2025 报告／2026.03 二代预览          | Google 专有                                       | 一代文本；二代图／文／音／视频／文档          | API             | —                    | —                       | Bi               | 检索子集高分；生态绑定 Google                                                                             |
 | **OpenAI / Google / 平台多模态 Embedding**                   | 2025–26          | 闭源                                              | 图文等                        | API             | 可变                  | 长                       | Bi               | 与开源 MLLM-Emb 并行                                                                                      |
 
 #### 读时间线的正确方式
 
-1. **先扫 “总览时间轴”**：按年扫一遍定位时代；★ 表分水岭；细节 model card 见 “前深度学习与静态词向量（简卡）”–2.1.8。
-2. **系列 ≠ 单点**：谈 BGE 至少区分 v1.5 / M3 / ICL / VL / Code / Reranker；谈 Jina 至少区分 clip-v2 / v3 / v4 / v5-text / v5-omni。
-3. **骨干 ≠ 交互**：Qwen3-Embedding、NV-Embed 骨干是 Decoder LLM，交互仍是 **Bi-Encoder**；ColPali 骨干是 VLM，交互是 **Late Interaction**。
-4. **API 与开源分工**：OpenAI / Cohere / Voyage / Seed(Doubao) 吃工程便利；BGE / E5 / GTE / Qwen3-Emb / Jina 吃可私有化与可微调。
-5. **多模态两派**：CLIP-style 双塔（①）vs MLLM 通用嵌入（③）vs 文档多向量（④）——同一年可并存，见《[图文 Embedding 模型技术综述](图文Embedding模型技术综述.md)》。
+1. **短表定位，逐项回查，卡片比较**：先看范式，随后沿具体模型与方法理解演进；窗口、维度、规模和实验条件再到卡片及独立研读核对。
+2. **系列和任务分别展开**：BGE 的文本、M3、ICL、VL、Code、Reranker 不是同一个模型；Jina 的 CLIP、单向量、多向量、任务适配和全模态也有不同计算路径。
+3. **区分三种日期**：论文首发、模型／API 发布、会议正式发表都可独立成为节点。例如 ColPali 有 2024 年预印本与 ICLR 2025，E5-Mistral 的首次提交与 arXiv 编号跨年。
+4. **骨干不决定交互**：Qwen3-Embedding 用 Decoder 骨干做 Bi-Encoder，ColPali 用 VLM 做 Late Interaction；不能把“用了大模型”都归成 Cross-Encoder。
+5. **开放程度逐个版本确认**：API 提供托管服务，开放权重便于自行部署，但训练代码、训练数据和商用许可仍需分别检查。Voyage 4-nano 等开放版本也不能因同系列有 API 就归为全闭源。
+6. **并行路线按问题比较**：图文双塔、MLLM 单向量与页面多向量并存；质量结论需要任务、输入预算、候选库和评测版本一致，不能仅按发布时间排序。
 
 ### 各阶段详解（演进因果，而不只是年表）
 
@@ -645,7 +837,7 @@ $\mathrm{KL}(P_T\|P_S)$ / $\mathrm{MSE}(s_T,s_S)$ / $1-\cos(v_T,v_S)$：蒸排�
 | Self-mining | 自检索           | 自我确认                             |
 | Multi-task  | 指令任务表       | 检索被 STS 采样稀释                  |
 
-E5 压缩课表：弱监督十亿对 → 监督 + 负例 → Query 侧 instruction。BGE-M3：RetroMAE → 对比 → 三头 + Self-KD（见专题）。
+E5 压缩课表：从大规模弱配对池筛选训练对 → 弱监督对比预训练 → 监督 + 负例；query／passage 角色前缀与后续 instruct 版本分别确认。BGE-M3：RetroMAE → 对比 → 三头 + Self-KD（见专题）。
 
 合成数据应核对任务语义与模板、实体及长短查询覆盖、多语言分层，并排除测试查询／标签进入生成提示。是否允许使用评测语料作无标签适配，应按后文评测协议声明。
 
