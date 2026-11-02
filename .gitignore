@@ -1,3 +1,6 @@
+# macOS Finder 文件夹显示设置
+.DS_Store
+
 # 模型权重：refs/ 下的参考仓库会自带 checkpoint，不入库
 *.bin
 *.pth
