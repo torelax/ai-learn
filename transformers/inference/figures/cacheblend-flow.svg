@@ -1,0 +1,48 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="400" viewBox="0 0 960 400" role="img" aria-labelledby="title desc">
+  <title id="title">CacheBlend 如何处理只改了一个 token 的请求</title>
+  <desc id="desc">旧请求 A B C D E F U 变成 A X C D E F Q。A 精确命中前缀。假设 C D E F 构成一个独立命中的块，CacheBlend 选 D 更新深层 KV，C E F 沿用旧 KV，X 和 Q 正常计算。</desc>
+  <defs>
+    <g id="neutral"><rect width="62" height="46" rx="8" fill="#e6edf6"/></g>
+    <g id="exact"><rect width="62" height="46" rx="8" fill="#cdeedc"/></g>
+    <g id="reuse"><rect width="62" height="46" rx="8" fill="#d9e7ff"/></g>
+    <g id="fresh"><rect width="62" height="46" rx="8" fill="#ffe3bd"/></g>
+    <g id="repair"><rect width="62" height="46" rx="8" fill="#eadbff"/></g>
+  </defs>
+  <rect x="1" y="1" width="958" height="398" rx="18" fill="#f7faff" stroke="#d4deea"/>
+  <g font-family="system-ui, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#172c48">
+    <text x="38" y="48" font-size="26" font-weight="700">一次 token 替换，两种 KV 处理方式</text>
+    <text x="38" y="79" font-size="16">假设 C D E F 是独立命中的缓存块，位置不变</text>
+    <path d="M382 115v-9h278v9" stroke="#5d7ca3" stroke-width="2" fill="none"/>
+    <text x="521" y="98" text-anchor="middle" font-size="14">同一个文本块</text>
+    <g font-size="17">
+      <text x="38" y="148">旧请求</text>
+      <text x="38" y="211">新请求 · 普通前缀缓存</text>
+      <text x="38" y="274">新请求 · CacheBlend</text>
+    </g>
+    <g font-size="20" font-weight="650" text-anchor="middle">
+      <g transform="translate(238 119)">
+        <use href="#neutral"/><use href="#neutral" x="72"/><use href="#reuse" x="144"/><use href="#reuse" x="216"/><use href="#reuse" x="288"/><use href="#reuse" x="360"/><use href="#neutral" x="432"/>
+        <text y="30"><tspan x="31">A</tspan><tspan x="103">B</tspan><tspan x="175">C</tspan><tspan x="247">D</tspan><tspan x="319">E</tspan><tspan x="391">F</tspan><tspan x="463">U</tspan></text>
+      </g>
+      <g transform="translate(238 182)">
+        <use href="#exact"/><use href="#fresh" x="72"/><use href="#fresh" x="144"/><use href="#fresh" x="216"/><use href="#fresh" x="288"/><use href="#fresh" x="360"/><use href="#fresh" x="432"/>
+        <text y="30"><tspan x="31">A</tspan><tspan x="103">X</tspan><tspan x="175">C</tspan><tspan x="247">D</tspan><tspan x="319">E</tspan><tspan x="391">F</tspan><tspan x="463">Q</tspan></text>
+      </g>
+      <g transform="translate(238 245)">
+        <use href="#exact"/><use href="#fresh" x="72"/><use href="#reuse" x="144"/><use href="#repair" x="216"/><use href="#reuse" x="288"/><use href="#reuse" x="360"/><use href="#fresh" x="432"/>
+        <text y="30"><tspan x="31">A</tspan><tspan x="103">X</tspan><tspan x="175">C</tspan><tspan x="247">D</tspan><tspan x="319">E</tspan><tspan x="391">F</tspan><tspan x="463">Q</tspan></text>
+      </g>
+    </g>
+    <g font-size="14" fill="#3c5370">
+      <text x="750" y="211">哈希链从 X 起失配</text>
+      <text x="750" y="274">示意某个深层</text>
+    </g>
+    <path d="M38 320h884" stroke="#d4deea"/>
+    <g font-size="15">
+      <rect x="38" y="343" width="18" height="18" rx="4" fill="#cdeedc"/><text x="64" y="357">精确复用前缀</text>
+      <rect x="238" y="343" width="18" height="18" rx="4" fill="#ffe3bd"/><text x="264" y="357">正常计算</text>
+      <rect x="416" y="343" width="18" height="18" rx="4" fill="#eadbff"/><text x="442" y="357">选中位置，刷新 KV</text>
+      <rect x="668" y="343" width="18" height="18" rx="4" fill="#d9e7ff"/><text x="694" y="357">沿用旧 KV</text>
+    </g>
+  </g>
+</svg>

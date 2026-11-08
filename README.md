@@ -32,6 +32,7 @@ ai-learn/
 ├── embedding/                   # 笔记与练习
 ├── agent/                       # Agent 练习；`agent/phistory/` 是独立 git 仓库（本仓库不追踪）
 ├── torch/                       # PyTorch 练习
+├── transformers/                # Transformer、BERT 与推理练习
 ├── ...
 ```
 
