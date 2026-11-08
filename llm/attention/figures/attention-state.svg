@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="930" height="336" viewBox="0 0 930 336" role="img" aria-labelledby="title desc">
+  <title id="title">逐 token KV、MLA 和线性状态</title>
+  <desc id="desc">逐 token KV 和 MLA 都在序列轴追加条目。MLA 存较窄的潜在表示。线性注意力更新一份尺寸固定的状态。</desc>
+  <rect x="1" y="1" width="928" height="334" rx="20" fill="#f7faff" stroke="#d4deea"/>
+  <g font-family="system-ui, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#182c47">
+    <text x="32" y="44" font-size="25" fill="#182c47" text-anchor="start" font-weight="700">历史信息怎么留下来？</text>
+    <path d="M32 72L898 72" fill="none" stroke="#d4deea" stroke-width="1.6"/>
+    <text x="35" y="113" font-size="18" fill="#182c47" text-anchor="start" font-weight="650">逐 token KV</text>
+    <rect x="199.5" y="95" width="77" height="28" rx="6" fill="#dceaff"/>
+    <text x="238" y="114" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">K₀/V₀</text>
+    <rect x="299.5" y="95" width="77" height="28" rx="6" fill="#dceaff"/>
+    <text x="338" y="114" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">K₁/V₁</text>
+    <rect x="399.5" y="95" width="77" height="28" rx="6" fill="#dceaff"/>
+    <text x="438" y="114" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">…</text>
+    <rect x="499.5" y="95" width="77" height="28" rx="6" fill="#dceaff"/>
+    <text x="538" y="114" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">Kₜ/Vₜ</text>
+    <text x="620" y="115" font-size="15" fill="#46617c" text-anchor="start" font-weight="400">追加新条目</text>
+    <path d="M32 144L898 144" fill="none" stroke="#d4deea" stroke-width="1.6"/>
+    <text x="35" y="185" font-size="18" fill="#182c47" text-anchor="start" font-weight="650">MLA</text>
+    <rect x="199.5" y="167" width="77" height="28" rx="6" fill="#e4ddf8"/>
+    <text x="238" y="186" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">c₀</text>
+    <rect x="299.5" y="167" width="77" height="28" rx="6" fill="#e4ddf8"/>
+    <text x="338" y="186" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">c₁</text>
+    <rect x="399.5" y="167" width="77" height="28" rx="6" fill="#e4ddf8"/>
+    <text x="438" y="186" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">…</text>
+    <rect x="499.5" y="167" width="77" height="28" rx="6" fill="#e4ddf8"/>
+    <text x="538" y="186" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">cₜ</text>
+    <text x="620" y="187" font-size="15" fill="#46617c" text-anchor="start" font-weight="400">追加较窄的潜在表示</text>
+    <path d="M32 216L898 216" fill="none" stroke="#d4deea" stroke-width="1.6"/>
+    <text x="35" y="257" font-size="18" fill="#182c47" text-anchor="start" font-weight="650">线性注意力</text>
+    <rect x="199.5" y="239" width="175" height="28" rx="6" fill="#d7eee8"/>
+    <text x="287" y="258" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">旧状态 Sₜ₋₁</text>
+    <text x="455" y="260" font-size="16" fill="#46617c" text-anchor="middle" font-weight="400">＋新 token →</text>
+    <rect x="512.5" y="239" width="175" height="28" rx="6" fill="#d7eee8"/>
+    <text x="600" y="258" font-size="14" fill="#182c47" text-anchor="middle" font-weight="650">更新后 Sₜ</text>
+    <text x="725" y="259" font-size="15" fill="#46617c" text-anchor="start" font-weight="400">状态尺寸固定</text>
+    <text x="32" y="314" font-size="14" fill="#46617c" text-anchor="start" font-weight="400">MLA 图中只画压缩主分量，实际实现还可能保存位置分量。</text>
+  </g>
+</svg>

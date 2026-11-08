@@ -1,0 +1,44 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="305" viewBox="0 0 960 305" role="img" aria-labelledby="title desc">
+  <title id="title">续接两个 token 时正确和错误的因果 mask</title>
+  <desc id="desc">已有四个缓存位置，新增位置四和五。正确的绝对位置 mask 中，Q4 可以读取 K0 到 K4，Q5 可以读取全部六个 K。错误的左上对齐 mask 中，Q4 只读 K0，Q5 只读 K0 和 K1。</desc>
+  <defs>
+    <g id="yes"><rect width="43" height="35" rx="6" fill="#cdeedc"/><text x="21.5" y="24" text-anchor="middle" fill="#174935">1</text></g>
+    <g id="no"><rect width="43" height="35" rx="6" fill="#e5eaf2"/><text x="21.5" y="24" text-anchor="middle" fill="#4b5b74">0</text></g>
+    <g id="columns" text-anchor="middle">
+      <text y="-17" fill="#3c5370" font-size="14"><tspan x="95">缓存中的 K</tspan><tspan x="247">本轮新增的 K</tspan></text>
+      <text y="12"><tspan x="21.5">K0</tspan><tspan x="70.5">K1</tspan><tspan x="119.5">K2</tspan><tspan x="168.5">K3</tspan><tspan x="225.5">K4</tspan><tspan x="274.5">K5</tspan></text>
+      <path d="M197 19v91" stroke="#b2c2d9" stroke-dasharray="4 4"/>
+      <text x="-32" y="47">Q4</text><text x="-32" y="88">Q5</text>
+    </g>
+  </defs>
+  <rect x="1" y="1" width="958" height="303" rx="18" fill="#f7faff" stroke="#d4deea"/>
+  <g font-family="system-ui, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#172c48">
+    <text x="32" y="47" font-size="26" font-weight="700">续接 2 个 token，因果 mask 怎么对齐？</text>
+    <g font-size="17" font-weight="650">
+      <text x="40" y="88">按绝对位置对齐</text>
+      <text x="509" y="88">直接用左上角三角形</text>
+    </g>
+    <path d="M480 70v162M32 244H928" stroke="#d4deea"/>
+    <g font-size="15">
+      <g transform="translate(95 138)">
+        <use href="#columns"/>
+        <g transform="translate(0 23)">
+          <use href="#yes"/><use href="#yes" x="49"/><use href="#yes" x="98"/><use href="#yes" x="147"/><use href="#yes" x="204"/><use href="#no" x="253"/>
+        </g>
+        <g transform="translate(0 64)">
+          <use href="#yes"/><use href="#yes" x="49"/><use href="#yes" x="98"/><use href="#yes" x="147"/><use href="#yes" x="204"/><use href="#yes" x="253"/>
+        </g>
+      </g>
+      <g transform="translate(564 138)">
+        <use href="#columns"/>
+        <g transform="translate(0 23)">
+          <use href="#yes"/><use href="#no" x="49"/><use href="#no" x="98"/><use href="#no" x="147"/><use href="#no" x="204"/><use href="#no" x="253"/>
+        </g>
+        <g transform="translate(0 64)">
+          <use href="#yes"/><use href="#yes" x="49"/><use href="#no" x="98"/><use href="#no" x="147"/><use href="#no" x="204"/><use href="#no" x="253"/>
+        </g>
+      </g>
+      <text x="40" y="275" fill="#3c5370">1 可读，0 屏蔽。每一行对应一个新 Q，每一列对应一个 K。</text>
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,66 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="960" height="361" viewBox="0 0 960 361" role="img" aria-labelledby="title desc">
+  <title id="title">Prefill 和 decode 中，模型输入与 KV cache 的变化</title>
+  <desc id="desc">Prefill 送入 A B C，缓存它们的 KV，最后一行 logits 预测 D。Decode 只送入 D，读取 A B C 的旧 KV 并追加 D 的 KV，再预测 E。</desc>
+  <defs>
+    <g id="new"><rect width="47" height="40" rx="8" fill="#e5d9ff"/></g>
+    <g id="old"><rect width="47" height="40" rx="8" fill="#d7e7ff"/></g>
+    <g id="next"><rect width="47" height="40" rx="8" fill="#ffebc5"/></g>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+      <path d="M0 1 9 5 0 9Z" fill="#5a7092"/>
+    </marker>
+  </defs>
+  <rect x="1" y="1" width="958" height="359" rx="18" fill="#f7faff" stroke="#d4deea"/>
+  <g font-family="system-ui, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#172c48">
+    <text x="32" y="47" font-size="26" font-weight="700">从 prompt 到逐 token 解码</text>
+    <g font-size="15" fill="#3c5370">
+      <text x="185" y="98">本轮送入模型</text>
+      <text x="425" y="98">本轮结束后，每层 KV cache</text>
+      <text x="778" y="98">本轮预测的 token</text>
+    </g>
+    <path d="M32 112H928M32 204H928M32 295H928" stroke="#d4deea"/>
+    <g font-size="20" font-weight="650">
+      <text x="32" y="158">Prefill</text>
+      <text x="32" y="248">Decode</text>
+    </g>
+    <g font-size="14" fill="#3c5370">
+      <text x="32" y="180">处理 prompt</text>
+      <text x="32" y="270">处理上一轮选中的 D</text>
+    </g>
+    <g font-size="19" text-anchor="middle" font-weight="650">
+      <g transform="translate(185 131)">
+        <use href="#new"/><use href="#new" x="55"/><use href="#new" x="110"/>
+        <text y="27"><tspan x="23.5">A</tspan><tspan x="78.5">B</tspan><tspan x="133.5">C</tspan></text>
+      </g>
+      <g transform="translate(185 221)">
+        <use href="#new"/><text x="23.5" y="27">D</text>
+      </g>
+      <g transform="translate(425 131)">
+        <use href="#new"/><use href="#new" x="55"/><use href="#new" x="110"/>
+        <text y="27"><tspan x="23.5">A</tspan><tspan x="78.5">B</tspan><tspan x="133.5">C</tspan></text>
+      </g>
+      <g transform="translate(425 221)">
+        <use href="#old"/><use href="#old" x="55"/><use href="#old" x="110"/><use href="#new" x="165"/>
+        <text y="27"><tspan x="23.5">A</tspan><tspan x="78.5">B</tspan><tspan x="133.5">C</tspan><tspan x="188.5">D</tspan></text>
+      </g>
+      <g transform="translate(778 131)">
+        <use href="#next"/><text x="23.5" y="27">D</text>
+      </g>
+      <g transform="translate(778 221)">
+        <use href="#next"/><text x="23.5" y="27">E</text>
+      </g>
+    </g>
+    <g fill="none" stroke="#5a7092" stroke-width="2" marker-end="url(#arrow)">
+      <path d="M357 151H404"/><path d="M357 241H404"/>
+      <path d="M659 151H756"/><path d="M659 241H756"/>
+    </g>
+    <g font-size="14" fill="#3c5370">
+      <text x="707" y="135" text-anchor="middle">C 的 logits</text>
+      <text x="707" y="225" text-anchor="middle">D 的 logits</text>
+      <text x="838" y="155">尚未进缓存</text>
+      <text x="838" y="245">尚未进缓存</text>
+      <rect x="185" y="315" width="17" height="17" rx="4" fill="#e5d9ff"/><text x="211" y="329">本轮计算</text>
+      <rect x="425" y="315" width="17" height="17" rx="4" fill="#d7e7ff"/><text x="451" y="329">从历史缓存读取</text>
+      <rect x="778" y="315" width="17" height="17" rx="4" fill="#ffebc5"/><text x="804" y="329">由 logits 选出</text>
+    </g>
+  </g>
+</svg>
