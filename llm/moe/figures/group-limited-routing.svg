@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="920" height="387" viewBox="0 0 920 387" role="img" aria-labelledby="title description">
+  <title id="title">同一个 token 的普通 Top-2 与分组 Top-2</title>
+  <desc id="description">一个 token 给六个专家打分。三组的最高分分别为 0.35、0.30、0.08。普通 Top-2 选 E0 和 E2，跨两组。只保留最高分的一组时，先选 G0，再从 G0 选 E0 和 E1。</desc>
+  <rect x="1" y="1" width="918" height="385" rx="20" fill="#f7faff" stroke="#d4deea"/>
+  <g font-family="system-ui, PingFang SC, Noto Sans CJK SC, sans-serif" fill="#182c47">
+    <text x="32" y="44" font-size="26" font-weight="700">同一个 token，两种选专家方式</text>
+    <text x="32" y="74" font-size="16" fill="#46617c">六个专家都先打分，每组有两个专家。</text>
+
+    <g font-size="15">
+      <rect x="32" y="93" width="272" height="96" rx="12" fill="#fff" stroke="#d4deea"/>
+      <rect x="324" y="93" width="272" height="96" rx="12" fill="#fff" stroke="#d4deea"/>
+      <rect x="616" y="93" width="272" height="96" rx="12" fill="#fff" stroke="#d4deea"/>
+      <g font-size="16" font-weight="650">
+        <text x="49" y="121">G0 · 组最高分 0.35</text>
+        <text x="341" y="121">G1 · 组最高分 0.30</text>
+        <text x="633" y="121">G2 · 组最高分 0.08</text>
+      </g>
+      <g fill="#e7edf6">
+        <rect x="49" y="137" width="108" height="32" rx="7"/>
+        <rect x="177" y="137" width="108" height="32" rx="7"/>
+        <rect x="341" y="137" width="108" height="32" rx="7"/>
+        <rect x="469" y="137" width="108" height="32" rx="7"/>
+        <rect x="633" y="137" width="108" height="32" rx="7"/>
+        <rect x="761" y="137" width="108" height="32" rx="7"/>
+      </g>
+      <g text-anchor="middle" font-weight="600">
+        <text x="103" y="158">E0 · 0.35</text>
+        <text x="231" y="158">E1 · 0.04</text>
+        <text x="395" y="158">E2 · 0.30</text>
+        <text x="523" y="158">E3 · 0.19</text>
+        <text x="687" y="158">E4 · 0.08</text>
+        <text x="815" y="158">E5 · 0.04</text>
+      </g>
+    </g>
+
+    <g>
+      <rect x="32" y="209" width="416" height="128" rx="12" fill="#eef3fe"/>
+      <rect x="472" y="209" width="416" height="128" rx="12" fill="#eaf5f0"/>
+      <g font-size="19" font-weight="700">
+        <text x="50" y="240">普通 Top-2</text>
+        <text x="490" y="240">分组 Top-2 · 只保留 1 组</text>
+      </g>
+      <g font-size="15" fill="#3c5370">
+        <text x="50" y="268">直接从全部专家中选两个</text>
+        <text x="490" y="268">先按最高分保留 G0，再从 G0 选两个</text>
+      </g>
+      <rect x="50" y="283" width="74" height="32" rx="7" fill="#d5e2ff"/>
+      <rect x="135" y="283" width="74" height="32" rx="7" fill="#d5e2ff"/>
+      <rect x="490" y="283" width="74" height="32" rx="7" fill="#c9e8d9"/>
+      <rect x="575" y="283" width="74" height="32" rx="7" fill="#c9e8d9"/>
+      <g text-anchor="middle" font-size="16" font-weight="700">
+        <text x="87" y="304">E0</text><text x="172" y="304">E2</text>
+        <text x="527" y="304">E0</text><text x="612" y="304">E1</text>
+      </g>
+      <g font-size="15" fill="#3c5370">
+        <text x="226" y="304">跨 G0、G1 两组</text>
+        <text x="666" y="304">只访问 G0</text>
+      </g>
+    </g>
+    <text x="32" y="364" font-size="15" fill="#46617c">两条路径都执行两次专家计算。分组限制减少的是一个 token 能跨的组数。</text>
+  </g>
+</svg>
