@@ -89,8 +89,8 @@ $$\mathcal{L}_{\text{score}} = \frac{1}{K}\sum_i \ell(s_i^S, s_i^T)$$
 
 **KL 蒸馏**（更常用，与 CE→Bi 一致）：对候选做温度 softmax
 
-$$p_i^T = \frac{\exp(s_i^T/\tau_T)}{\sum_j \exp(s_j^T/\tau_T)}, \quad
-p_i^S = \frac{\exp(s_i^S/\tau_S)}{\sum_j \exp(s_j^S/\tau_S)}$$
+$$p_i^T = \frac{\exp(s_i^T/\tau_T)}{\sum_j \exp(s_j^T/\tau_T)}, \quad $$
+$$ p_i^S = \frac{\exp(s_i^S/\tau_S)}{\sum_j \exp(s_j^S/\tau_S)}$$
 
 $$\mathcal{L}_{\text{KL}} = \mathrm{KL}(p^T \| p^S)$$
 
