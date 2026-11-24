@@ -28,7 +28,10 @@ cd ai-learn
 ```
 ai-learn/
 ├── AGENTS.md                    # Agent / 论文研究与 Notion 同步规范
-├── docs/reports/<topic>/        # 调研报告 + 论文 PDF / 中译 / 配图
+├── docs/                        # 知识库（Markdown 为源）：embedding/ · llm/ · post-training/
+├── mkdocs.yml                   # 知识站点配置；产物 site/ 不入库
+├── scripts/papers/              # 论文工具：配图、PDF 压缩、表格裁切
+├── scripts/site/                # 站点构建 / 预览 / 部署（scripts/site/site.sh）
 ├── embedding/                   # 笔记与练习
 ├── agent/                       # Agent 练习；`agent/phistory/` 是独立 git 仓库（本仓库不追踪）
 ├── torch/                       # PyTorch 练习
@@ -37,7 +40,18 @@ ai-learn/
 ├── ...
 ```
 
-论文深读须把 PDF / 中译 / 配图与报告 MD 放在同一 `docs/reports/<topic>/` 目录；具名报告 MD 为阅读笔记权威正文，按 [阅读笔记指南](docs/paper-reading-guide.md) 组织，并主动全文同步到单个 Notion 阅读页（不附审核清单等子页）（Embedding 落点见 `AGENTS.md`；其他专题先问）。
+论文深读须把 PDF / 中译 / 配图与报告 MD 放在同一 `docs/<领域>/<专题>/` 目录；具名报告 MD 为阅读笔记权威正文，按 [阅读笔记指南](docs/paper-reading-guide.md) 组织，并主动全文同步到单个 Notion 阅读页（不附审核清单等子页）（Embedding 落点见 `AGENTS.md`；其他专题先问）。
+
+## 知识站点
+
+`docs/` 的 Markdown 构建成可浏览、可搜索的 HTML 站点（MkDocs Material，公式由 MathJax 渲染）：
+
+```bash
+scripts/site/site.sh serve   # 本地预览 http://127.0.0.1:8732
+scripts/site/site.sh build   # 构建到 site/
+```
+
+只需 Python ≥ 3.10，依赖自动安装；部署到 GitHub Pages 等细节见 [scripts/README.md](scripts/README.md)。
 
 ## 贡献
 

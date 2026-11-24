@@ -1,0 +1,20 @@
+/* A · 文档型：白色顶栏 + 领域标签，三栏布局，正文 16px。适合在专题之间来回跳 */
+[data-site-style="docs"] [data-md-color-scheme="default"] {
+  --md-primary-fg-color: #ffffff;
+  --md-primary-fg-color--light: #f8fafc;
+  --md-primary-fg-color--dark: #e5e7eb;
+  --md-primary-bg-color: #1f2937;
+  --md-primary-bg-color--light: #6b7280;
+  --md-accent-fg-color: #2563eb;
+  --md-typeset-a-color: #2563eb;
+}
+[data-site-style="docs"] [data-md-color-scheme="default"] .md-header { border-bottom: 1px solid #e5e7eb; box-shadow: none; }
+[data-site-style="docs"] [data-md-color-scheme="default"] .md-tabs { border-bottom: 1px solid #e5e7eb; }
+[data-site-style="docs"] [data-md-color-scheme="default"] .md-search__input { background-color: #f1f5f9; }
+[data-site-style="docs"] [data-md-color-scheme="default"] .md-search__input::placeholder { color: #64748b; }
+
+[data-site-style="docs"] .md-tabs__link { font-size: .72rem; }
+[data-site-style="docs"] .md-tabs__item--active .md-tabs__link { color: var(--md-accent-fg-color); font-weight: 600; }
+
+[data-site-style="docs"] .md-grid { max-width: 78rem; }
+[data-site-style="docs"] .md-typeset { font-size: .8rem; line-height: 1.8; }
