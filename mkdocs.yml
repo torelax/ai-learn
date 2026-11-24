@@ -14,6 +14,7 @@ use_directory_urls: true
 # 论文 PDF 与图片抓取的标记文件不进站点；论文以原文链接为准
 exclude_docs: |
   *.pdf
+  *.html
   **/.from_html
   **/.from_pdf
   **/_from_pdf_crop/
@@ -32,7 +33,6 @@ theme:
     - navigation.tabs
     - navigation.sections
     - navigation.indexes
-    - navigation.prune
     - navigation.top
     - navigation.footer
     - navigation.tracking
@@ -94,6 +94,10 @@ markdown_extensions:
         - name: mermaid
           class: mermaid
           format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra:
+  # 默认版式：docs（文档型）| notion（阅读型）| paper（学术型）。读者可在顶栏「版式」菜单切换
+  style: docs
 
 extra_css:
   - assets/extra.css

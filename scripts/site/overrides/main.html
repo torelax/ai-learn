@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+
+{% block extrahead %}
+  {#- 在首屏渲染前确定版式，避免先画默认版式再闪一下。版式列表与默认值来自 hooks.py 的 STYLES / mkdocs.yml extra.style -#}
+  <script>
+    window.AI_LEARN_STYLES = {{ config.extra.styles | tojson }};
+    window.AI_LEARN_STYLE_DEFAULT = {{ config.extra.style | tojson }};
+    (function () {
+      var s = null;
+      try { s = localStorage.getItem("ai-learn.style"); } catch (e) {}
+      if (!s || !window.AI_LEARN_STYLES[s]) s = window.AI_LEARN_STYLE_DEFAULT;
+      document.documentElement.setAttribute("data-site-style", s);
+      var font = window.AI_LEARN_STYLES[s].font;
+      if (font) document.write('<link rel="stylesheet" href="' + font + '">');
+    })();
+  </script>
+{% endblock %}

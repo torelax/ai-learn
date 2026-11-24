@@ -12,7 +12,7 @@ alwaysApply: true
 - 研究时保存体积合理的 PDF；压缩后超过 5 MiB 的新 PDF 默认仅保留官方链接，遵守用户“不放太大 PDF”的偏好
 - **首次 commit 前压缩 PDF**：`python3 scripts/papers/shrink_pdf.py <目录>`（默认 `/ebook`；视觉类论文用 `--quality printer`）。文字是矢量的，降采样只影响位图。已入库的 PDF 不要补压——会让仓库变大，留到重写历史时一起处理
 - 报告元信息**不要**写 `local PDF`、本地 PDF 路径或中译落盘路径
-- Markdown 是唯一源文件；`docs/` 下不新增 HTML（站点由 `scripts/site/site.sh build` 生成到 `site/`，不入库），手写幻灯片例外放 `docs/slides/`
+- Markdown 是唯一源文件；`docs/` 下不新增 HTML（站点由 `scripts/site/site.sh build` 生成到 `site/`，不入库），本地 HTML（如 `docs/slides/` 的幻灯片）不入库、不发布
 - 配图优先 **arXiv HTML / ar5iv 原图** → 该篇的 `figs/`（`scripts/papers/fetch_figures.py`）；无则再 PDF 裁切（`scripts/papers/pdf_figures.py`）
 
 ## 阅读笔记 MD = 权威源

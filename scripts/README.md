@@ -26,9 +26,27 @@ clone 后只需要 Python ≥ 3.10：有 [uv](https://docs.astral.sh/uv/) 时在
 |------|------|
 | `mkdocs.yml`（仓库根） | 站点配置：主题、Markdown 扩展、导航、排除项 |
 | `site/hooks.py` | 构建期把 GFM 写法规范成 Python-Markdown 能正确渲染的形式，只处理内存中的文本，不改源文件 |
-| `site/overrides/assets/` | 中文排版 CSS、MathJax 配置 |
+| `site/overrides/` | 页面头部脚本、版式 CSS 与切换菜单、MathJax 配置 |
 | `site/requirements.txt` | 固定版本的构建依赖 |
 | `site/site.sh` | build / serve / check / deploy / clean 入口 |
+
+版式有三套，读者在顶栏右侧的「版式」菜单里切换，选择记在浏览器里，所有页面生效。默认版式由 `mkdocs.yml` 的 `extra.style` 决定，构建时可用 `SITE_STYLE=notion` 临时改默认值。
+
+| 名称 | 版式 |
+|------|------|
+| `docs`（默认） | 文档型：白色顶栏 + 顶部领域标签，正文较宽 |
+| `notion` | 阅读型：隐藏顶部标签，所有领域在左侧栏，正文行宽收窄 |
+| `paper` | 学术型：暖白背景 + 霞鹜文楷（选中时才从 CDN 加载），布局同阅读型 |
+
+实现上站点只构建一次（开启顶部标签、不剪裁侧栏），三份样式都按 `<html data-site-style>` 限定作用范围：
+
+- `site/overrides/main.html`：在首屏渲染前读取选择，避免切页闪烁
+- `site/overrides/assets/style-switcher.js`：顶栏菜单
+- `site/overrides/assets/extra.css`：共用修正（固定根字号、标题字重、中文字体），以及「无标签版式」下撤销 Material 的侧栏提升
+- `site/overrides/assets/styles/<名称>.css`：各版式的配色与尺寸
+- `site/hooks.py` 的 `STYLES`：版式列表
+
+新增版式时，在 `STYLES` 里加一项，再写一份对应的 CSS 即可。
 
 渲染方面的约定：
 

@@ -1,0 +1,34 @@
+/* C · 学术型：暖白纸色背景，正文用霞鹜文楷屏幕版（选中时由脚本从 CDN 加载，失败回退系统字体）；布局同阅读型 */
+html[data-site-style="paper"] {
+  --md-text-font: "LXGW WenKai Screen", "LXGW WenKai GB Screen", "PingFang SC",
+    "Microsoft YaHei", "Noto Sans CJK SC";
+}
+[data-site-style="paper"] [data-md-color-scheme="default"] {
+  --md-default-bg-color: #fbfaf6;
+  --md-primary-fg-color: #fbfaf6;
+  --md-primary-fg-color--light: #f5f2ea;
+  --md-primary-fg-color--dark: #ebe6da;
+  --md-primary-bg-color: #3a3833;
+  --md-primary-bg-color--light: #7a766c;
+  --md-default-fg-color: #2f2d29;
+  --md-accent-fg-color: #a24d27;
+  --md-typeset-a-color: #9a4a24;
+  --md-code-bg-color: #f2eee4;
+}
+[data-site-style="paper"] [data-md-color-scheme="default"] .md-header { border-bottom: 1px solid #e8e3d7; box-shadow: none; }
+[data-site-style="paper"] [data-md-color-scheme="default"] .md-search__input { background-color: #f0ece2; }
+[data-site-style="paper"] [data-md-color-scheme="default"] .md-search__input::placeholder { color: #8a857a; }
+
+/* 收窄整体网格让三栏贴紧，正文行宽约 46em */
+[data-site-style="paper"] .md-grid { max-width: 70rem; }
+[data-site-style="paper"] .md-typeset { font-size: .84rem; line-height: 1.85; }
+[data-site-style="paper"] .md-typeset h1,
+[data-site-style="paper"] .md-typeset h2,
+[data-site-style="paper"] .md-typeset h3 { font-weight: 700; }
+
+[data-site-style="paper"] [data-md-color-scheme="default"] .md-typeset blockquote {
+  border-left: 3px solid #c9b99a; background: #f5f1e7; color: var(--md-default-fg-color);
+  padding: .4em 1em;
+}
+[data-site-style="paper"] [data-md-color-scheme="default"] .md-typeset table:not([class]) { background: #fffdf8; }
+[data-site-style="paper"] .md-nav__item--section > .md-nav__link { font-weight: 700; }

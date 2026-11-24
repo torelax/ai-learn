@@ -99,6 +99,7 @@ case "$cmd" in
       [[ "$ans" == y || "$ans" == Y ]] || { echo "已取消"; exit 1; }
     fi
     src_rev="$(git rev-parse --short HEAD)"
+    git diff --quiet HEAD -- docs mkdocs.yml scripts/site || src_rev="$src_rev-dirty"
     # 沿用本仓库的提交身份（只作用于这次提交，不写 git config）
     export GIT_AUTHOR_NAME="${GIT_AUTHOR_NAME:-$(git config user.name || true)}"
     export GIT_AUTHOR_EMAIL="${GIT_AUTHOR_EMAIL:-$(git config user.email || true)}"

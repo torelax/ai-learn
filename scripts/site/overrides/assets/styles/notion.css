@@ -1,0 +1,35 @@
+/* B · 阅读型：类似 Notion。不显示顶部标签，所有领域在左侧栏（见 extra.css「无标签版式」）；网格收窄，适合长文精读 */
+[data-site-style="notion"] [data-md-color-scheme="default"] {
+  --md-primary-fg-color: #ffffff;
+  --md-primary-fg-color--light: #fbfbfa;
+  --md-primary-fg-color--dark: #f1f1ef;
+  --md-primary-bg-color: #37352f;
+  --md-primary-bg-color--light: #787774;
+  --md-default-fg-color: #37352f;
+  --md-default-fg-color--light: #6b6a66;
+  --md-default-fg-color--lighter: #9b9a97;
+  --md-accent-fg-color: #2383e2;
+  --md-typeset-a-color: #2383e2;
+  --md-code-bg-color: #f7f6f3;
+}
+[data-site-style="notion"] [data-md-color-scheme="default"] .md-header { border-bottom: 1px solid #ededeb; box-shadow: none; }
+[data-site-style="notion"] [data-md-color-scheme="default"] .md-search__input { background-color: #f1f1ef; }
+[data-site-style="notion"] [data-md-color-scheme="default"] .md-search__input::placeholder { color: #9b9a97; }
+
+/* 收窄整体网格让三栏贴紧，正文行宽约 48em */
+[data-site-style="notion"] .md-grid { max-width: 72rem; }
+[data-site-style="notion"] .md-typeset { font-size: .8rem; line-height: 1.85; }
+
+/* 左侧栏：分区标题小号灰字，条目更紧凑 */
+[data-site-style="notion"] .md-nav--primary .md-nav__item--section > .md-nav__link {
+  font-size: .62rem; font-weight: 600; color: var(--md-default-fg-color--lighter); letter-spacing: .02em;
+}
+[data-site-style="notion"] .md-nav__link { margin-top: .45em; }
+[data-site-style="notion"] [data-md-color-scheme="default"] .md-nav__link--active { color: var(--md-default-fg-color); font-weight: 600; }
+
+/* 文首 callout 与引用块：浅灰底 */
+[data-site-style="notion"] [data-md-color-scheme="default"] .md-typeset blockquote {
+  border-left: 3px solid #37352f; background: #f7f6f3; color: var(--md-default-fg-color);
+  padding: .4em 1em; border-radius: 0 4px 4px 0;
+}
+[data-site-style="notion"] .md-typeset table:not([class]) { border-radius: 4px; }

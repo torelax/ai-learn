@@ -29,6 +29,5 @@ agent/phistory/
 /site/
 /.site-deploy/
 /.venv-site/
-# docs/ 下不再收 HTML；手写幻灯片放 docs/slides/ 作为例外
+# docs/ 下的 HTML 只留在本地（如 docs/slides/ 里的分享幻灯片），不入库也不发布；正文一律写成 Markdown
 docs/**/*.html
-!docs/slides/*.html

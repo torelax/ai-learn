@@ -14,7 +14,7 @@
 | `scripts/papers/`、`scripts/site/` | 论文处理工具（配图、PDF 压缩、表格裁切）与知识站点构建；见 `scripts/README.md` |
 | `mkdocs.yml`、`site/` | 知识站点配置；`site/` 为构建产物，不入库 |
 
-领域与专题：`embedding/`；`llm/{DeepSeek,Qwen,long-context}`；`post-training/{peft,RLHF,distillation}`。手写 HTML 幻灯片放 `docs/slides/`（唯一允许入库的 HTML）。
+领域与专题：`embedding/`；`llm/{DeepSeek,Qwen,long-context}`；`post-training/{peft,RLHF,distillation}`。`docs/` 下的 HTML（如 `docs/slides/` 里的分享幻灯片）只保留在本地，不入库、不发布；需要入库的内容整理成 Markdown。
 
 ---
 
@@ -164,11 +164,12 @@ Callout 后紧接 1–2 个短段落的“论文简介”，约 200–350 字可
 
 ### 4.6 知识站点（HTML）
 
-- `docs/` 的 Markdown 是唯一源文件；HTML 站点由 MkDocs Material 构建到仓库根 `site/`，不入库。`docs/` 下不再新增 HTML（`.gitignore` 已拦截），手写幻灯片例外放 `docs/slides/`
+- `docs/` 的 Markdown 是唯一源文件；HTML 站点由 MkDocs Material 构建到仓库根 `site/`，不入库。`docs/` 下的 HTML 被 `.gitignore` 拦截且不进站点，只能留在本地；要入库的内容写成 Markdown
 - 构建 / 预览 / 检查：`scripts/site/site.sh build|serve|check`；依赖版本固定在 `scripts/site/requirements.txt`，有 uv 时用临时环境，不动项目 `.venv`
 - 写 MD 按 GFM 即可：嵌套列表缩进、列表/表格/`$$` 前缺空行、表格公式里的 `|` 由 `scripts/site/hooks.py` 在构建时规范化，源文件不改。`$$` 块内不要留空行
 - 论文 PDF 不发布到站点（`exclude_docs`），未被任何 MD 引用的图片也不发布；指向 `docs/` 之外的链接构建时改写为 GitHub 链接
 - 新增专题或改了章节结构后跑一次 `scripts/site/site.sh check`，断链和锚点错误会直接失败
+- 站点提供文档型 / 阅读型 / 学术型三套版式，读者在顶栏切换，默认值是 `mkdocs.yml` 的 `extra.style`；样式改动只动 `scripts/site/overrides/`，不要为版式改 Markdown
 
 ---
 

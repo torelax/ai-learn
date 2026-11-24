@@ -289,6 +289,31 @@ def _rewrite_outside_links(md: str, page, config, files) -> str:
 
 # --------------------------------------------------------------------------- hooks
 
+# 版式：读者在顶栏「版式」菜单里切换（存在浏览器 localStorage）；mkdocs.yml 的 extra.style 是默认值，
+# 环境变量 SITE_STYLE 可临时覆盖默认值。站点只构建一次，各版式的 CSS 都按 <html data-site-style> 限定作用范围。
+STYLES = {
+    "docs": {"label": "文档型", "desc": "顶部领域标签，正文较宽"},
+    "notion": {"label": "阅读型", "desc": "全部领域在左侧栏，行宽收窄"},
+    "paper": {"label": "学术型", "desc": "暖白底色，霞鹜文楷",
+              "font": "https://cdn.jsdelivr.net/npm/lxgw-wenkai-screen-webfont@1.7.0/style.css"},
+}
+
+
+def on_config(config):
+    style = os.environ.get("SITE_STYLE") or config.extra.get("style") or "docs"
+    if style not in STYLES:
+        raise ValueError(f"unknown site style {style!r}; choose from {sorted(STYLES)}")
+    if "navigation.prune" in config.theme["features"]:
+        # 无标签版式要在侧栏列出所有领域，不能把其他领域的条目剪掉
+        config.theme["features"].remove("navigation.prune")
+    for name in STYLES:
+        config.extra_css.append(f"assets/styles/{name}.css")
+    config.extra_javascript.append("assets/style-switcher.js")
+    config.extra["style"] = style
+    config.extra["styles"] = STYLES
+    log.info("ai-learn: default site style = %s", style)
+    return config
+
 
 def on_page_markdown(markdown: str, page, config, files):
     markdown = _rewrite_outside_links(markdown, page, config, files)
