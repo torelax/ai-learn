@@ -7,7 +7,7 @@
 
 # Remining Hard Negatives for Generative Pseudo Labeled Domain Adaptation
 
-# 面向生成式伪标签域适应的难负例重挖掘
+## 面向生成式伪标签域适应的难负例重挖掘
 
 **Authors / 作者：** Goksenin Yuksel, David Rau, Jaap Kamps
 

@@ -9,7 +9,7 @@
 
 # jina-reranker-v3.5: An Efficient Listwise Reranker with Hybrid Attention and Self-Distillation
 
-# jina-reranker-v3.5：带混合注意力与自蒸馏的高效列表级精排器
+## jina-reranker-v3.5：带混合注意力与自蒸馏的高效列表级精排器
 
 **Authors / 作者：** Christina Nasika, Feng Wang, Antonis Krasakis, Han Xiao
 

@@ -9,7 +9,7 @@
 
 # Making Monolingual Sentence Embeddings Multilingual using Knowledge Distillation
 
-# 用知识蒸馏把单语句向量变成多语
+## 用知识蒸馏把单语句向量变成多语
 
 **Authors / 作者：** Nils Reimers, Iryna Gurevych
 
@@ -652,7 +652,7 @@ Pierre Zweigenbaum, Serge Sharoff, and Reinhard Rapp. 2017. Overview of the Seco
 
 ---
 
-# Appendix / 附录
+## Appendix / 附录
 
 ## A Tatoeba Similarity Search / Tatoeba 相似性检索
 

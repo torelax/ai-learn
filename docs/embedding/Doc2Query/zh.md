@@ -9,7 +9,7 @@
 
 # Document Expansion by Query Prediction
 
-# 用查询预测做文档扩展
+## 用查询预测做文档扩展
 
 **Authors / 作者：** Rodrigo Nogueira<sup>1</sup>, Wei Yang<sup>2</sup>, Jimmy Lin<sup>2</sup>, and Kyunghyun Cho<sup>3,4,5,6</sup>
 

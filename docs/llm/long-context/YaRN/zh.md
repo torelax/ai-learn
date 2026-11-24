@@ -1,6 +1,6 @@
 # YaRN: Efficient Context Window Extension of Large Language Models
 
-# YaRN：大型语言模型的高效上下文窗口扩展
+## YaRN：大型语言模型的高效上下文窗口扩展
 
 > 原文：[arXiv:2309.00071v3](https://arxiv.org/html/2309.00071v3) · [ICLR 2024](https://openreview.net/forum?id=wHBfxhZu1u)。本文采用 2026-02-06 修订的 v3，保留该版本主文、附录、公式、图表、脚注和参考文献。英文段落后紧接中文；公式与相同的书目信息共用，表头与图注双语对应。中文以机器初译为底稿，统一术语并校订摘要、关键方法与已发现的翻译问题，不将其标作人工审定译本。
 

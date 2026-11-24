@@ -7,7 +7,7 @@
 
 # Promptagator: Few-shot Dense Retrieval From 8 Examples
 
-# Promptagator：从 8 条示例做少样本稠密检索
+## Promptagator：从 8 条示例做少样本稠密检索
 
 **Authors / 作者：** Zhuyun Dai<sup>∗†</sup>, Vincent Y. Zhao<sup>∗†</sup>, Ji Ma<sup>∗†</sup>, Yi Luan<sup>∗†</sup>, Jianmo Ni, Jing Lu, Anton Bakalov, Kelvin Guu, Keith B. Hall and Ming-Wei Chang<sup>†</sup>
 

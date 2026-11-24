@@ -9,7 +9,7 @@
 
 # GPL: Generative Pseudo Labeling for Unsupervised Domain Adaptation of Dense Retrieval
 
-# GPL：面向稠密检索无监督域适应的生成式伪标签
+## GPL：面向稠密检索无监督域适应的生成式伪标签
 
 **Authors / 作者：** Kexin Wang<sup>1</sup>, Nandan Thakur<sup>2∗</sup>, Nils Reimers<sup>3</sup>, Iryna Gurevych<sup>1</sup>
 

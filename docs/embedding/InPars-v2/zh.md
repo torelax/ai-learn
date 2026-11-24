@@ -9,7 +9,7 @@
 
 # InPars-v2: Large Language Models as Efficient Dataset Generators for Information Retrieval
 
-# InPars-v2：大语言模型作为信息检索的高效数据集生成器
+## InPars-v2：大语言模型作为信息检索的高效数据集生成器
 
 **Authors / 作者：** Vitor Jeronymo, Luiz Bonifacio, Hugo Abonizio, Marzieh Fadaee, Roberto Lotufo, Jakub Zavrel, Rodrigo Nogueira
 

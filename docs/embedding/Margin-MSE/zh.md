@@ -9,7 +9,7 @@
 
 # Improving Efficient Neural Ranking Models with Cross-Architecture Knowledge Distillation
 
-# 用跨架构知识蒸馏改进高效神经排序模型
+## 用跨架构知识蒸馏改进高效神经排序模型
 
 **Authors / 作者：** Sebastian Hofstätter, Sophia Althammer, Michael Schröder, Mete Sertkan, Allan Hanbury
 

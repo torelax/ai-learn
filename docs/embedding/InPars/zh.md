@@ -9,7 +9,7 @@
 
 # InPars: Data Augmentation for Information Retrieval using Large Language Models
 
-# InPars：用大语言模型为信息检索做数据增强
+## InPars：用大语言模型为信息检索做数据增强
 
 **Authors / 作者：** Luiz Bonifacio<sup>†⋄‡⋆</sup>, Hugo Abonizio<sup>†⋄⋆</sup>, Marzieh Fadaee<sup>†⋆</sup>, and Rodrigo Nogueira<sup>†⋄‡◃⋆</sup>
 

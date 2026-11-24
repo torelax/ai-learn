@@ -9,7 +9,7 @@
 
 # Synthetic Data Powers Product Retrieval for Long-tail Knowledge-Intensive Queries in E-commerce Search
 
-# 合成数据赋能电商搜索中长尾知识密集型查询的商品检索
+## 合成数据赋能电商搜索中长尾知识密集型查询的商品检索
 
 **Authors / 作者：** Gui Ling, Weiyuan Li, Yue Jiang, Wenjun Peng, Xingxian Liu, Dongshuai Li, Fuyu Lv<sup>∗</sup>, Dan Ou, Haihong Tang
 

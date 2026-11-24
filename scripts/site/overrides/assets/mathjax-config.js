@@ -6,7 +6,12 @@ window.MathJax = {
     processEscapes: true,
     processEnvironments: true,
     tags: "ams",
-    macros: { R: "\\mathbb{R}", E: "\\mathbb{E}" },
+    macros: {
+      R: "\\mathbb{R}",
+      E: "\\mathbb{E}",
+      // 论文里常见的 bm 包写法，MathJax 默认不提供；等价于 boldsymbol
+      bm: ["\\boldsymbol{#1}", 1],
+    },
   },
   options: {
     ignoreHtmlClass: ".*|",
