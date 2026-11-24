@@ -1,0 +1,26 @@
+/* 中文阅读排版：系统字体栈 + 舒适行高 */
+:root {
+  --md-text-font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC",
+    "Hiragino Sans GB", "Microsoft YaHei", "Noto Sans CJK SC", "Source Han Sans SC",
+    Roboto, Helvetica, Arial, sans-serif;
+  --md-code-font-family: "JetBrains Mono", "Fira Code", Menlo, Consolas, "Liberation Mono",
+    "Noto Sans Mono CJK SC", monospace;
+}
+.md-typeset { font-size: .82rem; line-height: 1.75; }
+.md-grid { max-width: 1440px; }
+
+/* 论文配图：不超出版心，居中 */
+.md-typeset img { max-width: 100%; height: auto; display: block; margin: .6em auto; }
+.md-typeset p > img:only-child { margin: .8em auto; }
+
+/* 宽表格横向滚动而不是撑破页面；中英对照表的长单元格不再被压成一列字 */
+.md-typeset__table { display: block; max-width: 100%; overflow-x: auto; }
+.md-typeset table:not([class]) { font-size: .74rem; }
+.md-typeset table:not([class]) td { min-width: 4em; vertical-align: top; }
+
+/* 块级公式过宽时横向滚动 */
+.md-typeset div.arithmatex { overflow-x: auto; overflow-y: hidden; }
+.md-typeset mjx-container[display="true"] { overflow-x: auto; overflow-y: hidden; }
+
+/* 引用块（文首 callout、中英对照的英文原文）*/
+.md-typeset blockquote { color: var(--md-default-fg-color--light); border-left-color: var(--md-accent-fg-color); }

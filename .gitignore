@@ -24,3 +24,11 @@ model_train
 
 # 独立 GitHub 仓库，勿纳入本仓库追踪
 agent/phistory/
+
+# 知识站点构建产物（scripts/site/site.sh 生成），Markdown 才是源文件
+/site/
+/.site-deploy/
+/.venv-site/
+# docs/ 下不再收 HTML；手写幻灯片放 docs/slides/ 作为例外
+docs/**/*.html
+!docs/slides/*.html

@@ -8,11 +8,13 @@
 
 | 路径 | 职责 |
 |------|------|
-| `docs/reports/<topic>/` | 研究报告 Markdown（**权威正文**）与论文 PDF / 中译 / 配图，同一专题目录入库 |
+| `docs/<领域>/<专题>/` | 研究报告 Markdown（**唯一源文件**）与论文 PDF / 中译 / 配图，同一专题目录入库 |
 | `embedding/`、`torch/`、`refs/` | 练习笔记 / 代码参考 |
 | `agent/` | Agent 练习代码；`agent/phistory/` 为独立 GitHub 仓库，本仓库 `.gitignore` 不追踪 |
+| `scripts/papers/`、`scripts/site/` | 论文处理工具（配图、PDF 压缩、表格裁切）与知识站点构建；见 `scripts/README.md` |
+| `mkdocs.yml`、`site/` | 知识站点配置；`site/` 为构建产物，不入库 |
 
-专题：`embedding`、`lora`、`distillation`、`Qwen` 等。
+领域与专题：`embedding/`；`llm/{DeepSeek,Qwen,long-context}`；`post-training/{peft,RLHF,distillation}`。手写 HTML 幻灯片放 `docs/slides/`（唯一允许入库的 HTML）。
 
 ---
 
@@ -21,7 +23,7 @@
 每个专题一份目录，深读 MD 与论文副本放在一起：
 
 ```
-docs/reports/<topic>/
+docs/<领域>/<专题>/
   README.md / 总览 / 合写 / 索引                # 跨多篇的总览仍在专题根
   figures/<短名>/                               # 报告嵌入图（Notion 上传用）
   <Name>/{详解.md, <Full Title>_<arxiv>.pdf, zh.md, figs/}
@@ -35,15 +37,15 @@ docs/reports/<topic>/
 
 示例：
 
-- `docs/reports/embedding/LLM2Vec/LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders_2404.05961.pdf`
-- `docs/reports/embedding/GTE/GTE/Towards General Text Embeddings with Multi-stage Contrastive Learning_2308.03281.pdf`
-- `docs/reports/embedding/GTE/mGTE/mGTE: Generalized Long-Context Text Representation and Reranking Models for Multilingual Text Retrieval_2407.19669.pdf`
+- `docs/embedding/LLM2Vec/LLM2Vec: Large Language Models Are Secretly Powerful Text Encoders_2404.05961.pdf`
+- `docs/embedding/GTE/GTE/Towards General Text Embeddings with Multi-stage Contrastive Learning_2308.03281.pdf`
+- `docs/embedding/GTE/mGTE/mGTE: Generalized Long-Context Text Representation and Reranking Models for Multilingual Text Retrieval_2407.19669.pdf`
 
 规则：
 
 - 目录按专题分；不存在则创建
 - 报告 MD **不要**写 `local PDF`、本地 PDF 路径、中译落盘路径；用 arXiv / ACL / 官方链接即可
-- 配图优先从 **arXiv HTML / ar5iv** 下载原图到对应 `figs/`；无 HTML 原图时再 PDF 裁切兜底（见 `docs/reports/embedding/_fetch_html_figures.py`）
+- 配图优先从 **arXiv HTML / ar5iv** 下载原图到对应 `figs/`（`scripts/papers/fetch_figures.py`）；无 HTML 原图时再 PDF 裁切兜底（`scripts/papers/pdf_figures.py`），表格可用 `scripts/papers/crop_tables.py` 按原排版裁出
 - **PDF 入库前先压**（见下）；按用户偏好，小文件保留，压缩后超过 5 MiB 的新论文 PDF 默认只保留官方下载链接，不强行入库
 
 ### 2.1 PDF 压缩（首次 commit 之前做）
@@ -51,23 +53,23 @@ docs/reports/<topic>/
 arXiv 的 PDF 常把配图嵌到离谱的分辨率（DINOv3 原件里有 1515 dpi 的图，而屏幕阅读只需 ~150 dpi）。这类 PDF 里的**文字是矢量的**，降采样只动位图，正文、公式、图内标注逐像素不变。
 
 ```bash
-cd docs/reports/embedding
-python3 _shrink_pdf.py <新论文目录> --dry-run   # 先看一眼
-python3 _shrink_pdf.py <新论文目录>             # 默认 /ebook
-python3 _shrink_pdf.py DINO/DINOv3 --quality printer
+# 路径可写 docs/ 下的相对路径，在仓库任意位置执行
+python3 scripts/papers/shrink_pdf.py <新论文目录> --dry-run   # 先看一眼
+python3 scripts/papers/shrink_pdf.py <新论文目录>             # 默认 /ebook
+python3 scripts/papers/shrink_pdf.py embedding/DINO/DINOv3 --quality printer
 ```
 
 - 默认 **`--quality ebook`**（图降到 150 dpi）。文字为主的论文和原件看不出区别，通常省 80–90%
 - **图本身就是论文结论**时（DINOv2/DINOv3/CLIP 这类视觉论文）用 **`--quality printer`**（300 dpi）。ebook 会把照片细节明显糊掉
 - 脚本只在「poppler 能读 + 页数不变 + 确实变小 + 图不低于 `--min-dpi`」时才替换；重复跑是空操作
 
-**时机很关键：只压还没 commit 的 PDF。** 已入库的 PDF 压了反而让仓库变大——新 blob 加进去，旧的还留在历史里。存量大 PDF（`_shrink_pdf.py . --dry-run` 可列出，约 69 MB 可回收）留到将来重写历史时一次性处理。
+**时机很关键：只压还没 commit 的 PDF。** 已入库的 PDF 压了反而让仓库变大——新 blob 加进去，旧的还留在历史里。存量大 PDF（`scripts/papers/shrink_pdf.py docs --dry-run` 可列出，约 69 MB 可回收）留到将来重写历史时一次性处理。
 
 ---
 
 ## 3. 研究报告 → Notion（主动导入）
 
-写完或重大更新 `docs/reports/**` 中的**论文阅读笔记**后，**主动**将该篇正文全文导入 Notion，并保证 **MD 与 Notion 正文一致**（格式可按 Notion 转换）。默认**一篇论文一个主阅读页，补充解读为其独立子页且入口置顶**；翻译仅保留在仓库，Notion 不放翻译正文、附件或链接。不自动导入研究过程、审核清单、选题依据，也不为这些资料创建子页或附件。**图必须同步**：Notion 页不得只有文字、漏掉报告中的关键图。
+写完或重大更新 `docs/**` 中的**论文阅读笔记**后，**主动**将该篇正文全文导入 Notion，并保证 **MD 与 Notion 正文一致**（格式可按 Notion 转换）。默认**一篇论文一个主阅读页，补充解读为其独立子页且入口置顶**；翻译仅保留在仓库，Notion 不放翻译正文、附件或链接。不自动导入研究过程、审核清单、选题依据，也不为这些资料创建子页或附件。**图必须同步**：Notion 页不得只有文字、漏掉报告中的关键图。
 
 ### 3.1 Embedding（已知落点，勿再问）
 
@@ -82,16 +84,16 @@ python3 _shrink_pdf.py DINO/DINOv3 --quality printer
 
 已确认采用论文与技术主题两层组织（2026-10-19）：
 
-- `docs/reports/lora/<Paper>/<方法名>详解.md` 是对应论文的中文译解与完整研读源，包含摘要译文、主文方法/实验/消融和必要的附录解释；保留该篇 PDF、原图及引用。原文译述与补充讲解分清，不把概要标为逐句全文翻译。
+- `docs/post-training/peft/<Paper>/<方法名>详解.md` 是对应论文的中文译解与完整研读源，包含摘要译文、主文方法/实验/消融和必要的附录解释；保留该篇 PDF、原图及引用。原文译述与补充讲解分清，不把概要标为逐句全文翻译。
 - LoRA、QLoRA、QA-LoRA 等论文页归入全局 **Paper**（`collection://0391fb9a-5dfb-4b28-b7dc-84cb27713890`），`Type=Paper`、`DOMAIN` 含 `LLM`、`SubDomain` 含 `Fine-Tune`、`TAG` 含 `Fine-Tuning` / `Peft`；`Readed` 按用户实际状态。
-- **Fine-Tune**（page ID：`235a174cd8c68016b3d6c922d1a1d70e`）的 Ref 保留 Paper 链接视图，Paper tab 筛选论文类型及微调分类；技术总章在原页 LoRA 部分展开，用于跨论文讲解 rank、alpha、目标模块、优化、量化与部署，不局限于某篇原文。对应仓库源为 `docs/reports/lora/LoRA技术深度调研报告.md`。
+- **Fine-Tune**（page ID：`235a174cd8c68016b3d6c922d1a1d70e`）的 Ref 保留 Paper 链接视图，Paper tab 筛选论文类型及微调分类；技术总章在原页 LoRA 部分展开，用于跨论文讲解 rank、alpha、目标模块、优化、量化与部署，不局限于某篇原文。对应仓库源为 `docs/post-training/peft/LoRA技术深度调研报告.md`。
 - 提示微调跨论文综述继续保留既有 Fine-Tune 子页。技术总章与各篇原文研读相互引用；已有页面可按用户授权移入 Paper，保留 URL，避免重复创建。
 - 本次及后续明确针对该总章的更新可局部替换 Fine-Tune 的 LoRA 技术内容；保留 Ref、其他技术章节和无关历史内容。已知落点无需重复询问。
 
 ### DeepSeek 与 RLHF（已确认落点，2026-10-22）
 
-- `docs/reports/LLM/DeepSeek/`：DeepSeek 官方模型报告及相关基础研究；论文原页放全局 Paper，`Type=Paper`、`DOMAIN` 含 `LLM`、`TAG` 含 `DeepSeek`（不存在时新建选项）。LLM（`1082a8d3bde24834a7f69559635458e0`）的 Model Series → DeepSeek tab 按四级语义标题分为 LLM、OCR、多模态、数学/证明、架构与系统等类别，只放对应论文的原生引用。
-- `docs/reports/LLM/RLHF/`：DPO 原论文同样归 Paper；DPO、GRPO 技术精讲放 PostTrain（`350a174cd8c6809ba1adda653dd8807c`）的 RLHF 部分。
+- `docs/llm/DeepSeek/`：DeepSeek 官方模型报告及相关基础研究；论文原页放全局 Paper，`Type=Paper`、`DOMAIN` 含 `LLM`、`TAG` 含 `DeepSeek`（不存在时新建选项）。LLM（`1082a8d3bde24834a7f69559635458e0`）的 Model Series → DeepSeek tab 按四级语义标题分为 LLM、OCR、多模态、数学/证明、架构与系统等类别，只放对应论文的原生引用。
+- `docs/post-training/RLHF/`：DPO 原论文同样归 Paper；DPO、GRPO 技术精讲放 PostTrain（`350a174cd8c6809ba1adda653dd8807c`）的 RLHF 部分。
 - 新论文主阅读页的补充解读子页入口置顶；已有用户正文保留，首次补充接在后面，后续只原位更新已导入范围。翻译只在仓库保留，不同步到 Notion。
 
 ### 3.3 Notion 删除禁令
@@ -108,7 +110,7 @@ python3 _shrink_pdf.py DINO/DINOv3 --quality printer
 
 ### 4.0 阅读笔记风格与文件职责
 
-- 详细做法见 [论文阅读笔记指南](docs/paper-reading-guide.md)；标准样例是**仓库中的** `docs/reports/embedding/E5-Mistral/zh.md` 与 `docs/reports/embedding/Qwen3-Embedding/zh.md`，不是其 Notion 页或自行抽象出的通用模板。结合两篇原论文与各自笔记理解精炼的尺度
+- 详细做法见 [论文阅读笔记指南](docs/paper-reading-guide.md)；标准样例是**仓库中的** `docs/embedding/E5-Mistral/zh.md` 与 `docs/embedding/Qwen3-Embedding/zh.md`，不是其 Notion 页或自行抽象出的通用模板。结合两篇原论文与各自笔记理解精炼的尺度
 - 主阅读笔记是**基本保留原论文全部章节、小节与论证顺序的易读精炼版**。先读原文并对应各节，再压缩段落；原文独立讨论的数据构建、训练阶段、实验协议、消融、讨论等分别保留，不统一重排成固定章法，也不只补标题而省略技术内容
 - 每节保留理解作者工作所需的定义、步骤、关键设置和证据；公式解释符号、维度与直觉，图表说明条件、比较与结果。必要的简短释义就近写清，跨论文分析、独立推导和实践建议放补充解读，不把主文写成观点文章、纠错清单或工作流水账
 - `<方法名>详解.md` / 既有具名报告为忠于原文的论文精炼版及 Notion 主体同步源；另写 `<方法名>解读.md` 放补充分析。`zh.md` 为完整中英逐段对照，同段英文后紧接中文，不默认拆成英中各一篇。历史文件不因本规则自动改名或重排
@@ -125,7 +127,7 @@ python3 _shrink_pdf.py DINO/DINOv3 --quality printer
 落盘建议（便于入库与 Notion 上传）：
 
 ```
-docs/reports/<topic>/figures/<短名>/fig01.png
+docs/<领域>/<专题>/figures/<短名>/fig01.png
 ```
 
 从该篇 `figs/` 拷贝关键图到上述目录后嵌入报告；同步 Notion 时**上传同一批图**，保持 MD ↔ Notion 图文一致。
@@ -160,13 +162,21 @@ Callout 后紧接 1–2 个短段落的“论文简介”，约 200–350 字可
 - 改 MD 后若已存在对应 Notion 页，应同步更新 Notion
 - 行内公式用 `$公式$`，公式内部不加反引号或中文引号；块级公式用独立行的 `$$`。转换时保护代码与公式，回读普通段落、列表、表格中的公式及主文是否重复
 
+### 4.6 知识站点（HTML）
+
+- `docs/` 的 Markdown 是唯一源文件；HTML 站点由 MkDocs Material 构建到仓库根 `site/`，不入库。`docs/` 下不再新增 HTML（`.gitignore` 已拦截），手写幻灯片例外放 `docs/slides/`
+- 构建 / 预览 / 检查：`scripts/site/site.sh build|serve|check`；依赖版本固定在 `scripts/site/requirements.txt`，有 uv 时用临时环境，不动项目 `.venv`
+- 写 MD 按 GFM 即可：嵌套列表缩进、列表/表格/`$$` 前缺空行、表格公式里的 `|` 由 `scripts/site/hooks.py` 在构建时规范化，源文件不改。`$$` 块内不要留空行
+- 论文 PDF 不发布到站点（`exclude_docs`），未被任何 MD 引用的图片也不发布；指向 `docs/` 之外的链接构建时改写为 GitHub 链接
+- 新增专题或改了章节结构后跑一次 `scripts/site/site.sh check`，断链和锚点错误会直接失败
+
 ---
 
 ## 5. Agent 操作权限
 
 | 操作 | 默认 |
 |------|------|
-| 读报告 / 写报告 MD / 下载 PDF 到 `docs/reports/<topic>/` | ✅ |
+| 读报告 / 写报告 MD / 下载 PDF 到 `docs/<领域>/<专题>/` | ✅ |
 | 导入 / 更新 Notion（按 §3） | ✅ |
 | 询问非 Embedding 的 Notion 落点 | ✅（必须先问） |
 | 删除 Notion 页面或内容 | ❌ 除非用户明确同意 |
@@ -181,7 +191,8 @@ Callout 后紧接 1–2 个短段落的“论文简介”，约 200–350 字可
 |------|------|
 | [README.md](README.md) | 项目概览 |
 | [docs/README.md](docs/README.md) | 文档索引 |
-| [docs/reports/embedding/README.md](docs/reports/embedding/README.md) | Embedding 报告索引 |
+| [docs/embedding/README.md](docs/embedding/README.md) | Embedding 报告索引 |
 | [.cursor/rules/paper-research.mdc](.cursor/rules/paper-research.mdc) | 论文研究强制规则 |
 | [docs/paper-reading-guide.md](docs/paper-reading-guide.md) | 阅读笔记风格、文件职责与单页同步流程 |
-| [.gitignore](.gitignore) | 忽略缓存 / 未完成目录等 |
+| [scripts/README.md](scripts/README.md) | 论文工具与知识站点构建脚本 |
+| [.gitignore](.gitignore) | 忽略缓存、站点产物与 docs/ 下的 HTML |

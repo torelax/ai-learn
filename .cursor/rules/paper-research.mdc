@@ -7,32 +7,33 @@ alwaysApply: true
 
 ## PDF（必做）
 
-- 路径：`docs/reports/<topic>/<Name>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}`；系列则为 `docs/reports/<topic>/<Series>/<Paper>/`。文件夹用方法名或文章名，**不要带 arXiv 编号**
+- 路径：`docs/<领域>/<专题>/<Name>/{<Full Title>_<arxiv>.pdf, zh.md, figs/}`（领域：`embedding`、`llm`、`post-training`）；系列则为 `docs/<领域>/<专题>/<Series>/<Paper>/`。文件夹用方法名或文章名，**不要带 arXiv 编号**
 - PDF **禁止** `paper.pdf`：文件名用论文英文全名，有 arXiv 则后缀 `_YYMM.NNNNN.pdf`
 - 研究时保存体积合理的 PDF；压缩后超过 5 MiB 的新 PDF 默认仅保留官方链接，遵守用户“不放太大 PDF”的偏好
-- **首次 commit 前压缩 PDF**：`python3 docs/reports/embedding/_shrink_pdf.py <目录>`（默认 `/ebook`；视觉类论文用 `--quality printer`）。文字是矢量的，降采样只影响位图。已入库的 PDF 不要补压——会让仓库变大，留到重写历史时一起处理
+- **首次 commit 前压缩 PDF**：`python3 scripts/papers/shrink_pdf.py <目录>`（默认 `/ebook`；视觉类论文用 `--quality printer`）。文字是矢量的，降采样只影响位图。已入库的 PDF 不要补压——会让仓库变大，留到重写历史时一起处理
 - 报告元信息**不要**写 `local PDF`、本地 PDF 路径或中译落盘路径
-- 配图优先 **arXiv HTML / ar5iv 原图** → 该篇的 `figs/`；无则再 PDF 裁切
+- Markdown 是唯一源文件；`docs/` 下不新增 HTML（站点由 `scripts/site/site.sh build` 生成到 `site/`，不入库），手写幻灯片例外放 `docs/slides/`
+- 配图优先 **arXiv HTML / ar5iv 原图** → 该篇的 `figs/`（`scripts/papers/fetch_figures.py`）；无则再 PDF 裁切（`scripts/papers/pdf_figures.py`）
 
 ## 阅读笔记 MD = 权威源
 
-- 标准样例取自**仓库文件** `docs/reports/embedding/E5-Mistral/zh.md` 与 `docs/reports/embedding/Qwen3-Embedding/zh.md`；结合各自原论文理解精炼尺度，不以 Notion 展示或通用模板代替样例
+- 标准样例取自**仓库文件** `docs/embedding/E5-Mistral/zh.md` 与 `docs/embedding/Qwen3-Embedding/zh.md`；结合各自原论文理解精炼尺度，不以 Notion 展示或通用模板代替样例
 - 主阅读笔记**基本保留原论文全部章节、小节与论证顺序**，压缩段落并让内容易懂；分别保留原文的数据构建、训练阶段、任务协议、实验、消融与讨论，不把所有论文重排为同一骨架，也不以标题加短结论代替原节技术内容
 - 每节讲清定义、方法步骤、关键设置与实验依据；核心公式解释符号和维度，原图与主要表格保留条件及结果。理解原文所需的简短释义就近写，跨论文比较、独立推导和工程建议另写解读
 - 具名详解 MD 为论文精炼版及 Notion 主体同步源；另写 `<方法名>解读.md`。`zh.md` 为完整中英逐段对照，英文后紧接中文，不默认拆成英中各一篇；历史文件不自动迁移或改名
-- 深读写在 `docs/reports/<topic>/`；单篇/系列精读与该篇 PDF / 中译 / `figs/` 放在同一方法文件夹，总览与跨多篇合写留在专题根目录
+- 深读写在 `docs/<领域>/<专题>/`；单篇/系列精读与该篇 PDF / 中译 / `figs/` 放在同一方法文件夹，总览与跨多篇合写留在专题根目录
 - Callout 增加“简述”：一句话讲清方法思路或具体工作；其后紧接约 200–350 个中文字的论文简介，依次交代背景/问题、核心方法步骤、代表结果与主要局限，正文继续详细展开
 - Callout 短小、自然：方法一句话与论文/时间/代码等必要入口即可，按论文特点合并或调整字段，不机械凑齐骨干/模态/语言栏目；详细信息放正文
 - Embedding 正文必含：训练数据、评测 benchmark、对比方法、关键数据集简介
 - **之后**新建/大改：章节标题**不加** `1.` / `6.` 等数字序号（语义标题即可）；存量带序号页不必为去序号而整页重排
-- **之后**新建/大改：正文须含关键**原图 + 中文解释**（方法图/主结果图等）；图可放 `docs/reports/<topic>/figures/<短名>/` 再嵌入（存量不必整页补图）
+- **之后**新建/大改：正文须含关键**原图 + 中文解释**（方法图/主结果图等）；图可放 `docs/<领域>/<专题>/figures/<短名>/` 再嵌入（存量不必整页补图）
 
 ## Notion（主动导入，全文一致）
 
 - 写完/大改后：精炼版**全文**导入 Notion 主阅读页，补充解读全文放独立子页，子页入口置于主页面开头（可做格式转换，禁止摘要替代）；优先原地更新，保留 URL 与既有入口
 - 默认一篇论文一个主阅读页，补充解读为其子页；不创建或提交审核清单、选题笔记等过程材料，临时源和日志留在仓库外 work/。全文使用 `zh.md` 中英逐段对照，覆盖主文、附录、图表、脚注与参考文献，仅保留在仓库；Notion 不放翻译正文、附件、折叠内容或翻译链接
 - **Embedding**：Paper 库 `collection://0391fb9a-5dfb-4b28-b7dc-84cb27713890`；模型/算法在 Embedding&Rerank ModelCard 对应 tab 加 mention
-- **LoRA / PEFT 两层组织**：单篇中文译解与完整研读归入同一全局 Paper，Type=Paper、SubDomain 含 Fine-Tune、TAG 含 Fine-Tuning/Peft；Fine-Tune 的 Ref 通过筛选视图呈现。跨论文原理与调参实践写入原页 LoRA 技术总章，对应 `docs/reports/lora/LoRA技术深度调研报告.md`；优先移动已有论文页并保留 URL，不重复建页
+- **LoRA / PEFT 两层组织**：单篇中文译解与完整研读归入同一全局 Paper，Type=Paper、SubDomain 含 Fine-Tune、TAG 含 Fine-Tuning/Peft；Fine-Tune 的 Ref 通过筛选视图呈现。跨论文原理与调参实践写入原页 LoRA 技术总章，对应 `docs/post-training/peft/LoRA技术深度调研报告.md`；优先移动已有论文页并保留 URL，不重复建页
 - **其他非 Embedding**：首次落点不明时**先问用户**，不得自选
 - 不删除无关 Notion 页面或历史内容；清理须有用户明确授权，已有的具体清理指示可直接执行，不重复询问
 - 有用户正文时首次补充放在其后，后续**只更新已识别的 Agent 导入范围，不再追加整篇**；保留用户文字、图片、代码、原生子页与数据库，维护原页面 URL

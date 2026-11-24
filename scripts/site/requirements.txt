@@ -1,0 +1,7 @@
+# 知识站点构建依赖（固定版本，保证 clone 后渲染一致）。由 scripts/site/site.sh 自动安装。
+mkdocs==1.6.1
+mkdocs-material==9.7.7
+pymdown-extensions==12.3
+markdown==3.10.3
+# 构建期中文分词，提升站内搜索中文命中
+jieba==0.42.1

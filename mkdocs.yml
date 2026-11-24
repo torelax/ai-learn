@@ -1,0 +1,110 @@
+# ai-learn 知识站点：docs/ 下的 Markdown 是唯一源文件，HTML 由此构建，不入库。
+# 构建 / 预览 / 部署：scripts/site/site.sh（见 scripts/README.md）
+site_name: ai-learn 知识库
+site_description: Embedding、LLM 与后训练的论文研读和技术调研笔记
+site_url: !ENV [SITE_URL, "https://torelax.github.io/"]
+repo_url: https://github.com/torelax/ai-learn
+repo_name: torelax/ai-learn
+edit_uri: blob/main/docs/
+
+docs_dir: docs
+site_dir: site
+use_directory_urls: true
+
+# 论文 PDF 与图片抓取的标记文件不进站点；论文以原文链接为准
+exclude_docs: |
+  *.pdf
+  **/.from_html
+  **/.from_pdf
+  **/_from_pdf_crop/
+  paper-reading-guide.md
+
+hooks:
+  - scripts/site/hooks.py
+
+theme:
+  name: material
+  custom_dir: scripts/site/overrides
+  language: zh
+  # 不从 Google Fonts 拉字体：国内常被墙，且中文正文用系统字体更清晰
+  font: false
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - navigation.indexes
+    - navigation.prune
+    - navigation.top
+    - navigation.footer
+    - navigation.tracking
+    - toc.follow
+    - search.suggest
+    - search.highlight
+    - content.code.copy
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: 切换到深色
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-4
+        name: 切换到浅色
+
+plugins:
+  - search:
+      lang: [zh, en]
+      # 有 jieba 时在构建期做中文分词，搜索中文词组更准
+      separator: '[\s​\-_,:!=\[\]()"`/]+|\.(?!\d)|&[lg]t;|(?!\b)(?=[A-Z][a-z])'
+
+markdown_extensions:
+  - abbr
+  - attr_list
+  - def_list
+  - footnotes
+  - md_in_html
+  - tables
+  - admonition
+  - toc:
+      permalink: true
+      toc_depth: 4
+      slugify: !!python/object/apply:pymdownx.slugs.slugify
+        kwds:
+          case: lower
+  - pymdownx.arithmatex:
+      generic: true
+  - pymdownx.betterem
+  - pymdownx.caret
+  - pymdownx.tilde
+  - pymdownx.mark
+  - pymdownx.details
+  - pymdownx.tasklist:
+      custom_checkbox: true
+  - pymdownx.highlight:
+      anchor_linenums: true
+      pygments_lang_class: true
+  - pymdownx.inlinehilite
+  - pymdownx.superfences:
+      custom_fences:
+        - name: mermaid
+          class: mermaid
+          format: !!python/name:pymdownx.superfences.fence_code_format
+
+extra_css:
+  - assets/extra.css
+extra_javascript:
+  - assets/mathjax-config.js
+  - https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js
+
+validation:
+  omitted_files: info
+  links:
+    not_found: warn
+    absolute_links: info
+    unrecognized_links: info
+    anchors: warn
