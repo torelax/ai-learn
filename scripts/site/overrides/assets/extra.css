@@ -26,13 +26,36 @@ html { font-size: 125%; }
 .md-nav { font-size: .68rem; }
 .md-nav__title { font-weight: 650; }
 
+/* 章节标题与正文的间距略收紧，长文更连贯 */
+.md-typeset h2 { margin: 2em 0 .7em; }
+.md-typeset h3 { margin: 1.5em 0 .6em; }
+
 /* 论文配图：不超出版心，居中 */
 .md-typeset img { max-width: 100%; height: auto; display: block; margin: .6em auto; }
 
-/* 宽表格横向滚动而不是撑破页面 */
+/* 表格：参照 PaperMod / Lilian Weng 的排法——只留水平细线、单元格紧凑、数字等宽对齐。
+   宽表格横向滚动而不是撑破页面 */
 .md-typeset__table { display: block; max-width: 100%; overflow-x: auto; }
-.md-typeset table:not([class]) { font-size: .74rem; }
-.md-typeset table:not([class]) td { min-width: 4em; vertical-align: top; }
+.md-typeset table:not([class]) {
+  display: table; width: 100%; border-collapse: collapse; border-spacing: 0;
+  font-size: .72rem; line-height: 1.4; font-variant-numeric: tabular-nums;
+  background: none; border: 0; border-radius: 0;
+}
+.md-typeset table:not([class]) th,
+.md-typeset table:not([class]) td {
+  min-width: 3em; padding: .34em .62em; border: 0;
+  border-bottom: .05rem solid var(--md-default-fg-color--lightest);
+  vertical-align: top;
+}
+.md-typeset table:not([class]) th {
+  background: none; color: var(--md-default-fg-color--light);
+  font-weight: 600; text-align: start;
+  border-bottom: .05rem solid var(--md-default-fg-color--lighter);
+}
+.md-typeset table:not([class]) tbody tr:last-child td { border-bottom: 0; }
+/* 第一列多为标签，少留左侧空白 */
+.md-typeset table:not([class]) th:first-child,
+.md-typeset table:not([class]) td:first-child { padding-left: .2em; }
 
 /* 块级公式过宽时横向滚动 */
 .md-typeset div.arithmatex,

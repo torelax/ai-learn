@@ -32,4 +32,4 @@
   border-left: 3px solid #37352f; background: #f7f6f3; color: var(--md-default-fg-color);
   padding: .4em 1em; border-radius: 0 4px 4px 0;
 }
-[data-site-style="notion"] .md-typeset table:not([class]) { border-radius: 4px; }
+[data-site-style="notion"]
