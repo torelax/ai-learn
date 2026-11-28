@@ -28,6 +28,7 @@ cd ai-learn
 ```
 ai-learn/
 ├── AGENTS.md                    # Agent / 论文研究与 Notion 同步规范
+├── .archify/                    # 本地 Archify 图与 JSON 图源，按模块分目录，不入库
 ├── docs/                        # 知识库（Markdown 为源）：embedding/ · llm/ · post-training/
 ├── mkdocs.yml                   # 知识站点配置；产物 site/ 不入库
 ├── scripts/papers/              # 论文工具：配图、PDF 压缩、表格裁切
@@ -41,6 +42,8 @@ ai-learn/
 ```
 
 论文深读须把 PDF / 中译 / 配图与报告 MD 放在同一 `docs/<领域>/<专题>/` 目录；具名报告 MD 为阅读笔记权威正文，按 [阅读笔记指南](docs/paper-reading-guide.md) 组织，并主动全文同步到单个 Notion 阅读页（不附审核清单等子页）（Embedding 落点见 `AGENTS.md`；其他专题先问）。
+
+Archify 交互图与可编辑 JSON 图源统一放在 `.archify/<模块路径>/`（如 `.archify/agent/hermes/`、`.archify/agent/pi/`），不纳入 Git 追踪。
 
 ## 知识站点
 

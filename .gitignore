@@ -31,3 +31,6 @@ agent/phistory/
 /.venv-site/
 # docs/ 下的 HTML 只留在本地（如 docs/slides/ 里的分享幻灯片），不入库也不发布；正文一律写成 Markdown
 docs/**/*.html
+
+# Archify 交互图与 JSON 图源，按模块存放，仅保留在本地
+/.archify/
